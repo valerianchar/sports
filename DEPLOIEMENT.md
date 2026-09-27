@@ -69,4 +69,4 @@ en général la base n'est pas encore prête (le conteneur réessaie 30 fois) ou
 HTTP échoue tant que `sports.vallau.com` ne pointe pas sur `217.160.8.59`
 (`dig +short sports.vallau.com`).
 
-**Mémoire.** La pile ajoute ~150 Mo à la machine (MySQL 32 Mo de buffer pool, l'application).
+**Mémoire.** La pile ajoute ~300 Mo à la machine (MySQL ~220 Mo malgré 32 Mo de buffer pool, l'application ~80 Mo).

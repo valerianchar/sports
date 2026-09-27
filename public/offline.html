@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#0e0f0c">
+    <title>Hors ligne — Séance</title>
+    <style>
+        :root { color-scheme: dark; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px 28px;
+            background: #0e0f0c;
+            color: #f2f3ee;
+            font-family: Manrope, system-ui, sans-serif;
+        }
+
+        .eyebrow { font-size: 12px; font-weight: 800; letter-spacing: .16em; color: #d4ff3a; }
+
+        h1 {
+            margin: 12px 0 14px;
+            font-family: "Barlow Condensed", system-ui, sans-serif;
+            font-size: 72px;
+            line-height: .88;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        p { margin: 0 0 28px; color: #9a9c92; font-size: 15px; line-height: 1.5; max-width: 340px; }
+
+        button {
+            height: 56px;
+            border: none;
+            border-radius: 28px;
+            background: #d4ff3a;
+            color: #0e0f0c;
+            font-family: "Barlow Condensed", system-ui, sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="eyebrow">SÉANCE</div>
+    <h1>Pas de<br>réseau.</h1>
+    <p>Une séance déjà ouverte continue de tourner, et une séance terminée partira dès que le réseau reviendra.</p>
+    <button type="button" onclick="location.reload()">Réessayer</button>
+</body>
+</html>

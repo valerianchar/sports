@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Enums\Equipment;
 use App\Enums\ExerciseMode;
+use App\Enums\Muscle;
 use App\Enums\MuscleGroup;
 use Illuminate\Support\Collection;
 
@@ -53,15 +54,17 @@ final class ExerciseCatalog
     }
 
     /**
-     * Chemins publics des deux images d'un exercice : départ puis arrivée.
+     * Chemins publics des images d'un exercice : départ puis arrivée, ou une
+     * seule quand la source n'en propose qu'une.
      *
      * @return list<string>
      */
     public static function images(string $slug): array
     {
-        $extension = self::all()[$slug]['image'];
-
-        return ["/images/exercices/{$slug}/0.{$extension}", "/images/exercices/{$slug}/1.{$extension}"];
+        return array_map(
+            fn (string $file): string => "/images/exercices/{$slug}/{$file}",
+            self::all()[$slug]['images'],
+        );
     }
 
     /**
@@ -85,12 +88,25 @@ final class ExerciseCatalog
             'equipment' => $exercise['equipment'],
             'equipment_label' => Equipment::from($exercise['equipment'])->label(),
             'mode' => $exercise['mode'],
-            'muscles' => $exercise['muscles'],
+            'primary' => $exercise['primary'],
+            'secondary' => $exercise['secondary'],
             'steps' => $exercise['steps'],
             'tip' => $exercise['tip'],
             'images' => self::images($exercise['slug']),
-            'illustrated' => $exercise['image_source'] === null,
+            'credit' => $exercise['credit'],
         ])->values()->all();
+    }
+
+    /**
+     * Libellés des muscles, par clé de la silhouette.
+     *
+     * @return array<string, string>
+     */
+    public static function muscles(): array
+    {
+        return collect(Muscle::cases())
+            ->mapWithKeys(fn (Muscle $muscle): array => [$muscle->value => $muscle->label()])
+            ->all();
     }
 
     /**

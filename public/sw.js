@@ -9,7 +9,7 @@
  */
 
 const CACHE_VERSION = 'seance-v1';
-const IMAGE_CACHE = 'seance-exercices-v1';
+const IMAGE_CACHE = 'seance-exercices-v2';
 const OFFLINE_PAGE = '/offline.html';
 
 const SHELL_ASSETS = [
@@ -58,7 +58,8 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 172 images au plus, ~45 Ko chacune : le catalogue entier tient en 8 Mo.
+    // ~730 images, ~40 Ko en moyenne : le catalogue entier tient en 30 Mo, et
+    // seules les images réellement vues sont gardées.
     if (url.pathname.startsWith('/images/exercices/') && /\.(jpg|svg)$/.test(url.pathname)) {
         event.respondWith(cacheFirst(request, IMAGE_CACHE));
 

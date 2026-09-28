@@ -21,6 +21,8 @@ final class WorkoutDefaults
         $values = match (true) {
             // Le cardio se fait d'une traite : 5 minutes, une seule série.
             $mode === ExerciseMode::Time && ExerciseCatalog::group($slug) === MuscleGroup::Cardio => [300, 1, 0, 60],
+            // Un étirement se tient 30 secondes, deux fois, presque sans pause.
+            $mode === ExerciseMode::Time && ExerciseCatalog::group($slug) === MuscleGroup::Mobilite => [30, 2, 10, 15],
             $mode === ExerciseMode::Time => [30, 3, 30, 60],
             default => [10, 3, 60, 90],
         };

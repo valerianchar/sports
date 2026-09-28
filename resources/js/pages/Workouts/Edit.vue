@@ -1,13 +1,15 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
+import BodyMap from '../../components/BodyMap.vue';
 import BottomSheet from '../../components/BottomSheet.vue';
 import ExerciseLibrary from '../../components/ExerciseLibrary.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
+import MuscleSummary from '../../components/MuscleSummary.vue';
 import Stepper from '../../components/Stepper.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
-import { bySlug, defaultsFor, formatShort, newItem, stepRest, stepValue, summary } from '../../workout';
+import { bySlug, defaultsFor, exerciseIntensity, formatShort, newItem, stepRest, stepValue, summary } from '../../workout';
 
 const props = defineProps({
     workout: { type: Object, default: null },
@@ -37,6 +39,8 @@ const detailExercise = computed(() => (detail.value ? catalog.value[detail.value
 const confirmLeave = ref(false);
 const confirmDelete = ref(false);
 const saving = ref(false);
+
+const muscleNames = (muscles) => muscles.map((muscle) => page.props.muscles[muscle]).join(', ');
 
 const draftSummary = computed(() =>
     items.value.length ? summary(items.value, page.props.seconds_per_rep) : 'Ajoute des exercices pour construire ta séance.',
@@ -146,6 +150,8 @@ function destroy() {
             />
             <p class="mb-1.5 text-[13px] font-semibold text-text-muted">{{ draftSummary }}</p>
 
+            <MuscleSummary v-if="items.length" :items="items" :catalog="catalog" :height="200" />
+
             <article v-for="(item, index) in items" :key="item.key" class="flex flex-col gap-3.5 rounded-[22px] bg-surface p-4">
                 <div class="flex items-start gap-3">
                     <span class="w-[30px] font-display text-[26px] leading-none font-extrabold text-accent">{{ String(index + 1).padStart(2, '0') }}</span>
@@ -167,6 +173,21 @@ function destroy() {
                         </button>
                     </div>
                 </div>
+
+                <button
+                    type="button"
+                    class="-mt-1 flex items-center gap-3 rounded-2xl bg-bg px-3 py-2 text-left"
+                    :aria-label="`Muscles : ${muscleNames(catalog[item.exercise].primary)}`"
+                    @click="detail = item.exercise"
+                >
+                    <BodyMap :intensity="exerciseIntensity(catalog[item.exercise])" :height="64" label="" />
+                    <span class="flex min-w-0 flex-col gap-0.5 text-[12.5px]">
+                        <span class="font-bold text-text">{{ muscleNames(catalog[item.exercise].primary) }}</span>
+                        <span v-if="catalog[item.exercise].secondary.length" class="font-medium text-text-muted">
+                            + {{ muscleNames(catalog[item.exercise].secondary) }}
+                        </span>
+                    </span>
+                </button>
 
                 <div class="grid grid-cols-2 gap-[3px] rounded-xl bg-bg p-[3px]" role="radiogroup" aria-label="Mesure des séries">
                     <button

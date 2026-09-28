@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\ExerciseCatalog;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -39,6 +40,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'registration_open' => config('sport.registration_open'),
             'seconds_per_rep' => config('sport.seconds_per_rep'),
+            // Libellés de la silhouette musculaire, partagés par tous les écrans qui l'affichent.
+            'muscles' => fn (): array => ExerciseCatalog::muscles(),
         ];
     }
 }

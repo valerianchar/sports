@@ -54,8 +54,12 @@ export function summary(items, secondsPerRep) {
  */
 export function defaultsFor(exercise) {
     if (exercise.mode === 'time') {
-        return exercise.group === 'cardio'
-            ? { value: 300, sets: 1, rest_sets: 0, rest_after: 60 }
+        if (exercise.group === 'cardio') {
+            return { value: 300, sets: 1, rest_sets: 0, rest_after: 60 };
+        }
+
+        return exercise.group === 'mobilite'
+            ? { value: 30, sets: 2, rest_sets: 10, rest_after: 15 }
             : { value: 30, sets: 3, rest_sets: 30, rest_after: 60 };
     }
 
@@ -103,3 +107,47 @@ export const normalize = (text) =>
         .normalize('NFD')
         .replace(/[̀-ͯ]/g, '')
         .toLowerCase();
+
+/** Un exercice seul : ses muscles principaux à fond, les secondaires à moitié. */
+export function exerciseIntensity(exercise) {
+    return {
+        ...Object.fromEntries(exercise.secondary.map((muscle) => [muscle, 0.5])),
+        ...Object.fromEntries(exercise.primary.map((muscle) => [muscle, 1])),
+    };
+}
+
+/**
+ * La charge de chaque muscle sur une séance, comptée en séries : une série
+ * pleine pour un muscle principal, une demie pour un secondaire. Rendu trié du
+ * plus sollicité au moins sollicité.
+ */
+export function muscleLoad(items, catalog) {
+    const load = {};
+
+    for (const item of items) {
+        const exercise = catalog[item.exercise];
+
+        if (!exercise) {
+            continue;
+        }
+
+        for (const muscle of exercise.primary) {
+            load[muscle] = (load[muscle] ?? 0) + item.sets;
+        }
+
+        for (const muscle of exercise.secondary) {
+            load[muscle] = (load[muscle] ?? 0) + item.sets / 2;
+        }
+    }
+
+    return Object.entries(load)
+        .map(([muscle, sets]) => ({ muscle, sets }))
+        .sort((a, b) => b.sets - a.sets);
+}
+
+/** La charge ramenée de 0 à 1, le muscle le plus sollicité valant 1. */
+export function loadIntensity(load) {
+    const max = Math.max(0, ...load.map((entry) => entry.sets));
+
+    return Object.fromEntries(load.map((entry) => [entry.muscle, max ? entry.sets / max : 0]));
+}

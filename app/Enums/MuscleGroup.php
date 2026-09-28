@@ -4,7 +4,8 @@ namespace App\Enums;
 
 /**
  * Les groupes de la bibliothèque, dans l'ordre où la maquette les présente :
- * du haut du corps vers le bas, le cardio à la fin.
+ * du haut du corps vers le bas, puis le cardio, le fonctionnel (cross-training,
+ * Hyrox) et la mobilité.
  */
 enum MuscleGroup: string
 {
@@ -16,6 +17,8 @@ enum MuscleGroup: string
     case Fessiers = 'fessiers';
     case Abdos = 'abdos';
     case Cardio = 'cardio';
+    case Fonctionnel = 'fonctionnel';
+    case Mobilite = 'mobilite';
 
     public function label(): string
     {
@@ -28,6 +31,8 @@ enum MuscleGroup: string
             self::Fessiers => 'Fessiers',
             self::Abdos => 'Abdos',
             self::Cardio => 'Cardio',
+            self::Fonctionnel => 'Fonctionnel',
+            self::Mobilite => 'Mobilité',
         };
     }
 }

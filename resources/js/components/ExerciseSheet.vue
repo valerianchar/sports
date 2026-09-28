@@ -1,6 +1,9 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import BodyMap from './BodyMap.vue';
 import ExerciseImage from './ExerciseImage.vue';
+import { exerciseIntensity } from '../workout';
 
 /**
  * La fiche « Comment faire » : elle recouvre l'écran courant sans le quitter,
@@ -12,6 +15,20 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+
+const page = usePage();
+const names = (muscles) => muscles.map((muscle) => page.props.muscles[muscle]).join(', ');
+const intensity = computed(() => exerciseIntensity(props.exercise));
+
+const credit = computed(() => {
+    const source = props.exercise.credit;
+
+    if (source === 'free-exercise-db') {
+        return 'Photos : free-exercise-db (domaine public)';
+    }
+
+    return source === 'illustration' ? 'Illustration Séance' : `Photo : ${source}`;
+});
 
 const videoUrl = () =>
     'https://www.youtube.com/results?search_query=' +
@@ -44,8 +61,25 @@ onUnmounted(() => window.removeEventListener('keydown', onKey));
                 </div>
                 <h2 class="display mt-1.5 text-[44px] leading-[0.92] font-extrabold text-balance">{{ props.exercise.name }}</h2>
                 <p class="text-[14px] font-semibold text-text-soft">{{ props.exercise.equipment_label }}</p>
-                <p class="text-[13px] font-medium text-text-muted">Muscles : {{ props.exercise.muscles }}</p>
             </div>
+
+            <section class="mx-5 mt-5 flex items-center gap-4 rounded-[22px] bg-surface p-4">
+                <BodyMap :intensity="intensity" :height="170" :label="`Muscles : ${names(props.exercise.primary)}`" />
+                <dl class="flex min-w-0 flex-1 flex-col gap-3 text-[13px]">
+                    <div>
+                        <dt class="flex items-center gap-1.5 text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">
+                            <span class="size-2.5 rounded-full bg-accent" aria-hidden="true" /> Principaux
+                        </dt>
+                        <dd class="mt-1 font-semibold">{{ names(props.exercise.primary) }}</dd>
+                    </div>
+                    <div v-if="props.exercise.secondary.length">
+                        <dt class="flex items-center gap-1.5 text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">
+                            <span class="size-2.5 rounded-full bg-[color-mix(in_srgb,var(--color-accent)_62%,var(--color-surface-3))]" aria-hidden="true" /> Secondaires
+                        </dt>
+                        <dd class="mt-1 font-medium text-text-soft">{{ names(props.exercise.secondary) }}</dd>
+                    </div>
+                </dl>
+            </section>
 
             <div class="flex flex-col gap-2.5 px-5 pt-[26px]">
                 <h3 class="display text-[22px] font-bold">Comment faire</h3>
@@ -71,7 +105,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey));
                 </a>
 
                 <p class="pt-2 text-center text-[11px] text-text-faint">
-                    {{ props.exercise.illustrated ? 'Illustration Séance' : 'Photos : free-exercise-db (domaine public)' }}
+                    {{ credit }}
                 </p>
             </div>
         </div>

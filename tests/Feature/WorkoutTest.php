@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\Workout;
+use App\Support\ExerciseCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
@@ -130,8 +131,8 @@ class WorkoutTest extends TestCase
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Workouts/Edit')
                 ->where('workout.id', $workout->id)
-                ->has('exercises', 86)
-                ->has('groups', 8));
+                ->has('exercises', ExerciseCatalog::all()->count())
+                ->has('groups', 10));
 
         $this->actingAs($user)->get('/seances/nouvelle')
             ->assertInertia(fn (AssertableInertia $page) => $page->component('Workouts/Edit')->where('workout', null));
@@ -192,7 +193,7 @@ class WorkoutTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Exercises/Index')
-                ->has('exercises', 86)
+                ->has('exercises', ExerciseCatalog::all()->count())
                 ->where('groups.2', ['value' => 'epaules', 'label' => 'Épaules']));
     }
 }

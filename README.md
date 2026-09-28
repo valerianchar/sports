@@ -1,7 +1,8 @@
 # Séance
 
 Application de séances de salle : on compose ses séances à partir d'une bibliothèque de
-86 exercices, puis le lecteur guide série par série — compte à rebours, effort, repos entre
+365 exercices — toutes les machines d'une salle comme L'Appart Fitness —, puis le lecteur
+guide série par série — compte à rebours, effort, repos entre
 séries et entre exercices, bips et vibrations, écran maintenu allumé. Mise en œuvre de la
 maquette « Séance » (Barlow Condensed + Manrope, citron sur noir).
 
@@ -12,9 +13,16 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
 - **Mes séances** — l'accueil. Trois séances d'exemple sont offertes à l'inscription (Push,
   Jambes, HIIT 20 minutes). Chaque carte donne le nombre d'exercices, de séries, une durée
   estimée (3 s par répétition) et la date de la dernière fois.
-- **Exercices** — la bibliothèque, par muscle ou par machine, filtrable et cherchable. Chaque
-  fiche montre deux images qui alternent (position de départ, d'arrivée), les muscles, les
+- **Exercices** — la bibliothèque, par muscle ou par machine (83 machines et équipements :
+  guidées Matrix et EGYM, machines assistées, iso-latérales Hammer Strength et Panatta,
+  squats machines, poulies, zone cross-training / Hyrox, cardio), filtrable et cherchable,
+  en dix groupes dont Fonctionnel et Mobilité. Chaque fiche montre deux images qui alternent
+  (position de départ, d'arrivée), la silhouette des muscles principaux et secondaires, les
   étapes, un conseil, et un lien vers une démo vidéo.
+- **Muscles ciblés** — une silhouette de face et de dos s'allume selon les muscles travaillés :
+  pour la séance entière dans l'éditeur (charge comptée en séries, une demie pour un muscle
+  secondaire) et sur chaque carte de l'accueil, pour chaque exercice dans l'éditeur et sa
+  fiche. Tracé repris de react-muscle-highlighter (MIT).
 - **Éditeur** — nom, exercices dans l'ordre, et pour chacun : répétitions ou durée, séries,
   repos entre séries, repos après l'exercice. Le brouillon reste dans le navigateur jusqu'à
   « Enregistrer ».
@@ -26,15 +34,18 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
 
 ## Les images d'exercices
 
-77 exercices sont illustrés par les photos de
-[free-exercise-db](https://github.com/yuhonas/free-exercise-db), versé au domaine public
-(Unlicense), redimensionnées à 720 px. Les 9 absents de cette base (air bike, burpees, chaise,
-hip thrust machine, hollow hold, jumping jacks, kickback machine, SkiErg, tractions assistées)
-sont dessinés par [scripts/illustrations.mjs](scripts/illustrations.mjs) : un pictogramme SVG
-en deux positions, au même format 3:2.
+- 276 exercices sont illustrés par les photos de
+  [free-exercise-db](https://github.com/yuhonas/free-exercise-db), versé au domaine public
+  (Unlicense), redimensionnées à 720 px ;
+- 25 par des images de [wger](https://wger.de) sous licence Creative Commons, dont l'auteur et
+  la licence sont affichés sur la fiche ;
+- les 64 autres, absents de ces banques (machines récentes, zone Hyrox, mobilité…), sont
+  dessinés par [scripts/illustrations.mjs](scripts/illustrations.mjs) : un pictogramme SVG en
+  deux positions, au même format 3:2 (outils dans `scripts/illustrations/lib.mjs`).
 
 Le catalogue vit dans le code, [database/data/exercises.php](database/data/exercises.php) : un
-contenu éditorial versionné avec l'application. Le slug est la clé stockée dans les séances.
+contenu éditorial versionné avec l'application. Le slug est la clé stockée dans les séances ;
+les 86 exercices de la première version gardent le leur (un test y veille).
 
 ## Stack
 

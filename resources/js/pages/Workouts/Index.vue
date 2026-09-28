@@ -1,11 +1,12 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import BodyMap from '../../components/BodyMap.vue';
 import SettingsSheet from '../../components/SettingsSheet.vue';
 import TabBar from '../../components/TabBar.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
-import { bySlug, groupsOf, summary } from '../../workout';
+import { bySlug, groupsOf, loadIntensity, muscleLoad, summary } from '../../workout';
 
 const props = defineProps({
     workouts: { type: Array, required: true },
@@ -23,6 +24,7 @@ const cards = computed(() =>
         ...workout,
         meta: summary(workout.items, page.props.seconds_per_rep),
         groups: groupsOf(workout.items, catalog.value),
+        intensity: loadIntensity(muscleLoad(workout.items, catalog.value)),
     })),
 );
 
@@ -64,10 +66,13 @@ function play(workout) {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /></svg>
                     </Link>
                 </div>
-                <p class="text-[12px] font-semibold tracking-[0.02em] text-text-soft">
-                    {{ workout.groups }}
-                    <span v-if="workout.last_done" class="text-text-faint"> · faite {{ workout.last_done }}</span>
-                </p>
+                <div class="flex items-center justify-between gap-3">
+                    <p class="text-[12px] font-semibold tracking-[0.02em] text-text-soft">
+                        {{ workout.groups }}
+                        <span v-if="workout.last_done" class="block pt-1 text-text-faint">Faite {{ workout.last_done }}</span>
+                    </p>
+                    <BodyMap v-if="workout.items.length" :intensity="workout.intensity" :height="84" :label="`Muscles de ${workout.name}`" />
+                </div>
                 <button type="button" class="btn-accent h-[52px] text-[22px]" @click="play(workout)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" /></svg>
                     Lancer

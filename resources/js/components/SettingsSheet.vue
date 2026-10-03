@@ -1,10 +1,10 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { SwitchRoot, SwitchThumb } from 'reka-ui';
 import BottomSheet from './BottomSheet.vue';
 import Stepper from './Stepper.vue';
-import { countdownBeep, unlockAudio } from '../audio';
+import { loadCustomSound, previewCountdown } from '../audio';
 import { routes } from '../routes';
 
 const props = defineProps({
@@ -21,12 +21,61 @@ const form = useForm({
     prep_seconds: user.value.prep_seconds,
     countdown_seconds: user.value.countdown_seconds ?? 5,
     volume: user.value.volume ?? 80,
+    countdown_sound: user.value.countdown_sound ?? 'bip',
 });
 
-/* Entendre le réglage tout de suite : trois bips, le dernier comme une reprise. */
-function test() {
-    unlockAudio();
-    [3, 2, 1].forEach((second, index) => setTimeout(() => countdownBeep(second, form.volume / 100), index * 1000));
+/* Entendre le réglage tout de suite : trois secondes de décompte et la reprise. */
+async function test() {
+    if (form.countdown_sound === 'perso') {
+        await loadCustomSound(user.value.custom_sound_url);
+    }
+
+    previewCountdown(form.countdown_sound, form.volume / 100);
+}
+
+function chooseSound(value) {
+    if (value === 'perso' && !user.value.custom_sound_url) {
+        fileInput.value?.click();
+
+        return;
+    }
+
+    form.countdown_sound = value;
+    test();
+}
+
+// « Mon son » : le fichier part tout de suite, puis devient le son choisi.
+const fileInput = ref(null);
+const uploading = ref(false);
+const uploadError = computed(() => page.props.errors.sound);
+
+function upload(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) {
+        return;
+    }
+
+    router.post(routes.preferences + '/son', { sound: file }, {
+        forceFormData: true,
+        preserveScroll: true,
+        preserveState: true,
+        onStart: () => (uploading.value = true),
+        onFinish: () => (uploading.value = false),
+        onSuccess: () => {
+            form.countdown_sound = 'perso';
+            test();
+        },
+    });
+}
+
+function removeSound() {
+    router.delete(routes.preferences + '/son', {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => (form.countdown_sound = 'bip'),
+    });
 }
 
 function save() {
@@ -78,8 +127,44 @@ function logout() {
             </div>
 
             <div v-if="form.sound" class="flex flex-col gap-2">
+                <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Son du décompte</span>
+                <div class="grid grid-cols-3 gap-1.5" role="radiogroup" aria-label="Son du décompte">
+                    <button
+                        v-for="choice in page.props.countdown_sounds"
+                        :key="choice.value"
+                        type="button"
+                        role="radio"
+                        :aria-checked="form.countdown_sound === choice.value"
+                        class="h-11 truncate rounded-xl px-2 text-[13px] font-bold"
+                        :class="form.countdown_sound === choice.value ? 'bg-accent text-on-accent' : 'bg-surface-2 text-text-soft'"
+                        @click="chooseSound(choice.value)"
+                    >
+                        {{ choice.value === 'perso' && !user.custom_sound_url ? '+ Mon son' : choice.label }}
+                    </button>
+                </div>
+                <div class="flex items-center justify-between gap-3 rounded-xl bg-bg px-3 py-2.5">
+                    <span class="min-w-0 truncate text-[12.5px] font-medium text-text-muted">
+                        <template v-if="uploading">Envoi du fichier…</template>
+                        <template v-else-if="user.custom_sound_url">Mon son : {{ user.custom_sound_name }}</template>
+                        <template v-else>Ton propre son : mp3, m4a, wav ou ogg, 2 Mo max.</template>
+                    </span>
+                    <span class="flex shrink-0 gap-3">
+                        <button type="button" class="text-[13px] font-extrabold text-accent" :disabled="uploading" @click="fileInput?.click()">
+                            {{ user.custom_sound_url ? 'Remplacer' : 'Choisir un fichier' }}
+                        </button>
+                        <button v-if="user.custom_sound_url" type="button" class="text-[13px] font-bold text-danger" @click="removeSound">Supprimer</button>
+                    </span>
+                    <input ref="fileInput" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.aac" class="hidden" @change="upload" />
+                </div>
+                <p v-if="uploadError" class="text-[13px] text-danger">{{ uploadError }}</p>
+                <p v-else class="text-[12px] font-medium text-text-faint">
+                    Un son court sonne à chaque seconde ; un son long (une phrase enregistrée) sonne une fois au début du décompte.
+                </p>
+            </div>
+
+            <div v-if="form.sound" class="flex flex-col gap-2">
                 <div class="flex items-baseline justify-between">
-                    <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Volume des bips</span>
+                    <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Volume des sons</span>
                     <span class="font-display text-[20px] font-bold tabular-nums">{{ form.volume }} %</span>
                 </div>
                 <div class="flex items-center gap-3">
@@ -89,7 +174,7 @@ function logout() {
                         min="10"
                         max="100"
                         step="10"
-                        aria-label="Volume des bips"
+                        aria-label="Volume des sons"
                         class="h-6 flex-1 cursor-pointer accent-[var(--color-accent)]"
                     />
                     <button type="button" class="h-10 shrink-0 rounded-full bg-surface-2 px-4 text-[13px] font-extrabold text-accent" @click="test">

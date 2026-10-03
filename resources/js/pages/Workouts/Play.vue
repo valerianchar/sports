@@ -4,7 +4,7 @@ import { Head, router } from '@inertiajs/vue3';
 import ExerciseImage from '../../components/ExerciseImage.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
 import { useWakeLock } from '../../composables/useWakeLock';
-import { beep, countdownBeep, unlockAudio, vibrate } from '../../audio';
+import { beep, countdownSound, goSound, loadCustomSound, restSound, unlockAudio, vibrate } from '../../audio';
 import { sendLog } from '../../pendingLogs';
 import { routes } from '../../routes';
 import { bySlug, clamp, formatClock, targetLabel } from '../../workout';
@@ -146,6 +146,7 @@ function restore() {
 // ---------------------------------------------------------------- lecture
 
 const volume = () => (props.preferences.volume ?? 80) / 100;
+const cue = () => props.preferences.countdown_sound ?? 'bip';
 
 function sound(frequency, duration) {
     if (props.preferences.sound) {
@@ -192,10 +193,16 @@ function goTo(target, countSet = false) {
     });
 
     if (step.kind === 'work') {
-        sound(990, 0.35);
+        if (props.preferences.sound) {
+            goSound(cue(), volume());
+        }
+
         buzz(200);
     } else if (step.kind === 'rest') {
-        sound(520, 0.3);
+        if (props.preferences.sound) {
+            restSound(cue(), volume());
+        }
+
         buzz(80);
     }
 
@@ -235,10 +242,11 @@ function tick() {
 
         // Les dernières secondes d'un repos, d'une série chronométrée ou du départ.
         if (seconds <= (props.preferences.countdown_seconds ?? 5) && seconds >= 1 && seconds !== lastBeep) {
+            const first = lastBeep === null;
             lastBeep = seconds;
 
             if (props.preferences.sound) {
-                countdownBeep(seconds, volume());
+                countdownSound(cue(), seconds, volume(), { first });
             }
         }
 
@@ -387,6 +395,11 @@ function onKey(event) {
 }
 
 onMounted(() => {
+    // Le son personnel se charge pendant le compte à rebours de départ.
+    if (props.preferences.sound && cue() === 'perso') {
+        loadCustomSound(props.preferences.custom_sound_url);
+    }
+
     if (!restore()) {
         goTo(0);
     }

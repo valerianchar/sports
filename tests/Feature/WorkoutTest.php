@@ -176,7 +176,7 @@ class WorkoutTest extends TestCase
                 ->has('workout.items', 2)
                 ->has('exercises', 2)
                 ->where('exercises.0.images.0', '/images/exercices/developpe-couche/0.jpg')
-                ->where('preferences', ['sound' => false, 'prep_seconds' => 8, 'countdown_seconds' => 5, 'volume' => 80]));
+                ->where('preferences', ['sound' => false, 'prep_seconds' => 8, 'countdown_seconds' => 5, 'volume' => 80, 'countdown_sound' => 'bip', 'custom_sound_url' => null]));
     }
 
     public function test_an_empty_workout_cannot_be_played(): void

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CountdownSound;
 use App\Notifications\ResetPassword;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -13,12 +14,26 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password', 'sound', 'prep_seconds', 'countdown_seconds', 'volume'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable(['name', 'email', 'password', 'sound', 'prep_seconds', 'countdown_seconds', 'volume', 'countdown_sound', 'custom_sound_path', 'custom_sound_name'])]
+#[Hidden(['password', 'remember_token', 'custom_sound_path'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Les réglages par défaut, les mêmes qu'en base : un compte tout juste créé
+     * les connaît sans être relu.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'sound' => true,
+        'prep_seconds' => 5,
+        'countdown_seconds' => 5,
+        'volume' => 80,
+        'countdown_sound' => 'bip',
+    ];
 
     /**
      * @return array<string, string>
@@ -32,6 +47,7 @@ class User extends Authenticatable
             'prep_seconds' => 'integer',
             'countdown_seconds' => 'integer',
             'volume' => 'integer',
+            'countdown_sound' => CountdownSound::class,
         ];
     }
 
@@ -66,6 +82,17 @@ class User extends Authenticatable
             ->take(2)
             ->map(fn (string $word): string => Str::upper(Str::substr($word, 0, 1)))
             ->implode(''));
+    }
+
+    /**
+     * Adresse du son personnel, s'il y en a un — l'horodatage dans l'adresse
+     * fait oublier au navigateur l'ancien fichier quand on le remplace.
+     */
+    protected function customSoundUrl(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->custom_sound_path === null
+            ? null
+            : route('preferences.sound.show', ['v' => $this->updated_at?->timestamp]));
     }
 
     public function sendPasswordResetNotification($token): void

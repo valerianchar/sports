@@ -24,7 +24,7 @@ class PreferencesTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->actingAs($user)->from('/')->put('/reglages', ['sound' => false, 'prep_seconds' => 10, 'countdown_seconds' => 10, 'volume' => 100])
+        $this->actingAs($user)->from('/')->put('/reglages', ['sound' => false, 'prep_seconds' => 10, 'countdown_seconds' => 10, 'volume' => 100, 'countdown_sound' => 'voix'])
             ->assertRedirect('/');
 
         $user->refresh();
@@ -37,7 +37,7 @@ class PreferencesTest extends TestCase
     public function test_the_countdown_is_capped(): void
     {
         $this->actingAs(User::factory()->create())
-            ->put('/reglages', ['sound' => true, 'prep_seconds' => 60, 'countdown_seconds' => 7, 'volume' => 150])
-            ->assertSessionHasErrors(['prep_seconds', 'countdown_seconds', 'volume']);
+            ->put('/reglages', ['sound' => true, 'prep_seconds' => 60, 'countdown_seconds' => 7, 'volume' => 150, 'countdown_sound' => 'trompette'])
+            ->assertSessionHasErrors(['prep_seconds', 'countdown_seconds', 'volume', 'countdown_sound']);
     }
 }

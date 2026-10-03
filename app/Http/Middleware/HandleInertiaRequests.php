@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\CountdownSound;
 use App\Support\ExerciseCatalog;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -34,6 +35,9 @@ class HandleInertiaRequests extends Middleware
                     'prep_seconds' => $user->prep_seconds,
                     'countdown_seconds' => $user->countdown_seconds,
                     'volume' => $user->volume,
+                    'countdown_sound' => $user->countdown_sound->value,
+                    'custom_sound_url' => $user->custom_sound_url,
+                    'custom_sound_name' => $user->custom_sound_name,
                 ],
             ],
             'flash' => [
@@ -42,6 +46,11 @@ class HandleInertiaRequests extends Middleware
             ],
             'registration_open' => config('sport.registration_open'),
             'seconds_per_rep' => config('sport.seconds_per_rep'),
+            // Les sons du compte à rebours, pour les réglages.
+            'countdown_sounds' => fn (): array => array_map(
+                fn (CountdownSound $sound): array => ['value' => $sound->value, 'label' => $sound->label()],
+                CountdownSound::cases(),
+            ),
             // Libellés de la silhouette musculaire, partagés par tous les écrans qui l'affichent.
             'muscles' => fn (): array => ExerciseCatalog::muscles(),
         ];

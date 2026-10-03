@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\CustomSoundController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\WorkoutAssistantController;
@@ -49,4 +50,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:30,1')->name('workouts.logs.store');
 
     Route::put('/reglages', [PreferencesController::class, 'update'])->name('preferences.update');
+    Route::post('/reglages/son', [CustomSoundController::class, 'store'])->middleware('throttle:10,1')->name('preferences.sound.store');
+    Route::get('/reglages/son', [CustomSoundController::class, 'show'])->name('preferences.sound.show');
+    Route::delete('/reglages/son', [CustomSoundController::class, 'destroy'])->name('preferences.sound.destroy');
 });

@@ -44,7 +44,10 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   téléphone et renvoyé plus tard, sans jamais être compté deux fois.
 - **Réglages** — bips et vibrations, bips avant la fin d'un repos (3, 5 ou 10 s, le dernier plus aigu
   pour annoncer la reprise), volume des bips avec un bouton « Tester », durée du compte à
-  rebours de départ, déconnexion. Les bips passent outre le mode silencieux de l'iPhone.
+  rebours de départ, déconnexion. Le son du décompte se choisit : bip (par défaut), double bip,
+  cloche, sifflet, claquement — synthétisés par le navigateur — voix française (« 3, 2, 1… Go ! »)
+  ou « Mon son », un fichier envoyé (mp3, m4a, wav, ogg ; 2 Mo) rangé sur le disque privé.
+  Les sons passent outre le mode silencieux de l'iPhone.
 
 ## Les images d'exercices
 

@@ -16,9 +16,13 @@ use Illuminate\Support\Facades\DB;
  * lecteur renvoie le journal tant qu'il n'a pas eu de réponse, sans jamais
  * compter la séance deux fois.
  *
+ * Seule une séance menée au bout — toutes les séries prévues faites — compte
+ * dans les statistiques ; interrompue, elle est gardée mais marquée
+ * incomplète, et ne bat aucun record.
+ *
  * Au passage, on repère les records battus — charge maximale, meilleur 1RM
- * estimé — en comparant à tout ce qui précède : le lecteur les annonce en
- * fin de séance.
+ * estimé — en comparant aux seules séances complètes qui précèdent : le
+ * lecteur les annonce en fin de séance.
  */
 final class RecordWorkoutLog
 {
@@ -28,7 +32,10 @@ final class RecordWorkoutLog
      */
     public function handle(User $user, Workout $workout, array $data): array
     {
-        return DB::transaction(function () use ($user, $workout, $data): array {
+        $mainSets = count(array_filter($data['sets'] ?? [], fn (array $set): bool => ($set['drop'] ?? null) === null));
+        $planned = isset($data['planned_sets']) ? (int) $data['planned_sets'] : null;
+
+        return DB::transaction(function () use ($user, $workout, $data, $mainSets, $planned): array {
             $log = $user->workoutLogs()->firstOrCreate(
                 ['client_id' => $data['client_id']],
                 [
@@ -37,6 +44,8 @@ final class RecordWorkoutLog
                     'duration_seconds' => $data['duration_seconds'],
                     'sets_done' => $data['sets_done'],
                     'exercises_done' => $data['exercises_done'],
+                    'planned_sets' => $planned,
+                    'completed' => $planned !== null && $planned > 0 && $mainSets >= $planned,
                     'finished_at' => $data['finished_at'],
                 ],
             );
@@ -47,7 +56,7 @@ final class RecordWorkoutLog
             }
 
             $sets = array_map(fn (array $set): array => $this->set($set, $log), $data['sets']);
-            $records = $this->records($user, $sets, $log);
+            $records = $log->completed ? $this->records($user, $sets, $log) : [];
             $log->sets()->createMany($sets);
 
             return [$log, $records];
@@ -94,6 +103,7 @@ final class RecordWorkoutLog
             ->where('user_id', $user->id)
             ->whereIn('exercise', $exercises)
             ->where('workout_log_id', '!=', $log->id)
+            ->whereIn('workout_log_id', WorkoutLog::query()->select('id')->where('user_id', $user->id)->where('completed', true))
             ->groupBy('exercise')
             ->selectRaw('exercise, max(weight) as weight, max(e1rm) as e1rm')
             ->get()

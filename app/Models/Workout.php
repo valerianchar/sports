@@ -37,6 +37,7 @@ class Workout extends Model
     /** @return HasOne<WorkoutLog, $this> */
     public function latestLog(): HasOne
     {
-        return $this->hasOne(WorkoutLog::class)->latestOfMany('finished_at');
+        // « Faite il y a… » : la dernière fois qu'elle a été menée au bout.
+        return $this->hasOne(WorkoutLog::class)->ofMany(['finished_at' => 'max'], fn ($query) => $query->where('completed', true));
     }
 }

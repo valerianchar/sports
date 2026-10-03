@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['workout_id', 'client_id', 'name', 'duration_seconds', 'sets_done', 'exercises_done', 'rpe', 'finished_at'])]
+#[Fillable(['workout_id', 'client_id', 'name', 'duration_seconds', 'sets_done', 'exercises_done', 'completed', 'planned_sets', 'rpe', 'finished_at'])]
 class WorkoutLog extends Model
 {
     /**
@@ -21,6 +21,8 @@ class WorkoutLog extends Model
             'sets_done' => 'integer',
             'exercises_done' => 'integer',
             'rpe' => 'integer',
+            'completed' => 'boolean',
+            'planned_sets' => 'integer',
         ];
     }
 

@@ -46,7 +46,8 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   ne fait pas dériver les minuteurs. Une séance interrompue (rechargement, appel) reprend en
   pause. En fin de séance, le journal part au serveur ; sans réseau, il est gardé sur le
   téléphone et renvoyé plus tard, sans jamais être compté deux fois.
-- **Progrès** — chaque série réellement faite est enregistrée (charge, répétitions faites,
+- **Progrès** — seules les séances menées au bout (toutes les séries prévues faites) comptent ;
+  une séance interrompue est gardée mais n'entre dans aucune statistique. Chaque série réellement faite est enregistrée (charge, répétitions faites,
   ajustables au « − / + » du lecteur, objectif, paliers de drop), avec la difficulté ressentie
   notée en fin de séance et les pesées. En découlent : sur l'accueil, la semaine (séances,
   semaines d'affilée, tonnage comparé à la semaine dernière au même moment, temps, records,

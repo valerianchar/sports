@@ -65,6 +65,13 @@ function buildSteps() {
 const steps = buildSteps();
 
 /*
+ * Une séance ne compte dans les statistiques que menée au bout : toutes les
+ * séries prévues faites (les paliers de drop prolongent une série, ils ne
+ * s'ajoutent pas au compte).
+ */
+const plannedSets = steps.filter((s) => s.kind === 'work' && s.drop === undefined).length;
+
+/*
  * Tous les instants sont absolus (Date.now) : un onglet endormi ou un écran
  * éteint ne fait pas dériver les minuteurs, qui rattrapent le temps au réveil.
  */
@@ -241,6 +248,7 @@ function finish(at) {
         exercises_done: Object.keys(state.doneItems).length,
         finished_at: new Date(at).toISOString(),
         sets: state.performed,
+        planned_sets: plannedSets,
     }).then((response) => {
         records.value = response?.records ?? [];
     });
@@ -267,6 +275,9 @@ function perform(s, seconds = null) {
         at: new Date().toISOString(),
     });
 }
+
+const mainSetsDone = computed(() => state.performed.filter((set) => set.drop === null).length);
+const complete = computed(() => mainSetsDone.value >= plannedSets);
 
 const sessionTonnage = computed(() => state.performed.reduce((total, set) => total + (set.weight && set.reps ? set.weight * set.reps : 0), 0));
 
@@ -753,17 +764,28 @@ onUnmounted(() => {
                     Reprendre
                 </button>
                 <button type="button" class="btn-soft h-[54px] text-[15px]" @click="restartStep">Recommencer cette étape</button>
-                <button type="button" class="btn-soft h-[54px] text-[15px]" @click="finishNow">Terminer la séance</button>
+                <button type="button" class="btn-soft h-[54px] flex-col gap-0 text-[15px]" @click="finishNow">
+                    Terminer la séance
+                    <span v-if="!complete" class="text-[11.5px] font-semibold text-prep">
+                        {{ plannedSets - mainSetsDone }} série{{ plannedSets - mainSetsDone > 1 ? 's' : '' }} restante{{ plannedSets - mainSetsDone > 1 ? 's' : '' }} : elle ne comptera pas
+                    </span>
+                </button>
                 <button type="button" class="h-12 text-[14px] font-bold text-danger" @click="quit">Abandonner sans enregistrer</button>
             </div>
         </template>
 
         <!-- Séance terminée -->
         <div v-else class="animate-pop no-scrollbar flex flex-1 flex-col justify-[safe_center] gap-2 overflow-y-auto px-7 pt-6 pb-10">
-            <span class="eyebrow text-accent">Séance terminée</span>
-            <h1 class="display text-[84px] leading-[0.86] font-extrabold">Bien<br />joué.</h1>
+            <span class="eyebrow" :class="complete ? 'text-accent' : 'text-prep'">{{ complete ? 'Séance terminée' : 'Séance interrompue' }}</span>
+            <h1 v-if="complete" class="display text-[84px] leading-[0.86] font-extrabold">Bien<br />joué.</h1>
+            <h1 v-else class="display text-[64px] leading-[0.88] font-extrabold">Arrêtée<br />en route.</h1>
             <p class="mt-2.5 mb-4 text-[15px] font-semibold text-text-soft">
                 {{ props.workout.name }}<template v-if="sessionTonnage"> · {{ formatTonnage(sessionTonnage) }} soulevés</template>
+            </p>
+
+            <p v-if="!complete" class="mb-4 rounded-[20px] border-[1.5px] border-line bg-surface p-4 text-[14px] leading-normal font-medium text-text-soft">
+                <span class="font-extrabold text-prep">Séance incomplète</span> — {{ mainSetsDone }} série{{ mainSetsDone > 1 ? 's' : '' }} sur {{ plannedSets }}.
+                Elle est gardée, mais ne compte ni dans tes progrès ni dans tes records.
             </p>
 
             <section v-if="records?.length" class="mb-4 flex flex-col gap-2 rounded-[20px] border-[1.5px] border-prep/60 bg-prep/8 p-4" aria-live="polite">
@@ -775,7 +797,7 @@ onUnmounted(() => {
                 </p>
             </section>
 
-            <section class="mb-4 flex flex-col gap-2">
+            <section v-if="complete" class="mb-4 flex flex-col gap-2">
                 <span class="text-[11px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Difficulté ressentie</span>
                 <div class="grid grid-cols-10 gap-1" role="radiogroup" aria-label="Difficulté ressentie, de 1 facile à 10 maximale">
                     <button

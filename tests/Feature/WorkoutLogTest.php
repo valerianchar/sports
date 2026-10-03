@@ -70,6 +70,8 @@ class WorkoutLogTest extends TestCase
         $workout = Workout::factory()->for($user)->withItems()->create();
         $this->actingAs($user)->postJson("/seances/{$workout->id}/journal", $this->payload([
             'finished_at' => now()->subDays(2)->toIso8601String(),
+            'planned_sets' => 1,
+            'sets' => [['exercise' => 'developpe-couche', 'position' => 0, 'set' => 1, 'reps' => 10, 'target_reps' => 10, 'weight' => 50]],
         ]));
 
         $this->actingAs($user)->get('/')

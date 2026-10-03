@@ -10,11 +10,13 @@ use App\Models\WorkoutLog;
 use App\Support\ExerciseCatalog;
 use App\Support\Strength;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 /**
  * Les indicateurs de performance d'un utilisateur, calculés à partir de ses
- * séances et de chacune de ses séries.
+ * séances et de chacune de ses séries — les séances complètes seulement : une
+ * séance abandonnée en route ne dit rien de ses performances.
  *
  * Tout est lu en une fois (une année glissante), puis agrégé en mémoire : un
  * pratiquant assidu cumule quelques milliers de séries par an, rien qui
@@ -181,6 +183,7 @@ final class PerformanceStats
     public function exercise(string $slug): array
     {
         $sets = $this->user->setLogs()
+            ->whereIn('workout_log_id', $this->completedLogIds())
             ->where('exercise', $slug)
             ->orderBy('performed_at')
             ->get();
@@ -347,6 +350,7 @@ final class PerformanceStats
     private function logs(): Collection
     {
         return $this->logs ??= $this->user->workoutLogs()
+            ->where('completed', true)
             ->where('finished_at', '>=', $this->now->subYear())
             ->orderBy('finished_at')
             ->get();
@@ -356,9 +360,16 @@ final class PerformanceStats
     private function sets(): Collection
     {
         return $this->sets ??= $this->user->setLogs()
+            ->whereIn('workout_log_id', $this->completedLogIds())
             ->where('performed_at', '>=', $this->now->subYear())
             ->orderBy('performed_at')
             ->get();
+    }
+
+    /** Sous-requête des séances complètes de l'utilisateur. */
+    private function completedLogIds(): Builder
+    {
+        return WorkoutLog::query()->select('id')->where('user_id', $this->user->id)->where('completed', true);
     }
 
     private function weekStart(CarbonImmutable $date): CarbonImmutable

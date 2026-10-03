@@ -21,6 +21,8 @@ class StoreWorkoutLogRequest extends FormRequest
             'exercises_done' => ['required', 'integer', 'min:0', 'max:100'],
             // Rejoué après une coupure, le journal garde l'heure réelle de la fin.
             'finished_at' => ['required', 'date', 'before_or_equal:+5 minutes', 'after:-60 days'],
+            // Séries prévues (hors paliers de drop) : la séance ne compte que si toutes sont faites.
+            'planned_sets' => ['nullable', 'integer', 'min:0', 'max:400'],
             // Chaque série réellement faite : la matière des statistiques de progression.
             'sets' => ['nullable', 'array', 'max:400'],
             'sets.*.exercise' => ['required', 'string', Rule::in(ExerciseCatalog::slugs())],

@@ -31,7 +31,7 @@ class PerformanceTest extends TestCase
      *
      * @return array<string, mixed>
      */
-    private function finish(float $weight, int $daysAgo = 0, int $reps = 8, int $target = 8): array
+    private function finish(float $weight, int $daysAgo = 0, int $reps = 8, int $target = 8, int $planned = 5): array
     {
         $at = now()->subDays($daysAgo);
         $sets = [];
@@ -47,6 +47,7 @@ class PerformanceTest extends TestCase
             'duration_seconds' => 2400,
             'sets_done' => 5,
             'exercises_done' => 2,
+            'planned_sets' => $planned,
             'finished_at' => $at->toIso8601String(),
             'sets' => $sets,
         ])->assertCreated()->json();
@@ -193,5 +194,38 @@ class PerformanceTest extends TestCase
 
         $this->actingAs(User::factory()->create())->patchJson("/journal/{$clientId}/ressenti", ['rpe' => 2])->assertNotFound();
         $this->actingAs($this->user)->patchJson("/journal/{$clientId}/ressenti", ['rpe' => 11])->assertUnprocessable();
+    }
+
+    public function test_a_session_left_unfinished_counts_for_nothing(): void
+    {
+        $this->finish(60, 7);
+        // Huit séries prévues, cinq faites : arrêtée en route.
+        $response = $this->finish(100, 1, planned: 8);
+
+        $this->assertSame([], $response['records'], 'Une séance incomplète ne bat aucun record.');
+        $this->assertFalse($this->user->workoutLogs()->latest('finished_at')->first()->completed);
+
+        $this->actingAs($this->user)->get('/')
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('kpis.total_sessions', 1)
+                ->where('kpis.records_30d', 0)
+                ->where('workouts.0.last_done', 'il y a 1 semaine'));
+
+        $this->actingAs($this->user)->get("/seances/{$this->workout->id}/lancer")
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('history.developpe-couche.sets.0.weight', fn ($w) => (float) $w === 60.0));
+
+        $this->actingAs($this->user)->get('/progres/exercices/developpe-couche')
+            ->assertInertia(fn (AssertableInertia $page) => $page->has('stats.sessions', 1));
+    }
+
+    public function test_a_session_without_its_plan_is_not_counted_either(): void
+    {
+        $this->actingAs($this->user)->postJson("/seances/{$this->workout->id}/journal", [
+            'client_id' => (string) Str::uuid(), 'duration_seconds' => 60, 'sets_done' => 1, 'exercises_done' => 1, 'finished_at' => now()->toIso8601String(),
+        ])->assertCreated();
+
+        $this->assertFalse($this->user->workoutLogs()->sole()->completed);
+        $this->actingAs($this->user)->get('/')->assertInertia(fn (AssertableInertia $page) => $page->where('kpis.has_data', false));
     }
 }

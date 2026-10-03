@@ -70,7 +70,7 @@ final class SuggestWorkout
 
     private Randomizer $random;
 
-    /** @var array{reps?: int, rest_sets?: int, rest_after?: int} réglages choisis à la place de ceux de l'objectif */
+    /** @var array{reps?: int, sets?: int, rest_sets?: int, rest_after?: int} réglages choisis à la place de ceux de l'objectif */
     private array $settings = [];
 
     /**
@@ -192,12 +192,16 @@ final class SuggestWorkout
         $one = $this->prescribe($goal, ExerciseMode::Reps);
         $perExercise = $one['sets'] * $one['value'] * (float) config('sport.seconds_per_rep')
             + ($one['sets'] - 1) * $one['rest_sets'] + $one['rest_after'];
-        $limit = max(2, min(12, max(count($targets), (int) round($budget / max(60, $perExercise)))));
+        // Séries fixées : seul le nombre d'exercices peut remplir le temps, d'où un plafond plus haut.
+        $ceiling = isset($this->settings['sets']) ? 16 : 12;
+        $limit = max(2, min($ceiling, max(count($targets), (int) round($budget / max(60, $perExercise)))));
 
         while ($pool->isNotEmpty() && count($chosen) < $limit) {
             $best = $pool
                 ->map(fn (array $exercise): array => [$exercise, $this->score($exercise, $targets, $coverage, $chosen, $equipment)])
-                ->filter(fn (array $pair): bool => $pair[1] > 0)
+                // Séries fixées : seul le nombre d'exercices remplit le temps, on accepte
+                // alors les variantes moins bien classées plutôt qu'une séance trop courte.
+                ->filter(fn (array $pair): bool => isset($this->settings['sets']) ? $pair[1] > -INF : $pair[1] > 0)
                 ->sortByDesc(fn (array $pair): float => $pair[1])
                 ->first();
 
@@ -212,7 +216,7 @@ final class SuggestWorkout
 
             // Plus de temps pour tout : tant qu'un muscle visé attend son exercice,
             // on rabote les séries (jamais sous deux) plutôt que de l'oublier.
-            while ($uncovered && WorkoutEstimate::seconds($candidate) > $budget * 1.05) {
+            while ($uncovered && ! isset($this->settings['sets']) && WorkoutEstimate::seconds($candidate) > $budget * 1.05) {
                 $index = collect($candidate)->keys()->sortByDesc(fn (int $i): int => $candidate[$i]['sets'])->first();
 
                 if ($candidate[$index]['sets'] <= 2) {
@@ -304,8 +308,9 @@ final class SuggestWorkout
             }
         }
 
+        // Hors des muscles visés : jamais candidat.
         if ($gain <= 0) {
-            return 0;
+            return -INF;
         }
 
         // Un exercice qui fait surtout travailler ailleurs n'est pas le bienvenu.
@@ -352,7 +357,7 @@ final class SuggestWorkout
      * a choisis — les répétitions ne concernent que les exercices comptés en
      * répétitions, un gainage garde sa durée.
      *
-     * @param  array{reps?: int, rest_sets?: int, rest_after?: int}|null  $settings
+     * @param  array{reps?: int, sets?: int, rest_sets?: int, rest_after?: int}|null  $settings
      * @return array{value: int, sets: int, rest_sets: int, rest_after: int}
      */
     public function prescribe(WorkoutGoal $goal, ExerciseMode $mode, ?array $settings = null): array
@@ -366,7 +371,7 @@ final class SuggestWorkout
 
         return [
             ...$prescription,
-            ...array_intersect_key($settings, ['rest_sets' => true, 'rest_after' => true]),
+            ...array_intersect_key($settings, ['sets' => true, 'rest_sets' => true, 'rest_after' => true]),
         ];
     }
 
@@ -414,7 +419,8 @@ final class SuggestWorkout
      */
     private function fill(array $items, int $budget, WorkoutGoal $goal): array
     {
-        if ($items === []) {
+        // Séries fixées : on ne touche à rien, le nombre d'exercices a déjà fait le travail.
+        if ($items === [] || isset($this->settings['sets'])) {
             return $items;
         }
 

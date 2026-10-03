@@ -79,6 +79,7 @@ class WorkoutAssistantController extends Controller
                 'stretch' => filter_var($input['stretch'] ?? false, FILTER_VALIDATE_BOOL),
                 'variant' => (int) ($input['variant'] ?? 0),
                 'reps' => isset($input['reps']) ? (int) $input['reps'] : null,
+                'sets' => isset($input['sets']) ? (int) $input['sets'] : null,
                 'rest_sets' => isset($input['rest_sets']) ? (int) $input['rest_sets'] : null,
                 'rest_after' => isset($input['rest_after']) ? (int) $input['rest_after'] : null,
             ],

@@ -54,6 +54,8 @@ const form = reactive({
     minutes: props.input.minutes,
     goal: props.input.goal,
     reps: props.input.reps ?? goalDefaults(props.input.goal).value,
+    // null : l'assistant ajuste les séries pour tenir le temps.
+    sets: props.input.sets ?? null,
     rest_sets: props.input.rest_sets ?? goalDefaults(props.input.goal).rest_sets,
     rest_after: props.input.rest_after ?? goalDefaults(props.input.goal).rest_after,
     equipment: props.input.equipment ?? '',
@@ -96,11 +98,11 @@ const restStep = (value, direction) => clamp(stepRest(value, direction), 0, 600)
  * le serveur pour décider du nombre d'exercices.
  */
 const expected = computed(() => {
-    const sets = goalDefaults(form.goal).sets;
+    const sets = form.sets ?? goalDefaults(form.goal).sets;
     const perExercise = sets * form.reps * page.props.seconds_per_rep + (sets - 1) * form.rest_sets + form.rest_after;
     const reserved = (form.warmup ? 360 : 0) + (form.stretch ? 180 : 0);
 
-    return clamp(Math.round((form.minutes * 60 - reserved) / Math.max(60, perExercise)), 2, 12);
+    return clamp(Math.round((form.minutes * 60 - reserved) / Math.max(60, perExercise)), 2, form.sets ? 16 : 12);
 });
 
 function setMinutes(value) {
@@ -118,6 +120,7 @@ function suggest(variant = 0) {
             warmup: form.warmup ? 1 : 0,
             stretch: form.stretch ? 1 : 0,
             reps: form.reps,
+            sets: form.sets ?? undefined,
             rest_sets: form.rest_sets,
             rest_after: form.rest_after,
             variant,
@@ -368,6 +371,23 @@ const prescription = (item) => {
                     <h2 class="display text-[22px] font-bold">Séries et repos</h2>
                     <span class="text-[12px] font-bold text-accent" aria-live="polite">jusqu’à {{ expected }} exercices</span>
                 </div>
+                <div class="flex flex-col gap-1.5">
+                    <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Séries par exercice</span>
+                    <div class="grid grid-cols-6 gap-1.5" role="radiogroup" aria-label="Séries par exercice">
+                        <button
+                            v-for="choice in [null, 2, 3, 4, 5, 6]"
+                            :key="String(choice)"
+                            type="button"
+                            role="radio"
+                            :aria-checked="form.sets === choice"
+                            class="h-10 rounded-xl text-[14px] font-bold"
+                            :class="form.sets === choice ? 'bg-text text-bg' : 'bg-surface-2 text-text-soft'"
+                            @click="form.sets = choice"
+                        >
+                            {{ choice ?? 'Auto' }}
+                        </button>
+                    </div>
+                </div>
                 <Stepper
                     label="Répétitions par série"
                     :display="String(form.reps)"
@@ -397,7 +417,12 @@ const prescription = (item) => {
                     />
                 </div>
                 <p class="text-[12.5px] font-medium text-text-muted">
-                    Moins de repos, plus d'exercices dans le même temps. Les séries s'ajustent pour tenir {{ form.minutes }} min.
+                    <template v-if="form.sets">
+                        {{ form.sets }} séries de {{ form.reps }} sur chaque exercice ; c'est le nombre d'exercices qui s'ajuste pour tenir {{ form.minutes }} min.
+                    </template>
+                    <template v-else>
+                        Moins de repos, plus d'exercices dans le même temps. En « Auto », les séries s'ajustent pour tenir {{ form.minutes }} min.
+                    </template>
                 </p>
             </section>
 

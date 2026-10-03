@@ -26,8 +26,10 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
 - **Assistant** — on choisit les muscles à travailler (sur la silhouette ou par raccourcis :
   Push, Pull, Jambes, Full body…), la durée, l'objectif (force, volume, endurance) et le
   matériel (machines, charges libres, poids du corps), avec en option un échauffement et des
-  étirements. Les répétitions par série, le repos entre séries et entre exercices se règlent
-  (préremplis selon l'objectif) : moins de repos, plus d'exercices dans le même temps. Il propose une séance qui couvre chaque muscle demandé et tient dans le temps
+  étirements. Les séries par exercice (Auto ou 2 à 6), les répétitions par série, le repos
+  entre séries et entre exercices se règlent (préremplis selon l'objectif) : moins de repos,
+  plus d'exercices dans le même temps ; avec des séries fixées, c'est le nombre d'exercices
+  qui s'ajuste au temps. Il propose une séance qui couvre chaque muscle demandé et tient dans le temps
   (à ±15 %), les classiques de salle et les gros mouvements en tête ; « Autre proposition »
   en tire une nouvelle. Un exercice qui ne plaît pas se change d'un toucher (⟳ : l'équivalent
   suivant, qui travaille les mêmes muscles) ou se choisit parmi les équivalents classés, voire

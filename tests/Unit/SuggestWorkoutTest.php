@@ -207,6 +207,23 @@ class SuggestWorkoutTest extends TestCase
         }
     }
 
+    public function test_fixed_sets_stay_put_and_the_exercise_count_adapts(): void
+    {
+        $muscles = [Muscle::Chest, Muscle::UpperBack, Muscle::Quadriceps];
+
+        foreach ([2, 4, 6] as $sets) {
+            $proposal = $this->suggest($muscles, 60, settings: ['sets' => $sets]);
+
+            $this->assertSame([$sets], array_values(array_unique(array_column($proposal['items'], 'sets'))), "{$sets} séries");
+            $this->assertEqualsWithDelta(60 * 60, $proposal['seconds'], 60 * 60 * 0.2, "{$sets} séries");
+        }
+
+        $this->assertGreaterThan(
+            count($this->suggest($muscles, 60, settings: ['sets' => 6])['items']),
+            count($this->suggest($muscles, 60, settings: ['sets' => 2])['items']),
+        );
+    }
+
     public function test_the_name_tells_what_and_how_long(): void
     {
         $this->assertSame('Dos · Bras — 45 min', $this->suggest([Muscle::UpperBack, Muscle::Biceps])['name']);

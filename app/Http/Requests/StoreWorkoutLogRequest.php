@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Support\ExerciseCatalog;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreWorkoutLogRequest extends FormRequest
 {
@@ -18,7 +20,18 @@ class StoreWorkoutLogRequest extends FormRequest
             'sets_done' => ['required', 'integer', 'min:0', 'max:1000'],
             'exercises_done' => ['required', 'integer', 'min:0', 'max:100'],
             // Rejoué après une coupure, le journal garde l'heure réelle de la fin.
-            'finished_at' => ['required', 'date', 'before_or_equal:+5 minutes', 'after:-30 days'],
+            'finished_at' => ['required', 'date', 'before_or_equal:+5 minutes', 'after:-60 days'],
+            // Chaque série réellement faite : la matière des statistiques de progression.
+            'sets' => ['nullable', 'array', 'max:400'],
+            'sets.*.exercise' => ['required', 'string', Rule::in(ExerciseCatalog::slugs())],
+            'sets.*.position' => ['required', 'integer', 'min:0', 'max:100'],
+            'sets.*.set' => ['required', 'integer', 'min:1', 'max:20'],
+            'sets.*.drop' => ['nullable', 'integer', 'min:0', 'max:3'],
+            'sets.*.reps' => ['nullable', 'integer', 'min:0', 'max:500'],
+            'sets.*.target_reps' => ['nullable', 'integer', 'min:0', 'max:500'],
+            'sets.*.seconds' => ['nullable', 'integer', 'min:0', 'max:7200'],
+            'sets.*.weight' => ['nullable', 'numeric', 'min:0', 'max:999'],
+            'sets.*.at' => ['nullable', 'date'],
         ];
     }
 }

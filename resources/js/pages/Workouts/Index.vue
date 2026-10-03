@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import BodyMap from '../../components/BodyMap.vue';
 import BottomSheet from '../../components/BottomSheet.vue';
+import HomeKpis from '../../components/HomeKpis.vue';
 import SettingsSheet from '../../components/SettingsSheet.vue';
 import TabBar from '../../components/TabBar.vue';
 import { unlockAudio } from '../../audio';
@@ -12,6 +13,7 @@ import { bySlug, groupsOf, loadIntensity, muscleLoad, summary } from '../../work
 const props = defineProps({
     workouts: { type: Array, required: true },
     exercises: { type: Array, required: true },
+    kpis: { type: Object, required: true },
 });
 
 const page = usePage();
@@ -67,7 +69,11 @@ function play(workout) {
                 {{ page.props.auth.user.initials }}
             </button>
         </div>
-        <h1 class="display mt-1 mb-6 text-[56px] leading-[0.88] font-extrabold tracking-[-0.01em]">Mes<br />séances</h1>
+        <h1 class="display mt-1 mb-6 text-[56px] leading-[0.88] font-extrabold tracking-[-0.01em]">Salut<br />{{ page.props.auth.user.first_name }}</h1>
+
+        <HomeKpis :kpis="props.kpis" />
+
+        <h2 class="display mb-3 text-[22px] font-bold">Mes séances</h2>
 
         <div class="flex flex-col gap-3">
             <article v-for="workout in cards" :key="workout.id" class="flex flex-col gap-3.5 rounded-3xl bg-surface p-[18px]">

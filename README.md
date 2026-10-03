@@ -46,6 +46,17 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   ne fait pas dériver les minuteurs. Une séance interrompue (rechargement, appel) reprend en
   pause. En fin de séance, le journal part au serveur ; sans réseau, il est gardé sur le
   téléphone et renvoyé plus tard, sans jamais être compté deux fois.
+- **Progrès** — chaque série réellement faite est enregistrée (charge, répétitions faites,
+  ajustables au « − / + » du lecteur, objectif, paliers de drop), avec la difficulté ressentie
+  notée en fin de séance et les pesées. En découlent : sur l'accueil, la semaine (séances,
+  semaines d'affilée, tonnage comparé à la semaine dernière au même moment, temps, records,
+  muscles délaissés depuis 14 jours) ; dans « Progrès », les séances et le tonnage par semaine,
+  le calendrier, la charge d'entraînement (difficulté × minutes), les records ; par exercice, le
+  1RM estimé (Epley) et sa courbe, la tendance sur 4 semaines, les records, l'historique et la
+  charge conseillée (surcharge progressive) ; par muscle, les séries de la semaine face au
+  repère de 10 à 20, l'évolution de la force et les équilibres poussée/tirage, haut/bas,
+  quadriceps/ischios ; côté corps, le poids et la force relative des grands mouvements. Le
+  lecteur rappelle la dernière fois, propose la charge conseillée et annonce les records battus.
 - **Réglages** — bips et vibrations, bips avant la fin d'un repos (3, 5 ou 10 s, le dernier plus aigu
   pour annoncer la reprise), volume des bips avec un bouton « Tester », durée du compte à
   rebours de départ, déconnexion. Le son du décompte se choisit : bip (par défaut), double bip,

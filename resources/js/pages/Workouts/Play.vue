@@ -8,6 +8,7 @@ import { beep, countdownSound, goSound, loadCustomSound, restSound, unlockAudio,
 import { sendLog } from '../../pendingLogs';
 import { routes } from '../../routes';
 import { patchJson } from '../../http';
+import { formatKg, formatSet, formatTonnage } from '../../format';
 import { bySlug, clamp, dropsOn, formatClock, formatWeight, setWeight, stepWeight, targetLabel, usesWeight } from '../../workout';
 
 defineOptions({ layout: null });
@@ -16,6 +17,7 @@ const props = defineProps({
     workout: { type: Object, required: true },
     exercises: { type: Array, required: true },
     preferences: { type: Object, required: true },
+    history: { type: Object, default: () => ({}) },
 });
 
 useWakeLock();
@@ -78,6 +80,10 @@ const state = reactive({
     currentDuration: null,
     doneSets: 0,
     doneItems: {},
+    // Chaque série réellement faite, envoyée avec le journal : la matière des statistiques.
+    performed: [],
+    // Répétitions faites sur l'étape en cours, si elles diffèrent de l'objectif.
+    repsDone: null,
     startedAt: Date.now(),
     pausedTotal: 0,
     done: false,
@@ -192,6 +198,7 @@ function goTo(target, countSet = false) {
     }
 
     const step = steps[target];
+    state.repsDone = null;
     Object.assign(state, {
         index: target,
         currentDuration: step.duration,
@@ -233,7 +240,79 @@ function finish(at) {
         sets_done: state.doneSets,
         exercises_done: Object.keys(state.doneItems).length,
         finished_at: new Date(at).toISOString(),
+        sets: state.performed,
+    }).then((response) => {
+        records.value = response?.records ?? [];
     });
+}
+
+/*
+ * Note la série qui vient d'être faite : charge, répétitions réellement
+ * faites (ajustées au − / + si besoin), objectif, ou durée au chrono.
+ */
+function perform(s, seconds = null) {
+    const it = items[s.item];
+    const { reps, weight } = load(s);
+    const timed = it.mode === 'time' && s.drop === undefined;
+
+    state.performed.push({
+        exercise: it.exercise,
+        position: s.item,
+        set: s.set,
+        drop: s.drop ?? null,
+        reps: timed ? null : (state.repsDone ?? reps),
+        target_reps: timed ? null : reps,
+        seconds: timed ? (seconds ?? it.value) : Math.round((state.elapsedBase + (state.paused ? 0 : Date.now() - state.startAt)) / 1000),
+        weight,
+        at: new Date().toISOString(),
+    });
+}
+
+const sessionTonnage = computed(() => state.performed.reduce((total, set) => total + (set.weight && set.reps ? set.weight * set.reps : 0), 0));
+
+// Fin de séance : records battus (réponse du serveur) et difficulté ressentie.
+const records = ref(null);
+const rpe = ref(null);
+
+function rate(value) {
+    rpe.value = value;
+    patchJson(props.workout.urls.feeling.replace('__client__', state.clientId), { rpe: value }).catch(() => {
+        // Hors réseau : le ressenti est perdu, la séance, elle, est gardée.
+    });
+}
+
+/** Répétitions faites : on part de l'objectif, on corrige au besoin. */
+function adjustReps(direction) {
+    const planned = load(step.value).reps;
+    state.repsDone = Math.max(0, Math.min(100, (state.repsDone ?? planned) + direction));
+}
+
+const shownReps = computed(() => (step.value ? (state.repsDone ?? load(step.value).reps) : 0));
+
+/** La dernière fois sur cet exercice, et le conseil pour aujourd'hui. */
+const lastTime = computed(() => (exercise.value ? props.history[exercise.value.slug] ?? null : null));
+
+/** « 4 × 8 à 62,5 kg » quand toutes les séries se ressemblent, sinon le détail. */
+const lastTimeText = computed(() => {
+    const sets = lastTime.value?.sets ?? [];
+    const same = sets.length > 1 && sets.every((x) => x.weight === sets[0].weight && x.reps === sets[0].reps);
+
+    if (same && sets[0].reps !== null) {
+        return sets[0].weight ? `${sets.length} × ${sets[0].reps} à ${formatKg(sets[0].weight, 2)}` : `${sets.length} × ${sets[0].reps}`;
+    }
+
+    return sets.map(formatSet).join(' · ');
+});
+
+function applyAdvice() {
+    const target = lastTime.value?.next?.weight;
+
+    if (!target) {
+        return;
+    }
+
+    // Même chemin qu'un appui sur − / + : la charge est enregistrée pour la suite.
+    setWeightTo(target);
 }
 
 function tick() {
@@ -259,6 +338,10 @@ function tick() {
         }
 
         if (remaining <= 0) {
+            if (step.kind === 'work') {
+                perform(step, step.duration);
+            }
+
             goTo(state.index + 1, step.kind === 'work');
 
             return;
@@ -346,20 +429,28 @@ function target(s) {
 const weightTimers = {};
 
 function changeWeight(direction) {
+    setWeightTo(stepWeight(load(step.value).weight, direction));
+}
+
+/*
+ * Fixe la charge de l'étape en cours — la charge fixe, celle de la série en
+ * dégressif, ou celle du palier de drop — et l'envoie au serveur.
+ */
+function setWeightTo(weight) {
     const current = step.value;
     const position = current.item;
     const it = items[position];
     let payload;
 
     if (current.drop !== undefined) {
-        it.drops[current.drop].weight = stepWeight(it.drops[current.drop].weight, direction);
-        payload = { position, drop: current.drop, weight: it.drops[current.drop].weight };
+        it.drops[current.drop].weight = weight;
+        payload = { position, drop: current.drop, weight };
     } else if (it.set_weights?.length) {
-        it.set_weights[current.set - 1] = stepWeight(it.set_weights[current.set - 1], direction);
-        payload = { position, set: current.set - 1, weight: it.set_weights[current.set - 1] };
+        it.set_weights[current.set - 1] = weight;
+        payload = { position, set: current.set - 1, weight };
     } else {
-        it.weight = stepWeight(it.weight, direction);
-        payload = { position, weight: it.weight };
+        it.weight = weight;
+        payload = { position, weight };
     }
 
     const key = JSON.stringify([position, current.drop, current.set]);
@@ -373,6 +464,7 @@ function changeWeight(direction) {
 }
 
 const completeSet = () => {
+    perform(step.value);
     unlockAudio();
     goTo(state.index + 1, true);
 };
@@ -557,18 +649,29 @@ onUnmounted(() => {
                         <span class="size-[60px] shrink-0 overflow-hidden rounded-xl">
                             <ExerciseImage :images="exercise.images" :alt="exercise.name" />
                         </span>
-                        <span class="min-w-0 flex-1 text-[13px] font-semibold text-text-soft">{{ exercise.equipment_label }}</span>
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span class="truncate text-[13px] font-semibold text-text-soft">{{ exercise.equipment_label }}</span>
+                            <span v-if="lastTime" class="truncate text-[11.5px] font-semibold text-text-muted">
+                                Dernière fois : {{ lastTimeText }}
+                            </span>
+                        </span>
                         <button type="button" class="h-[38px] shrink-0 rounded-full bg-surface-2 px-3.5 text-[13px] font-extrabold text-accent" @click="openDetail">
                             Comment faire ?
                         </button>
                     </div>
 
                     <template v-if="step.mode === 'reps'">
-                        <div class="mt-2.5 flex items-baseline gap-2 text-accent">
-                            <span class="font-display leading-[0.85] font-extrabold" :class="usesWeight(exercise) ? 'text-[100px]' : 'text-[120px]'">{{ load(step).reps }}</span>
-                            <span class="font-display text-[28px] font-bold">REPS</span>
+                        <div class="mt-2.5 flex items-center gap-4">
+                            <button type="button" class="iconbtn size-11 bg-surface! text-[22px] font-semibold disabled:opacity-35" aria-label="Une répétition de moins" :disabled="shownReps === 0" @click="adjustReps(-1)">−</button>
+                            <div class="flex items-baseline gap-2" :class="state.repsDone !== null && state.repsDone < load(step).reps ? 'text-prep' : 'text-accent'">
+                                <span class="font-display leading-[0.85] font-extrabold tabular-nums" :class="usesWeight(exercise) ? 'text-[100px]' : 'text-[120px]'" aria-live="polite">{{ shownReps }}</span>
+                                <span class="font-display text-[28px] font-bold">REPS</span>
+                            </div>
+                            <button type="button" class="iconbtn size-11 bg-surface! text-[22px] font-semibold" aria-label="Une répétition de plus" @click="adjustReps(1)">+</button>
                         </div>
-                        <span class="mt-1.5 text-[13px] font-semibold text-text-muted">Temps sur la série · {{ elapsed }}</span>
+                        <span class="mt-1.5 text-[13px] font-semibold text-text-muted">
+                            <template v-if="state.repsDone !== null && state.repsDone !== load(step).reps">Objectif {{ load(step).reps }} · </template>Temps sur la série · {{ elapsed }}
+                        </span>
                     <div v-if="usesWeight(exercise)" class="mt-2.5 flex items-center gap-3 rounded-full bg-surface p-1.5">
                         <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold disabled:opacity-35" aria-label="Charge : moins" :disabled="load(step).weight === null" @click="changeWeight(-1)">−</button>
                         <span class="min-w-[130px] text-center font-display text-[34px] leading-none font-extrabold tabular-nums" :class="load(step).weight === null ? 'text-[18px]! text-text-muted' : 'text-text'" aria-live="polite">
@@ -576,6 +679,14 @@ onUnmounted(() => {
                         </span>
                         <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold" aria-label="Charge : plus" @click="changeWeight(1)">+</button>
                     </div>
+                    <button
+                        v-if="lastTime?.next && step.drop === undefined && lastTime.next.weight !== load(step).weight"
+                        type="button"
+                        class="mt-2 rounded-full border-[1.5px] border-accent/50 px-3.5 py-1.5 text-[12.5px] font-bold text-text-soft"
+                        @click="applyAdvice"
+                    >
+                        Conseil : <span class="text-accent">{{ formatWeight(lastTime.next.weight) }} {{ { up: '▲', keep: '=', down: '▼' }[lastTime.next.trend] }}</span> · Appliquer
+                    </button>
 
                         <button
                             type="button"
@@ -648,11 +759,42 @@ onUnmounted(() => {
         </template>
 
         <!-- Séance terminée -->
-        <div v-else class="animate-pop flex flex-1 flex-col justify-center gap-2 px-7 pt-6 pb-10">
+        <div v-else class="animate-pop no-scrollbar flex flex-1 flex-col justify-[safe_center] gap-2 overflow-y-auto px-7 pt-6 pb-10">
             <span class="eyebrow text-accent">Séance terminée</span>
             <h1 class="display text-[84px] leading-[0.86] font-extrabold">Bien<br />joué.</h1>
-            <p class="mt-2.5 mb-[26px] text-[15px] font-semibold text-text-soft">{{ props.workout.name }}</p>
-            <div class="mb-7 grid grid-cols-3 gap-2">
+            <p class="mt-2.5 mb-4 text-[15px] font-semibold text-text-soft">
+                {{ props.workout.name }}<template v-if="sessionTonnage"> · {{ formatTonnage(sessionTonnage) }} soulevés</template>
+            </p>
+
+            <section v-if="records?.length" class="mb-4 flex flex-col gap-2 rounded-[20px] border-[1.5px] border-prep/60 bg-prep/8 p-4" aria-live="polite">
+                <span class="eyebrow text-prep">★ Nouveau{{ records.length > 1 ? 'x' : '' }} record{{ records.length > 1 ? 's' : '' }}</span>
+                <p v-for="(rec, i) in records" :key="i" class="text-[14px] font-semibold">
+                    <span class="font-extrabold">{{ rec.name }}</span> —
+                    {{ formatKg(rec.value) }} {{ rec.kind === 'e1rm' ? 'en 1RM estimé' : 'de charge' }}
+                    <span class="text-text-muted">(avant {{ formatKg(rec.previous) }})</span>
+                </p>
+            </section>
+
+            <section class="mb-4 flex flex-col gap-2">
+                <span class="text-[11px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Difficulté ressentie</span>
+                <div class="grid grid-cols-10 gap-1" role="radiogroup" aria-label="Difficulté ressentie, de 1 facile à 10 maximale">
+                    <button
+                        v-for="n in 10"
+                        :key="n"
+                        type="button"
+                        role="radio"
+                        :aria-checked="rpe === n"
+                        class="h-10 rounded-lg text-[14px] font-extrabold tabular-nums"
+                        :class="rpe === n ? 'bg-accent text-on-accent' : 'bg-surface text-text-soft'"
+                        @click="rate(n)"
+                    >
+                        {{ n }}
+                    </button>
+                </div>
+                <span class="flex justify-between text-[11px] font-semibold text-text-faint"><span>facile</span><span>maximale</span></span>
+            </section>
+
+            <div class="mb-6 grid grid-cols-3 gap-2">
                 <div v-for="stat in [
                     { label: 'Durée', value: formatClock(activeMilliseconds / 1000) },
                     { label: 'Séries', value: state.doneSets },

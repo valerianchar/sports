@@ -5,6 +5,9 @@
 export const routes = {
     home: '/',
     library: '/exercices',
+    progress: '/progres',
+    progressExercise: (slug) => `/progres/exercices/${slug}`,
+    bodyWeights: '/progres/poids',
     newWorkout: '/seances/nouvelle',
     assistant: '/seances/assistant',
     assistantSuggest: '/seances/assistant/proposition',

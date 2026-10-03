@@ -4,9 +4,11 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\BodyWeightController;
 use App\Http\Controllers\CustomSoundController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\PreferencesController;
+use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\WorkoutAssistantController;
 use App\Http\Controllers\WorkoutController;
 use App\Http\Controllers\WorkoutItemWeightController;
@@ -53,6 +55,15 @@ Route::middleware('auth')->group(function () {
     // Journal d'une séance terminée — JSON, rejouable.
     Route::post('/seances/{workout}/journal', [WorkoutLogController::class, 'store'])
         ->middleware('throttle:30,1')->name('workouts.logs.store');
+
+    Route::patch('/journal/{clientId}/ressenti', [WorkoutLogController::class, 'feeling'])
+        ->whereUuid('clientId')->middleware('throttle:30,1')->name('workouts.logs.feeling');
+
+    // Progrès : statistiques de performance, pesées.
+    Route::get('/progres', [ProgressController::class, 'index'])->name('progress.index');
+    Route::get('/progres/exercices/{exercise}', [ProgressController::class, 'exercise'])->name('progress.exercise');
+    Route::post('/progres/poids', [BodyWeightController::class, 'store'])->name('body-weights.store');
+    Route::delete('/progres/poids/{bodyWeight}', [BodyWeightController::class, 'destroy'])->name('body-weights.destroy');
 
     Route::put('/reglages', [PreferencesController::class, 'update'])->name('preferences.update');
     Route::post('/reglages/son', [CustomSoundController::class, 'store'])->middleware('throttle:10,1')->name('preferences.sound.store');

@@ -6,6 +6,7 @@ use App\Actions\RecordWorkoutLog;
 use App\Http\Requests\StoreWorkoutLogRequest;
 use App\Models\Workout;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -18,8 +19,21 @@ class WorkoutLogController extends Controller
     {
         Gate::authorize('view', $workout);
 
-        $log = $recordWorkoutLog->handle($request->user(), $workout, $request->validated());
+        [$log, $records] = $recordWorkoutLog->handle($request->user(), $workout, $request->validated());
 
-        return response()->json(['id' => $log->id], $log->wasRecentlyCreated ? 201 : 200);
+        return response()->json(['id' => $log->id, 'records' => $records], $log->wasRecentlyCreated ? 201 : 200);
+    }
+
+    /**
+     * La difficulté ressentie, notée sur l'écran de fin de séance.
+     */
+    public function feeling(Request $request, string $clientId): JsonResponse
+    {
+        $data = $request->validate(['rpe' => ['required', 'integer', 'min:1', 'max:10']]);
+
+        $log = $request->user()->workoutLogs()->where('client_id', $clientId)->firstOrFail();
+        $log->update(['rpe' => $data['rpe']]);
+
+        return response()->json(['rpe' => $log->rpe]);
     }
 }

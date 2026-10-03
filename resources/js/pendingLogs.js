@@ -24,10 +24,23 @@ function write(logs) {
     }
 }
 
+/**
+ * Envoie le journal d'une séance et rend la réponse du serveur — les records
+ * battus — ou null s'il n'a pas pu partir : il est alors gardé et renvoyé plus
+ * tard.
+ */
 export async function sendLog(url, payload) {
     write([...read().filter((log) => log.payload.client_id !== payload.client_id), { url, payload }]);
 
-    return flushPendingLogs();
+    try {
+        const response = await postJson(url, payload);
+        write(read().filter((log) => log.payload.client_id !== payload.client_id));
+        flushPendingLogs();
+
+        return response;
+    } catch {
+        return null;
+    }
 }
 
 /** Renvoie ce qui attend. Rend true si plus rien n'attend. */

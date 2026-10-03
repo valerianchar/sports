@@ -6,6 +6,7 @@ use App\Actions\SaveWorkout;
 use App\Http\Requests\SaveWorkoutRequest;
 use App\Http\Resources\WorkoutResource;
 use App\Models\Workout;
+use App\Queries\PerformanceStats;
 use App\Support\ExerciseCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +30,7 @@ class WorkoutController extends Controller
             'workouts' => WorkoutResource::collection($workouts),
             // Les séances ne portent que des slugs : groupes et durées se déduisent du catalogue.
             'exercises' => ExerciseCatalog::forClient($workouts->flatMap->items->pluck('exercise')),
+            'kpis' => (new PerformanceStats($request->user()))->home(),
         ]);
     }
 
@@ -86,6 +88,8 @@ class WorkoutController extends Controller
         return Inertia::render('Workouts/Play', [
             'workout' => new WorkoutResource($workout),
             'exercises' => ExerciseCatalog::forClient($workout->items->pluck('exercise')),
+            // La dernière fois sur chaque exercice, et la charge conseillée cette fois-ci.
+            'history' => (new PerformanceStats($request->user()))->lastTimes($workout->items->pluck('exercise')->unique()->values()->all()),
             'preferences' => [
                 'sound' => $request->user()->sound,
                 'prep_seconds' => $request->user()->prep_seconds,

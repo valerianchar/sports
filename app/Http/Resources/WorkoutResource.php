@@ -39,6 +39,7 @@ class WorkoutResource extends JsonResource
                 'destroy' => route('workouts.destroy', $this->resource),
                 'play' => route('workouts.play', $this->resource),
                 'log' => route('workouts.logs.store', $this->resource),
+                'feeling' => url('/journal/__client__/ressenti'),
                 'weight' => route('workouts.weight.update', $this->resource),
             ],
         ];

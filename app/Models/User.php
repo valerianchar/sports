@@ -57,6 +57,18 @@ class User extends Authenticatable
         return $this->hasMany(Workout::class);
     }
 
+    /** @return HasMany<SetLog, $this> */
+    public function setLogs(): HasMany
+    {
+        return $this->hasMany(SetLog::class);
+    }
+
+    /** @return HasMany<BodyWeight, $this> */
+    public function bodyWeights(): HasMany
+    {
+        return $this->hasMany(BodyWeight::class);
+    }
+
     /** @return HasMany<WorkoutLog, $this> */
     public function workoutLogs(): HasMany
     {

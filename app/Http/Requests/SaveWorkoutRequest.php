@@ -26,6 +26,8 @@ class SaveWorkoutRequest extends FormRequest
             'items.*.rest_after' => ['required', 'integer', 'min:0', 'max:900'],
             // Enregistrer puis lancer aussitôt : « Lancer la séance » depuis l'éditeur.
             'start' => ['boolean'],
+            // Enregistrer puis ouvrir l'éditeur : une proposition de l'assistant qu'on veut retoucher.
+            'edit' => ['boolean'],
         ];
     }
 

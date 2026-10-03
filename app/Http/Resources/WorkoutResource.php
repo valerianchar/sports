@@ -32,6 +32,7 @@ class WorkoutResource extends JsonResource
             'urls' => [
                 'edit' => route('workouts.edit', $this->resource),
                 'update' => route('workouts.update', $this->resource),
+                'destroy' => route('workouts.destroy', $this->resource),
                 'play' => route('workouts.play', $this->resource),
                 'log' => route('workouts.logs.store', $this->resource),
             ],

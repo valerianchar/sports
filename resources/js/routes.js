@@ -6,6 +6,8 @@ export const routes = {
     home: '/',
     library: '/exercices',
     newWorkout: '/seances/nouvelle',
+    assistant: '/seances/assistant',
+    assistantSuggest: '/seances/assistant/proposition',
     workouts: '/seances',
     workout: (id) => `/seances/${id}`,
     preferences: '/reglages',

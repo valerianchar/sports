@@ -48,6 +48,11 @@ final class ExerciseCatalog
         return ExerciseMode::from(self::all()[$slug]['mode']);
     }
 
+    public static function equipment(string $slug): Equipment
+    {
+        return Equipment::from(self::all()[$slug]['equipment']);
+    }
+
     public static function group(string $slug): MuscleGroup
     {
         return MuscleGroup::from(self::all()[$slug]['group']);

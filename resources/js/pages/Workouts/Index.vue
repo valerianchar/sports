@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import BodyMap from '../../components/BodyMap.vue';
+import BottomSheet from '../../components/BottomSheet.vue';
 import SettingsSheet from '../../components/SettingsSheet.vue';
 import TabBar from '../../components/TabBar.vue';
 import { unlockAudio } from '../../audio';
@@ -16,6 +17,19 @@ const props = defineProps({
 const page = usePage();
 const catalog = computed(() => bySlug(props.exercises));
 const settingsOpen = ref(false);
+const deleting = ref(null);
+const deleteOpen = computed({
+    get: () => deleting.value !== null,
+    set: (open) => {
+        if (!open) {
+            deleting.value = null;
+        }
+    },
+});
+
+function destroy() {
+    router.delete(deleting.value.urls.destroy, { preserveScroll: true, onFinish: () => (deleting.value = null) });
+}
 
 const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
 
@@ -62,9 +76,14 @@ function play(workout) {
                         <h2 class="display text-[28px] font-bold text-pretty">{{ workout.name }}</h2>
                         <p class="text-[13px] font-medium text-text-muted">{{ workout.meta }}</p>
                     </div>
-                    <Link :href="workout.urls.edit" class="iconbtn size-10 bg-surface-2!" :aria-label="`Modifier ${workout.name}`">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /></svg>
-                    </Link>
+                    <div class="flex shrink-0 gap-2">
+                        <button type="button" class="iconbtn size-10 bg-surface-2! text-text-muted hover:text-danger" :aria-label="`Supprimer ${workout.name}`" @click="deleting = workout">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></svg>
+                        </button>
+                        <Link :href="workout.urls.edit" class="iconbtn size-10 bg-surface-2!" :aria-label="`Modifier ${workout.name}`">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /></svg>
+                        </Link>
+                    </div>
                 </div>
                 <div class="flex items-center justify-between gap-3">
                     <p class="text-[12px] font-semibold tracking-[0.02em] text-text-soft">
@@ -83,9 +102,19 @@ function play(workout) {
                 Aucune séance pour l'instant.<br />Crée ta première séance.
             </p>
 
+            <Link :href="routes.assistant" class="flex items-center gap-4 rounded-3xl border-[1.5px] border-accent bg-accent/8 p-[18px] text-text hover:bg-accent/12">
+                <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></svg>
+                </span>
+                <span class="flex min-w-0 flex-col gap-0.5">
+                    <span class="font-display text-[22px] leading-none font-extrabold uppercase">Assistant</span>
+                    <span class="text-[13px] font-medium text-text-muted">Choisis tes muscles et ton temps, je compose la séance.</span>
+                </span>
+            </Link>
+
             <Link :href="routes.newWorkout" class="dashed h-[60px] rounded-3xl">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
-                Nouvelle séance
+                Nouvelle séance vide
             </Link>
         </div>
     </div>
@@ -93,4 +122,13 @@ function play(workout) {
     <TabBar active="home" />
 
     <SettingsSheet v-model:open="settingsOpen" />
+
+    <BottomSheet
+        v-model:open="deleteOpen"
+        title="Supprimer ?"
+        :description="deleting ? `« ${deleting.name} » disparaîtra. Les séances déjà faites restent dans ton historique.` : ''"
+    >
+        <button type="button" class="btn-accent h-14 w-full bg-danger! text-[22px]" @click="destroy">Supprimer la séance</button>
+        <button type="button" class="btn-soft h-[54px] text-[15px]" @click="deleting = null">Garder</button>
+    </BottomSheet>
 </template>

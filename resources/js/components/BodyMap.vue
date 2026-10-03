@@ -11,7 +11,11 @@ const props = defineProps({
     intensity: { type: Object, required: true },
     height: { type: Number, default: 220 },
     label: { type: String, default: 'Muscles sollicités' },
+    // Choix des muscles à la souris ou au doigt (assistant) : un toucher sur un muscle le bascule.
+    interactive: { type: Boolean, default: false },
 });
+
+const emit = defineEmits(['toggle']);
 
 const sides = [BODY.front, BODY.back];
 
@@ -52,7 +56,15 @@ const width = computed(() => props.height / 2);
         >
             <path v-for="(d, i) in side.decor" :key="`d${i}`" :d="d" fill="var(--color-divider)" />
             <template v-for="(paths, slug) in side.muscles" :key="slug">
-                <path v-for="(d, i) in paths" :key="i" :d="d" :fill="fill(slug)" class="transition-[fill] duration-300" />
+                <path
+                    v-for="(d, i) in paths"
+                    :key="i"
+                    :d="d"
+                    :fill="fill(slug)"
+                    class="transition-[fill] duration-300"
+                    :class="props.interactive && 'cursor-pointer hover:opacity-80'"
+                    @click="props.interactive && emit('toggle', slug)"
+                />
             </template>
             <path :d="side.outline" fill="none" stroke="var(--color-line-strong)" stroke-width="2" vector-effect="non-scaling-stroke" />
         </svg>

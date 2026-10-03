@@ -11,7 +11,7 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
 ## Ce que fait l'application
 
 - **Mes séances** — l'accueil. Trois séances d'exemple sont offertes à l'inscription (Push,
-  Jambes, HIIT 20 minutes). Chaque carte donne le nombre d'exercices, de séries, une durée
+  Jambes, HIIT 20 minutes). Chaque carte se modifie ou se supprime d'un geste ; elle donne le nombre d'exercices, de séries, une durée
   estimée (3 s par répétition) et la date de la dernière fois.
 - **Exercices** — la bibliothèque, par muscle ou par machine (83 machines et équipements :
   guidées Matrix et EGYM, machines assistées, iso-latérales Hammer Strength et Panatta,
@@ -23,6 +23,13 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   pour la séance entière dans l'éditeur (charge comptée en séries, une demie pour un muscle
   secondaire) et sur chaque carte de l'accueil, pour chaque exercice dans l'éditeur et sa
   fiche. Tracé repris de react-muscle-highlighter (MIT).
+- **Assistant** — on choisit les muscles à travailler (sur la silhouette ou par raccourcis :
+  Push, Pull, Jambes, Full body…), la durée, l'objectif (force, volume, endurance) et le
+  matériel (machines, charges libres, poids du corps), avec en option un échauffement et des
+  étirements. Il propose une séance qui couvre chaque muscle demandé et tient dans le temps
+  (à ±15 %), les classiques de salle et les gros mouvements en tête ; « Autre proposition »
+  en tire une nouvelle. On la lance tout de suite, on l'enregistre ou on la retouche dans
+  l'éditeur. Le choix vit dans `app/Actions/SuggestWorkout.php`.
 - **Éditeur** — nom, exercices dans l'ordre, et pour chacun : répétitions ou durée, séries,
   repos entre séries, repos après l'exercice. Le brouillon reste dans le navigateur jusqu'à
   « Enregistrer ».

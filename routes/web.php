@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\PreferencesController;
+use App\Http\Controllers\WorkoutAssistantController;
 use App\Http\Controllers\WorkoutController;
 use App\Http\Controllers\WorkoutLogController;
 use Illuminate\Support\Facades\Route;
@@ -33,8 +34,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [WorkoutController::class, 'index'])->name('workouts.index');
     Route::get('/exercices', [ExerciseController::class, 'index'])->name('exercises.index');
 
-    // Avant la route paramétrée : « nouvelle » n'est pas un identifiant de séance.
+    // Avant la route paramétrée : « nouvelle » et « assistant » ne sont pas des identifiants de séance.
     Route::get('/seances/nouvelle', [WorkoutController::class, 'create'])->name('workouts.create');
+    Route::get('/seances/assistant', [WorkoutAssistantController::class, 'create'])->name('workouts.assistant');
+    Route::get('/seances/assistant/proposition', [WorkoutAssistantController::class, 'suggest'])->name('workouts.assistant.suggest');
     Route::post('/seances', [WorkoutController::class, 'store'])->name('workouts.store');
     Route::get('/seances/{workout}/modifier', [WorkoutController::class, 'edit'])->name('workouts.edit');
     Route::put('/seances/{workout}', [WorkoutController::class, 'update'])->name('workouts.update');

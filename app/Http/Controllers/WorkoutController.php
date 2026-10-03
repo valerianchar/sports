@@ -109,6 +109,10 @@ class WorkoutController extends Controller
             return redirect()->route('workouts.play', $workout);
         }
 
+        if ($request->boolean('edit')) {
+            return redirect()->route('workouts.edit', $workout)->with('success', $message.' Ajuste-la à ton goût.');
+        }
+
         return redirect()->route('workouts.index')->with('success', $message);
     }
 }

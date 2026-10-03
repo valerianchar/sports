@@ -182,4 +182,28 @@ enum Equipment: string
             self::ArmErgometer => 'Ergomètre à bras',
         };
     }
+
+    public function kind(): EquipmentKind
+    {
+        return match ($this) {
+            self::ChestPress, self::InclinePress, self::DeclinePress, self::PecDeck, self::ShoulderPress,
+            self::LateralMachine, self::LatPulldown, self::SeatedRow, self::PulloverMachine,
+            self::BackMachine, self::BicepsMachine, self::TricepsMachine, self::DipsMachine, self::Assisted,
+            self::LegPress, self::LegPressFortyFive, self::LegExtension, self::LegCurlSeated,
+            self::LegCurlLying, self::LegCurlStanding, self::HipMachine, self::MultiHip, self::GluteMachine,
+            self::HipThrustMachine, self::CalfStanding, self::CalfSeated, self::AbMachine, self::RotaryTorso,
+            self::HackSquat, self::PendulumSquat, self::VSquat, self::BeltSquat, self::IsoChest,
+            self::IsoShoulder, self::IsoRow, self::IsoPulldown, self::TBar, self::Smith, self::Cable,
+            self::Crossover => EquipmentKind::Machine,
+            self::Rack, self::Barbell, self::Plate, self::EzBar, self::TrapBar, self::Dumbbells, self::Bench,
+            self::Preacher, self::Landmine, self::Kettlebell => EquipmentKind::Free,
+            self::RomanChair, self::Ghd, self::CaptainChair, self::PullUpBar, self::ParallelBars,
+            self::Rings, self::Trx, self::Bands, self::SwissBall, self::AbWheel, self::Bodyweight, self::Mat,
+            self::FoamRoller, self::PlyoBox => EquipmentKind::Bodyweight,
+            self::Sled, self::BattleRope, self::Sandbag, self::WallBall, self::SlamBall, self::JumpRope,
+            self::PunchingBag, self::Treadmill, self::CurveTreadmill, self::Bike, self::RecumbentBike,
+            self::SpinBike, self::AirBike, self::Elliptical, self::Stepper, self::StairClimber, self::Rower,
+            self::Skierg, self::ArmErgometer => EquipmentKind::Conditioning,
+        };
+    }
 }

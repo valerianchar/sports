@@ -32,6 +32,8 @@ class HandleInertiaRequests extends Middleware
                     'initials' => $user->initials,
                     'sound' => $user->sound,
                     'prep_seconds' => $user->prep_seconds,
+                    'countdown_seconds' => $user->countdown_seconds,
+                    'volume' => $user->volume,
                 ],
             ],
             'flash' => [

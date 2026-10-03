@@ -89,6 +89,8 @@ class WorkoutController extends Controller
             'preferences' => [
                 'sound' => $request->user()->sound,
                 'prep_seconds' => $request->user()->prep_seconds,
+                'countdown_seconds' => $request->user()->countdown_seconds,
+                'volume' => $request->user()->volume,
             ],
         ]);
     }

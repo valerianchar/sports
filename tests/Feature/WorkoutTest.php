@@ -165,7 +165,8 @@ class WorkoutTest extends TestCase
 
     public function test_the_player_gets_the_workout_and_its_exercises(): void
     {
-        $user = User::factory()->create(['prep_seconds' => 8, 'sound' => false]);
+        // Rechargé : les réglages non précisés prennent leur valeur par défaut en base.
+        $user = User::factory()->create(['prep_seconds' => 8, 'sound' => false])->fresh();
         $workout = Workout::factory()->for($user)->withItems()->create();
 
         $this->actingAs($user)->get("/seances/{$workout->id}/lancer")
@@ -175,7 +176,7 @@ class WorkoutTest extends TestCase
                 ->has('workout.items', 2)
                 ->has('exercises', 2)
                 ->where('exercises.0.images.0', '/images/exercices/developpe-couche/0.jpg')
-                ->where('preferences', ['sound' => false, 'prep_seconds' => 8]));
+                ->where('preferences', ['sound' => false, 'prep_seconds' => 8, 'countdown_seconds' => 5, 'volume' => 80]));
     }
 
     public function test_an_empty_workout_cannot_be_played(): void

@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password', 'sound', 'prep_seconds'])]
+#[Fillable(['name', 'email', 'password', 'sound', 'prep_seconds', 'countdown_seconds', 'volume'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -30,6 +30,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'sound' => 'boolean',
             'prep_seconds' => 'integer',
+            'countdown_seconds' => 'integer',
+            'volume' => 'integer',
         ];
     }
 

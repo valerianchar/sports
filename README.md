@@ -42,7 +42,9 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   ne fait pas dériver les minuteurs. Une séance interrompue (rechargement, appel) reprend en
   pause. En fin de séance, le journal part au serveur ; sans réseau, il est gardé sur le
   téléphone et renvoyé plus tard, sans jamais être compté deux fois.
-- **Réglages** — bips et vibrations, durée du compte à rebours de départ, déconnexion.
+- **Réglages** — bips et vibrations, bips avant la fin d'un repos (3, 5 ou 10 s, le dernier plus aigu
+  pour annoncer la reprise), volume des bips avec un bouton « Tester », durée du compte à
+  rebours de départ, déconnexion. Les bips passent outre le mode silencieux de l'iPhone.
 
 ## Les images d'exercices
 

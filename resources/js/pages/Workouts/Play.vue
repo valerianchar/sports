@@ -4,7 +4,7 @@ import { Head, router } from '@inertiajs/vue3';
 import ExerciseImage from '../../components/ExerciseImage.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
 import { useWakeLock } from '../../composables/useWakeLock';
-import { beep, unlockAudio, vibrate } from '../../audio';
+import { beep, countdownBeep, unlockAudio, vibrate } from '../../audio';
 import { sendLog } from '../../pendingLogs';
 import { routes } from '../../routes';
 import { bySlug, clamp, formatClock, targetLabel } from '../../workout';
@@ -145,9 +145,11 @@ function restore() {
 
 // ---------------------------------------------------------------- lecture
 
+const volume = () => (props.preferences.volume ?? 80) / 100;
+
 function sound(frequency, duration) {
     if (props.preferences.sound) {
-        beep(frequency, duration);
+        beep(frequency, duration, volume());
     }
 }
 
@@ -231,9 +233,13 @@ function tick() {
         const remaining = state.endAt - at;
         const seconds = Math.ceil(remaining / 1000);
 
-        if (seconds <= 3 && seconds >= 1 && seconds !== lastBeep) {
+        // Les dernières secondes d'un repos, d'une série chronométrée ou du départ.
+        if (seconds <= (props.preferences.countdown_seconds ?? 5) && seconds >= 1 && seconds !== lastBeep) {
             lastBeep = seconds;
-            sound(660, 0.1);
+
+            if (props.preferences.sound) {
+                countdownBeep(seconds, volume());
+            }
         }
 
         if (remaining <= 0) {

@@ -67,7 +67,7 @@ export function defaultsFor(exercise) {
 }
 
 export function newItem(exercise) {
-    return { key: crypto.randomUUID(), exercise: exercise.slug, mode: exercise.mode, ...defaultsFor(exercise) };
+    return { key: crypto.randomUUID(), exercise: exercise.slug, mode: exercise.mode, weight: null, ...defaultsFor(exercise) };
 }
 
 /**
@@ -151,3 +151,28 @@ export function loadIntensity(load) {
 
     return Object.fromEntries(load.map((entry) => [entry.muscle, max ? entry.sets / max : 0]));
 }
+
+/** 62.5 → « 62,5 kg » ; vide → null (poids du corps). */
+export function formatWeight(weight) {
+    if (weight === null || weight === undefined || weight === '') {
+        return null;
+    }
+
+    return `${Number(weight).toLocaleString('fr-FR', { maximumFractionDigits: 2 })} kg`;
+}
+
+/**
+ * Pas du « + / − » de la charge : 1 kg sous 10 kg (haltères), 2,5 kg au-delà
+ * (les disques). En descendant sous zéro, on revient au poids du corps.
+ */
+export function stepWeight(weight, direction) {
+    const current = Number(weight) || 0;
+    const reference = direction < 0 ? current - 0.01 : current;
+    const step = reference < 10 ? 1 : 2.5;
+    const next = Math.round((current + direction * step) * 100) / 100;
+
+    return next <= 0 ? null : Math.min(999, next);
+}
+
+/** Une charge a du sens partout sauf au cardio et en mobilité. */
+export const usesWeight = (exercise) => exercise && !['cardio', 'mobilite'].includes(exercise.group);

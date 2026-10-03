@@ -9,6 +9,7 @@ use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\WorkoutAssistantController;
 use App\Http\Controllers\WorkoutController;
+use App\Http\Controllers\WorkoutItemWeightController;
 use App\Http\Controllers\WorkoutLogController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +45,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/seances/{workout}', [WorkoutController::class, 'update'])->name('workouts.update');
     Route::delete('/seances/{workout}', [WorkoutController::class, 'destroy'])->name('workouts.destroy');
     Route::get('/seances/{workout}/lancer', [WorkoutController::class, 'play'])->name('workouts.play');
+
+    // Charge changée depuis le lecteur — JSON.
+    Route::patch('/seances/{workout}/charge', [WorkoutItemWeightController::class, 'update'])
+        ->middleware('throttle:60,1')->name('workouts.weight.update');
 
     // Journal d'une séance terminée — JSON, rejouable.
     Route::post('/seances/{workout}/journal', [WorkoutLogController::class, 'store'])

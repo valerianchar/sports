@@ -7,7 +7,8 @@ import { useWakeLock } from '../../composables/useWakeLock';
 import { beep, countdownSound, goSound, loadCustomSound, restSound, unlockAudio, vibrate } from '../../audio';
 import { sendLog } from '../../pendingLogs';
 import { routes } from '../../routes';
-import { bySlug, clamp, formatClock, targetLabel } from '../../workout';
+import { patchJson } from '../../http';
+import { bySlug, clamp, formatClock, formatWeight, stepWeight, targetLabel, usesWeight } from '../../workout';
 
 defineOptions({ layout: null });
 
@@ -20,7 +21,8 @@ const props = defineProps({
 useWakeLock();
 
 const catalog = bySlug(props.exercises);
-const items = props.workout.items;
+// Copie modifiable : la charge peut changer en pleine séance.
+const items = reactive(props.workout.items.map((item) => ({ ...item })));
 const RING_REST = 722.57;
 const RING_WORK = 753.98;
 
@@ -310,6 +312,29 @@ function addTime(seconds) {
     persist(true);
 }
 
+/** « 8 reps · 60 kg » : la cible d'une série, charge comprise. */
+const target = (item) => [targetLabel(item), formatWeight(item.weight)].filter(Boolean).join(' · ');
+
+/*
+ * La charge se règle sans quitter la séance ; elle part au serveur une fois
+ * le doigt posé (un court délai regroupe les appuis successifs) et devient
+ * celle de l'exercice pour la prochaine fois.
+ */
+const weightTimers = {};
+
+function changeWeight(direction) {
+    const position = step.value.item;
+    items[position].weight = stepWeight(items[position].weight, direction);
+
+    clearTimeout(weightTimers[position]);
+    weightTimers[position] = setTimeout(() => {
+        patchJson(props.workout.urls.weight, { position, weight: items[position].weight }).catch(() => {
+            // Hors réseau : la séance continue avec la nouvelle charge ; elle ne sera
+            // simplement pas retenue pour la prochaine fois.
+        });
+    }, 700);
+}
+
 const completeSet = () => {
     unlockAudio();
     goTo(state.index + 1, true);
@@ -366,7 +391,7 @@ const nextLabel = computed(() => {
     const s = steps[upcoming];
     const i = items[s.item];
 
-    return `${catalog[i.exercise].name} · série ${s.set}/${i.sets} · ${targetLabel(i)}`;
+    return `${catalog[i.exercise].name} · série ${s.set}/${i.sets} · ${target(i)}`;
 });
 
 const detailExercise = computed(() => (detail.value ? catalog[detail.value] : null));
@@ -442,7 +467,7 @@ onUnmounted(() => {
                     <span class="font-display text-[190px] leading-[0.9] font-extrabold text-prep tabular-nums" aria-live="polite">{{ seconds }}</span>
                     <span class="mt-2.5 text-[13px] font-semibold text-text-muted">Premier exercice</span>
                     <span class="display text-[34px] font-extrabold">{{ exercise.name }}</span>
-                    <span class="text-[14px] font-semibold text-text-soft">{{ targetLabel(item) }}</span>
+                    <span class="text-[14px] font-semibold text-text-soft">{{ target(item) }}</span>
                 </template>
 
                 <!-- Repos -->
@@ -478,7 +503,7 @@ onUnmounted(() => {
                         <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
                             <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-text-muted">À SUIVRE</span>
                             <span class="text-[16px] font-extrabold">{{ exercise.name }}</span>
-                            <span class="text-[12.5px] font-semibold text-text-soft">{{ setLabel }} · {{ targetLabel(item) }}</span>
+                            <span class="text-[12.5px] font-semibold text-text-soft">{{ setLabel }} · {{ target(item) }}</span>
                         </span>
                         <button type="button" class="iconbtn size-[38px] bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" aria-label="Comment faire" @click="openDetail">i</button>
                     </div>
@@ -500,10 +525,18 @@ onUnmounted(() => {
 
                     <template v-if="step.mode === 'reps'">
                         <div class="mt-2.5 flex items-baseline gap-2 text-accent">
-                            <span class="font-display text-[120px] leading-[0.85] font-extrabold">{{ item.value }}</span>
+                            <span class="font-display leading-[0.85] font-extrabold" :class="usesWeight(exercise) ? 'text-[100px]' : 'text-[120px]'">{{ item.value }}</span>
                             <span class="font-display text-[28px] font-bold">REPS</span>
                         </div>
                         <span class="mt-1.5 text-[13px] font-semibold text-text-muted">Temps sur la série · {{ elapsed }}</span>
+                    <div v-if="usesWeight(exercise)" class="mt-2.5 flex items-center gap-3 rounded-full bg-surface p-1.5">
+                        <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold disabled:opacity-35" aria-label="Charge : moins" :disabled="item.weight === null" @click="changeWeight(-1)">−</button>
+                        <span class="min-w-[130px] text-center font-display text-[34px] leading-none font-extrabold tabular-nums" :class="item.weight === null ? 'text-[18px]! text-text-muted' : 'text-text'" aria-live="polite">
+                            {{ formatWeight(item.weight) ?? 'Poids du corps' }}
+                        </span>
+                        <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold" aria-label="Charge : plus" @click="changeWeight(1)">+</button>
+                    </div>
+
                         <button
                             type="button"
                             class="btn-accent mt-[18px] h-[84px] w-full rounded-[26px]! text-[30px] shadow-[0_10px_30px_rgb(212_255_58/0.18)] active:scale-[0.97]"

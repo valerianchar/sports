@@ -15,9 +15,9 @@ export class HttpError extends Error {
     }
 }
 
-export async function postJson(url, payload) {
+export async function postJson(url, payload, method = 'POST') {
     const response = await fetch(url, {
-        method: 'POST',
+        method,
         body: JSON.stringify(payload),
         credentials: 'same-origin',
         headers: {
@@ -34,3 +34,5 @@ export async function postJson(url, payload) {
 
     return response.status === 204 ? null : response.json();
 }
+
+export const patchJson = (url, payload) => postJson(url, payload, 'PATCH');

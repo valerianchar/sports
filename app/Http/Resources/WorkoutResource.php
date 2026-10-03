@@ -24,6 +24,7 @@ class WorkoutResource extends JsonResource
                 'exercise' => $item->exercise,
                 'mode' => $item->mode->value,
                 'value' => $item->value,
+                'weight' => $item->weight,
                 'sets' => $item->sets,
                 'rest_sets' => $item->rest_sets,
                 'rest_after' => $item->rest_after,
@@ -35,6 +36,7 @@ class WorkoutResource extends JsonResource
                 'destroy' => route('workouts.destroy', $this->resource),
                 'play' => route('workouts.play', $this->resource),
                 'log' => route('workouts.logs.store', $this->resource),
+                'weight' => route('workouts.weight.update', $this->resource),
             ],
         ];
     }

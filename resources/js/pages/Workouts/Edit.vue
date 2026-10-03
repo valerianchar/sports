@@ -7,9 +7,10 @@ import ExerciseLibrary from '../../components/ExerciseLibrary.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
 import MuscleSummary from '../../components/MuscleSummary.vue';
 import Stepper from '../../components/Stepper.vue';
+import WeightInput from '../../components/WeightInput.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
-import { bySlug, defaultsFor, exerciseIntensity, formatShort, newItem, stepRest, stepValue, summary } from '../../workout';
+import { bySlug, defaultsFor, exerciseIntensity, formatShort, newItem, stepRest, stepValue, summary, usesWeight } from '../../workout';
 
 const props = defineProps({
     workout: { type: Object, default: null },
@@ -203,6 +204,13 @@ function destroy() {
                         {{ option.label }}
                     </button>
                 </div>
+
+                <WeightInput
+                    v-if="usesWeight(catalog[item.exercise])"
+                    :model-value="item.weight ?? null"
+                    label="Charge"
+                    @update:model-value="update(index, { weight: $event })"
+                />
 
                 <div class="grid grid-cols-2 gap-x-3 gap-y-3.5">
                     <Stepper

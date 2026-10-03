@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 final class SaveWorkout
 {
     /**
-     * @param  list<array{exercise: string, mode: string, value: int, sets: int, rest_sets: int, rest_after: int}>  $items
+     * @param  list<array{exercise: string, mode: string, value: int, weight?: float|null, sets: int, rest_sets: int, rest_after: int}>  $items
      */
     public function handle(User $user, ?Workout $workout, string $name, array $items): Workout
     {

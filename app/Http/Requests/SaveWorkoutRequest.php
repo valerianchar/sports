@@ -21,6 +21,8 @@ class SaveWorkoutRequest extends FormRequest
             'items.*.exercise' => ['required', 'string', Rule::in(ExerciseCatalog::slugs())],
             'items.*.mode' => ['required', Rule::enum(ExerciseMode::class)],
             'items.*.value' => ['required', 'integer', 'min:1', 'max:3600'],
+            // Charge en kilos ; vide au poids du corps.
+            'items.*.weight' => ['nullable', 'numeric', 'min:0', 'max:999'],
             'items.*.sets' => ['required', 'integer', 'min:1', 'max:20'],
             'items.*.rest_sets' => ['required', 'integer', 'min:0', 'max:900'],
             'items.*.rest_after' => ['required', 'integer', 'min:0', 'max:900'],
@@ -68,6 +70,8 @@ class SaveWorkoutRequest extends FormRequest
             'items.max' => 'Une séance compte au plus '.config('sport.max_items').' exercices.',
             'items.*.exercise.in' => 'Cet exercice n’existe pas dans la bibliothèque.',
             'items.*.sets.max' => 'Au plus 20 séries par exercice.',
+            'items.*.weight.numeric' => 'La charge s’écrit en kilos, par exemple 62,5.',
+            'items.*.weight.max' => 'Une charge de plus de 999 kg ? Vérifie la saisie.',
             'items.*.rest_sets.max' => 'Le repos ne dépasse pas 15 minutes.',
             'items.*.rest_after.max' => 'Le repos ne dépasse pas 15 minutes.',
         ];
@@ -79,7 +83,7 @@ class SaveWorkoutRequest extends FormRequest
     }
 
     /**
-     * @return list<array{exercise: string, mode: string, value: int, sets: int, rest_sets: int, rest_after: int}>
+     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, sets: int, rest_sets: int, rest_after: int}>
      */
     public function items(): array
     {
@@ -87,6 +91,7 @@ class SaveWorkoutRequest extends FormRequest
             'exercise' => $item['exercise'],
             'mode' => $item['mode'],
             'value' => (int) $item['value'],
+            'weight' => isset($item['weight']) && $item['weight'] !== '' ? round((float) $item['weight'], 2) : null,
             'sets' => (int) $item['sets'],
             'rest_sets' => (int) $item['rest_sets'],
             'rest_after' => (int) $item['rest_after'],

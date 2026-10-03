@@ -35,8 +35,10 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   suivant, qui travaille les mêmes muscles) ou se choisit parmi les équivalents classés, voire
   dans toute la bibliothèque. On la lance tout de suite, on l'enregistre ou on la retouche dans
   l'éditeur. Le choix vit dans `app/Actions/SuggestWorkout.php`.
-- **Éditeur** — nom, exercices dans l'ordre, et pour chacun : répétitions ou durée, séries,
-  repos entre séries, repos après l'exercice. Le brouillon reste dans le navigateur jusqu'à
+- **Éditeur** — nom, exercices dans l'ordre, et pour chacun : charge en kilos (pas de 1 kg
+  sous 10 kg puis de 2,5 kg, ou saisie libre), répétitions ou durée, séries, repos entre séries,
+  repos après l'exercice. Le lecteur affiche la charge et la laisse ajuster en pleine séance :
+  elle devient celle de l'exercice pour la fois suivante. Le brouillon reste dans le navigateur jusqu'à
   « Enregistrer ».
 - **Lecteur** — tout se joue dans le navigateur, sur des instants absolus : un onglet endormi
   ne fait pas dériver les minuteurs. Une séance interrompue (rechargement, appel) reprend en

@@ -8,7 +8,7 @@ import { beep, countdownSound, goSound, loadCustomSound, restSound, unlockAudio,
 import { sendLog } from '../../pendingLogs';
 import { routes } from '../../routes';
 import { patchJson } from '../../http';
-import { bySlug, clamp, formatClock, formatWeight, stepWeight, targetLabel, usesWeight } from '../../workout';
+import { bySlug, clamp, dropsOn, formatClock, formatWeight, setWeight, stepWeight, targetLabel, usesWeight } from '../../workout';
 
 defineOptions({ layout: null });
 
@@ -41,6 +41,11 @@ function buildSteps() {
     items.forEach((item, index) => {
         for (let set = 1; set <= item.sets; set++) {
             steps.push({ kind: 'work', item: index, set, mode: item.mode, duration: item.mode === 'time' ? item.value : null });
+
+            // Drop set : les paliers suivent la série sans repos.
+            if (dropsOn(item, set)) {
+                item.drops.forEach((_, drop) => steps.push({ kind: 'work', item: index, set, mode: 'reps', duration: null, drop }));
+            }
 
             if (set < item.sets && item.rest_sets > 0) {
                 steps.push({ kind: 'rest', duration: item.rest_sets, item: index, set: set + 1 });
@@ -167,7 +172,8 @@ function goTo(target, countSet = false) {
     const current = steps[state.index];
     lastBeep = null;
 
-    if (countSet && current) {
+    // Un palier de drop prolonge la série : il ne compte pas comme une série de plus.
+    if (countSet && current && current.drop === undefined) {
         state.doneSets += 1;
         state.doneItems = { ...state.doneItems, [current.item]: true };
     }
@@ -312,8 +318,25 @@ function addTime(seconds) {
     persist(true);
 }
 
-/** « 8 reps · 60 kg » : la cible d'une série, charge comprise. */
-const target = (item) => [targetLabel(item), formatWeight(item.weight)].filter(Boolean).join(' · ');
+/** Répétitions et charge d'une étape d'effort : la série, ou un palier de drop. */
+function load(s) {
+    const it = items[s.item];
+
+    if (s.drop !== undefined) {
+        return { reps: it.drops[s.drop].reps, weight: it.drops[s.drop].weight ?? null };
+    }
+
+    return { reps: it.value, weight: setWeight(it, s.set) };
+}
+
+/** « 8 reps · 60 kg » : la cible d'une étape, charge comprise. */
+function target(s) {
+    const it = items[s.item];
+    const { reps, weight } = load(s);
+    const effort = it.mode === 'reps' || s.drop !== undefined ? `${reps} reps` : targetLabel(it);
+
+    return [effort, formatWeight(weight)].filter(Boolean).join(' · ');
+}
 
 /*
  * La charge se règle sans quitter la séance ; elle part au serveur une fois
@@ -323,12 +346,26 @@ const target = (item) => [targetLabel(item), formatWeight(item.weight)].filter(B
 const weightTimers = {};
 
 function changeWeight(direction) {
-    const position = step.value.item;
-    items[position].weight = stepWeight(items[position].weight, direction);
+    const current = step.value;
+    const position = current.item;
+    const it = items[position];
+    let payload;
 
-    clearTimeout(weightTimers[position]);
-    weightTimers[position] = setTimeout(() => {
-        patchJson(props.workout.urls.weight, { position, weight: items[position].weight }).catch(() => {
+    if (current.drop !== undefined) {
+        it.drops[current.drop].weight = stepWeight(it.drops[current.drop].weight, direction);
+        payload = { position, drop: current.drop, weight: it.drops[current.drop].weight };
+    } else if (it.set_weights?.length) {
+        it.set_weights[current.set - 1] = stepWeight(it.set_weights[current.set - 1], direction);
+        payload = { position, set: current.set - 1, weight: it.set_weights[current.set - 1] };
+    } else {
+        it.weight = stepWeight(it.weight, direction);
+        payload = { position, weight: it.weight };
+    }
+
+    const key = JSON.stringify([position, current.drop, current.set]);
+    clearTimeout(weightTimers[key]);
+    weightTimers[key] = setTimeout(() => {
+        patchJson(props.workout.urls.weight, payload).catch(() => {
             // Hors réseau : la séance continue avec la nouvelle charge ; elle ne sera
             // simplement pas retenue pour la prochaine fois.
         });
@@ -391,7 +428,9 @@ const nextLabel = computed(() => {
     const s = steps[upcoming];
     const i = items[s.item];
 
-    return `${catalog[i.exercise].name} · série ${s.set}/${i.sets} · ${target(i)}`;
+    const label = s.drop !== undefined ? `drop ${s.drop + 1}/${i.drops.length}` : `série ${s.set}/${i.sets}`;
+
+    return `${catalog[i.exercise].name} · ${label} · ${target(s)}`;
 });
 
 const detailExercise = computed(() => (detail.value ? catalog[detail.value] : null));
@@ -467,7 +506,7 @@ onUnmounted(() => {
                     <span class="font-display text-[190px] leading-[0.9] font-extrabold text-prep tabular-nums" aria-live="polite">{{ seconds }}</span>
                     <span class="mt-2.5 text-[13px] font-semibold text-text-muted">Premier exercice</span>
                     <span class="display text-[34px] font-extrabold">{{ exercise.name }}</span>
-                    <span class="text-[14px] font-semibold text-text-soft">{{ target(item) }}</span>
+                    <span class="text-[14px] font-semibold text-text-soft">{{ target(step) }}</span>
                 </template>
 
                 <!-- Repos -->
@@ -503,7 +542,7 @@ onUnmounted(() => {
                         <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
                             <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-text-muted">À SUIVRE</span>
                             <span class="text-[16px] font-extrabold">{{ exercise.name }}</span>
-                            <span class="text-[12.5px] font-semibold text-text-soft">{{ setLabel }} · {{ target(item) }}</span>
+                            <span class="text-[12.5px] font-semibold text-text-soft">{{ setLabel }} · {{ target({ ...step, kind: 'work' }) }}</span>
                         </span>
                         <button type="button" class="iconbtn size-[38px] bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" aria-label="Comment faire" @click="openDetail">i</button>
                     </div>
@@ -511,7 +550,8 @@ onUnmounted(() => {
 
                 <!-- Effort -->
                 <template v-else>
-                    <span class="eyebrow text-accent">Effort · {{ setLabel }}</span>
+                    <span v-if="step.drop !== undefined" class="eyebrow text-prep">Drop {{ step.drop + 1 }}/{{ item.drops.length }} · {{ setLabel }} · sans repos</span>
+                    <span v-else class="eyebrow text-accent">Effort · {{ setLabel }}</span>
                     <h1 class="display mt-1.5 text-[40px] leading-[0.95] font-extrabold text-balance">{{ exercise.name }}</h1>
                     <div class="mt-2.5 flex w-full items-center gap-3 rounded-[18px] bg-surface p-2 text-left">
                         <span class="size-[60px] shrink-0 overflow-hidden rounded-xl">
@@ -525,14 +565,14 @@ onUnmounted(() => {
 
                     <template v-if="step.mode === 'reps'">
                         <div class="mt-2.5 flex items-baseline gap-2 text-accent">
-                            <span class="font-display leading-[0.85] font-extrabold" :class="usesWeight(exercise) ? 'text-[100px]' : 'text-[120px]'">{{ item.value }}</span>
+                            <span class="font-display leading-[0.85] font-extrabold" :class="usesWeight(exercise) ? 'text-[100px]' : 'text-[120px]'">{{ load(step).reps }}</span>
                             <span class="font-display text-[28px] font-bold">REPS</span>
                         </div>
                         <span class="mt-1.5 text-[13px] font-semibold text-text-muted">Temps sur la série · {{ elapsed }}</span>
                     <div v-if="usesWeight(exercise)" class="mt-2.5 flex items-center gap-3 rounded-full bg-surface p-1.5">
-                        <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold disabled:opacity-35" aria-label="Charge : moins" :disabled="item.weight === null" @click="changeWeight(-1)">−</button>
-                        <span class="min-w-[130px] text-center font-display text-[34px] leading-none font-extrabold tabular-nums" :class="item.weight === null ? 'text-[18px]! text-text-muted' : 'text-text'" aria-live="polite">
-                            {{ formatWeight(item.weight) ?? 'Poids du corps' }}
+                        <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold disabled:opacity-35" aria-label="Charge : moins" :disabled="load(step).weight === null" @click="changeWeight(-1)">−</button>
+                        <span class="min-w-[130px] text-center font-display text-[34px] leading-none font-extrabold tabular-nums" :class="load(step).weight === null ? 'text-[18px]! text-text-muted' : 'text-text'" aria-live="polite">
+                            {{ formatWeight(load(step).weight) ?? 'Poids du corps' }}
                         </span>
                         <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold" aria-label="Charge : plus" @click="changeWeight(1)">+</button>
                     </div>
@@ -543,7 +583,7 @@ onUnmounted(() => {
                             @click="completeSet"
                         >
                             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-                            Série terminée
+                            {{ step.drop !== undefined ? 'Palier terminé' : 'Série terminée' }}
                         </button>
                         <span class="hidden text-[12px] font-semibold text-text-faint [@media(hover:hover)]:inline">ou touche Espace</span>
                     </template>

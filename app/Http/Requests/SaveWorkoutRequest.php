@@ -23,6 +23,14 @@ class SaveWorkoutRequest extends FormRequest
             'items.*.value' => ['required', 'integer', 'min:1', 'max:3600'],
             // Charge en kilos ; vide au poids du corps.
             'items.*.weight' => ['nullable', 'numeric', 'min:0', 'max:999'],
+            // Dégressif / pyramide : une charge par série.
+            'items.*.set_weights' => ['nullable', 'array', 'max:20'],
+            'items.*.set_weights.*' => ['nullable', 'numeric', 'min:0', 'max:999'],
+            // Drop set : jusqu'à quatre paliers enchaînés sans repos.
+            'items.*.drops' => ['nullable', 'array', 'max:4'],
+            'items.*.drops.*.reps' => ['required', 'integer', 'min:1', 'max:100'],
+            'items.*.drops.*.weight' => ['nullable', 'numeric', 'min:0', 'max:999'],
+            'items.*.drop_on' => ['nullable', 'in:last,all'],
             'items.*.sets' => ['required', 'integer', 'min:1', 'max:20'],
             'items.*.rest_sets' => ['required', 'integer', 'min:0', 'max:900'],
             'items.*.rest_after' => ['required', 'integer', 'min:0', 'max:900'],
@@ -72,6 +80,9 @@ class SaveWorkoutRequest extends FormRequest
             'items.*.sets.max' => 'Au plus 20 séries par exercice.',
             'items.*.weight.numeric' => 'La charge s’écrit en kilos, par exemple 62,5.',
             'items.*.weight.max' => 'Une charge de plus de 999 kg ? Vérifie la saisie.',
+            'items.*.set_weights.*.numeric' => 'La charge s’écrit en kilos, par exemple 62,5.',
+            'items.*.drops.max' => 'Un drop set compte au plus quatre paliers.',
+            'items.*.drops.*.reps.required' => 'Chaque palier du drop set a son nombre de répétitions.',
             'items.*.rest_sets.max' => 'Le repos ne dépasse pas 15 minutes.',
             'items.*.rest_after.max' => 'Le repos ne dépasse pas 15 minutes.',
         ];
@@ -83,7 +94,7 @@ class SaveWorkoutRequest extends FormRequest
     }
 
     /**
-     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, sets: int, rest_sets: int, rest_after: int}>
+     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, set_weights: list<float|null>|null, drops: list<array{reps: int, weight: float|null}>|null, drop_on: string|null, sets: int, rest_sets: int, rest_after: int}>
      */
     public function items(): array
     {
@@ -91,10 +102,58 @@ class SaveWorkoutRequest extends FormRequest
             'exercise' => $item['exercise'],
             'mode' => $item['mode'],
             'value' => (int) $item['value'],
-            'weight' => isset($item['weight']) && $item['weight'] !== '' ? round((float) $item['weight'], 2) : null,
+            'weight' => self::kilos($item['weight'] ?? null),
+            'set_weights' => $this->setWeights($item),
+            'drops' => $this->drops($item),
+            'drop_on' => $this->drops($item) === null ? null : ($item['drop_on'] ?? 'last'),
             'sets' => (int) $item['sets'],
             'rest_sets' => (int) $item['rest_sets'],
             'rest_after' => (int) $item['rest_after'],
         ], $this->validated('items')));
+    }
+
+    private static function kilos(mixed $value): ?float
+    {
+        return $value === null || $value === '' ? null : round((float) $value, 2);
+    }
+
+    /**
+     * Une charge par série, ajustée au nombre de séries : une série ajoutée
+     * reprend la charge de la précédente. Les charges ne portent que sur un
+     * exercice compté en répétitions.
+     *
+     * @param  array<string, mixed>  $item
+     * @return list<float|null>|null
+     */
+    private function setWeights(array $item): ?array
+    {
+        if (empty($item['set_weights']) || $item['mode'] !== 'reps') {
+            return null;
+        }
+
+        $weights = array_map(self::kilos(...), array_values($item['set_weights']));
+        $sets = (int) $item['sets'];
+
+        while (count($weights) < $sets) {
+            $weights[] = end($weights);
+        }
+
+        return array_slice($weights, 0, $sets);
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return list<array{reps: int, weight: float|null}>|null
+     */
+    private function drops(array $item): ?array
+    {
+        if (empty($item['drops']) || $item['mode'] !== 'reps') {
+            return null;
+        }
+
+        return array_map(fn (array $drop): array => [
+            'reps' => (int) $drop['reps'],
+            'weight' => self::kilos($drop['weight'] ?? null),
+        ], array_values($item['drops']));
     }
 }

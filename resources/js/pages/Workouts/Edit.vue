@@ -7,7 +7,7 @@ import ExerciseLibrary from '../../components/ExerciseLibrary.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
 import MuscleSummary from '../../components/MuscleSummary.vue';
 import Stepper from '../../components/Stepper.vue';
-import WeightInput from '../../components/WeightInput.vue';
+import LoadEditor from '../../components/LoadEditor.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
 import { bySlug, defaultsFor, exerciseIntensity, formatShort, newItem, stepRest, stepValue, summary, usesWeight } from '../../workout';
@@ -48,7 +48,15 @@ const draftSummary = computed(() =>
 );
 
 function update(index, changes) {
-    items.value[index] = { ...items.value[index], ...changes };
+    const next = { ...items.value[index], ...changes };
+
+    // En dégressif, une charge par série : la liste suit le nombre de séries,
+    // une série ajoutée reprenant la charge de la précédente.
+    if (next.set_weights?.length && next.set_weights.length !== next.sets) {
+        next.set_weights = Array.from({ length: next.sets }, (_, i) => next.set_weights[i] ?? next.set_weights.at(-1) ?? null);
+    }
+
+    items.value[index] = next;
 }
 
 function move(index, direction) {
@@ -72,9 +80,11 @@ function setMode(index, mode) {
     }
 
     // Passer un exercice en « durée » repart des réglages chronométrés par défaut.
+    // Une série chronométrée n'a ni charge par série ni drop set.
     update(index, {
         mode,
         value: mode === 'reps' ? 10 : defaultsFor({ ...exercise, mode: 'time' }).value,
+        ...(mode === 'time' ? { set_weights: null, drops: null, drop_on: null } : {}),
     });
 }
 
@@ -205,12 +215,7 @@ function destroy() {
                     </button>
                 </div>
 
-                <WeightInput
-                    v-if="usesWeight(catalog[item.exercise])"
-                    :model-value="item.weight ?? null"
-                    label="Charge"
-                    @update:model-value="update(index, { weight: $event })"
-                />
+                <LoadEditor v-if="usesWeight(catalog[item.exercise])" :item="item" @update="update(index, $event)" />
 
                 <div class="grid grid-cols-2 gap-x-3 gap-y-3.5">
                     <Stepper

@@ -36,7 +36,9 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   dans toute la bibliothèque. On la lance tout de suite, on l'enregistre ou on la retouche dans
   l'éditeur. Le choix vit dans `app/Actions/SuggestWorkout.php`.
 - **Éditeur** — nom, exercices dans l'ordre, et pour chacun : charge en kilos (pas de 1 kg
-  sous 10 kg puis de 2,5 kg, ou saisie libre), répétitions ou durée, séries, repos entre séries,
+  sous 10 kg puis de 2,5 kg, ou saisie libre) — fixe ou une par série (dégressif, pyramide ;
+  « Dégressif auto » baisse de 10 % par série) —, drop set (jusqu'à quatre paliers enchaînés
+  sans repos, sur la dernière série ou sur chacune), répétitions ou durée, séries, repos entre séries,
   repos après l'exercice. Le lecteur affiche la charge et la laisse ajuster en pleine séance :
   elle devient celle de l'exercice pour la fois suivante. Le brouillon reste dans le navigateur jusqu'à
   « Enregistrer ».

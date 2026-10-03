@@ -36,9 +36,21 @@ export function estimate(items, secondsPerRep = 3) {
             total +
             item.sets * (item.mode === 'reps' ? item.value * secondsPerRep : item.value) +
             (item.sets - 1) * item.rest_sets +
+            dropReps(item) * secondsPerRep +
             (index < items.length - 1 ? item.rest_after : 0),
         0,
     );
+}
+
+/** Répétitions des drop sets d'un exercice, sur toute la séance. */
+function dropReps(item) {
+    if (!item.drops?.length) {
+        return 0;
+    }
+
+    const perSet = item.drops.reduce((total, drop) => total + drop.reps, 0);
+
+    return perSet * (item.drop_on === 'all' ? item.sets : 1);
 }
 
 /** « 6 exos · 20 séries · ~45 min » */
@@ -176,3 +188,27 @@ export function stepWeight(weight, direction) {
 
 /** Une charge a du sens partout sauf au cardio et en mobilité. */
 export const usesWeight = (exercise) => exercise && !['cardio', 'mobilite'].includes(exercise.group);
+
+/** La charge d'une série (dès 1) : celle de la série en dégressif, sinon la charge fixe. */
+export const setWeight = (item, set) => (item.set_weights?.length ? (item.set_weights[set - 1] ?? null) : (item.weight ?? null));
+
+/** Arrondi au disque le plus proche : 2,5 kg (1 kg sous 10 kg). */
+export function roundPlate(weight) {
+    const step = weight < 10 ? 1 : 2.5;
+
+    return Math.max(step, Math.round(weight / step) * step);
+}
+
+/** Dégressif auto : chaque série 10 % plus légère que la précédente. */
+export function degressive(start, sets) {
+    const weights = [start];
+
+    for (let set = 1; set < sets; set++) {
+        weights.push(start ? roundPlate(weights[set - 1] * 0.9) : null);
+    }
+
+    return weights;
+}
+
+/** Les séries d'un exercice qui se prolongent en drop set (dès 1). */
+export const dropsOn = (item, set) => Boolean(item.drops?.length) && (item.drop_on === 'all' || set === item.sets);

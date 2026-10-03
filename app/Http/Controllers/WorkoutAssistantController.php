@@ -34,6 +34,7 @@ class WorkoutAssistantController extends Controller
             warmup: $request->boolean('warmup'),
             stretch: $request->boolean('stretch'),
             variant: $request->integer('variant'),
+            settings: $request->settings(),
         );
 
         $equipment = EquipmentKind::tryFrom((string) $request->validated('equipment'));
@@ -47,8 +48,8 @@ class WorkoutAssistantController extends Controller
 
         $goal = WorkoutGoal::from($request->validated('goal'));
         $proposal['prescriptions'] = [
-            'reps' => $goal->prescription(ExerciseMode::Reps),
-            'time' => $goal->prescription(ExerciseMode::Time),
+            'reps' => $suggestWorkout->prescribe($goal, ExerciseMode::Reps, array_filter($request->settings(), fn ($v): bool => $v !== null)),
+            'time' => $suggestWorkout->prescribe($goal, ExerciseMode::Time, array_filter($request->settings(), fn ($v): bool => $v !== null)),
         ];
 
         return $this->page($proposal, $request->validated());
@@ -77,11 +78,16 @@ class WorkoutAssistantController extends Controller
                 'warmup' => filter_var($input['warmup'] ?? false, FILTER_VALIDATE_BOOL),
                 'stretch' => filter_var($input['stretch'] ?? false, FILTER_VALIDATE_BOOL),
                 'variant' => (int) ($input['variant'] ?? 0),
+                'reps' => isset($input['reps']) ? (int) $input['reps'] : null,
+                'rest_sets' => isset($input['rest_sets']) ? (int) $input['rest_sets'] : null,
+                'rest_after' => isset($input['rest_after']) ? (int) $input['rest_after'] : null,
             ],
             'goals' => array_map(fn (WorkoutGoal $goal): array => [
                 'value' => $goal->value,
                 'label' => $goal->label(),
                 'description' => $goal->description(),
+                // Les réglages par défaut de l'objectif, que le formulaire préremplit.
+                'prescription' => $goal->prescription(ExerciseMode::Reps),
             ], WorkoutGoal::cases()),
             'equipments' => array_map(fn (EquipmentKind $kind): array => [
                 'value' => $kind->value,

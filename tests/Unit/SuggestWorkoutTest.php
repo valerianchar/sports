@@ -17,9 +17,9 @@ class SuggestWorkoutTest extends TestCase
      * @param  list<Muscle>  $muscles
      * @return array{name: string, items: list<array<string, mixed>>, seconds: int}
      */
-    private function suggest(array $muscles, int $minutes = 45, WorkoutGoal $goal = WorkoutGoal::Hypertrophy, ?EquipmentKind $equipment = null, bool $warmup = false, bool $stretch = false, int $variant = 0): array
+    private function suggest(array $muscles, int $minutes = 45, WorkoutGoal $goal = WorkoutGoal::Hypertrophy, ?EquipmentKind $equipment = null, bool $warmup = false, bool $stretch = false, int $variant = 0, array $settings = []): array
     {
-        return app(SuggestWorkout::class)->handle($muscles, $minutes, $goal, $equipment, $warmup, $stretch, $variant);
+        return app(SuggestWorkout::class)->handle($muscles, $minutes, $goal, $equipment, $warmup, $stretch, $variant, $settings);
     }
 
     /**
@@ -172,6 +172,38 @@ class SuggestWorkoutTest extends TestCase
 
         foreach ($suggest->alternatives($stretch['slug']) as $slug) {
             $this->assertSame('mobilite', ExerciseCatalog::find($slug)['group'], $slug);
+        }
+    }
+
+    public function test_chosen_reps_and_rests_replace_the_goal_defaults(): void
+    {
+        $proposal = app(SuggestWorkout::class)->handle([Muscle::Chest, Muscle::Abs], 45, WorkoutGoal::Hypertrophy, settings: ['reps' => 12, 'rest_sets' => 45, 'rest_after' => 120]);
+
+        foreach ($proposal['items'] as $item) {
+            $this->assertSame(45, $item['rest_sets']);
+            $this->assertSame(120, $item['rest_after']);
+
+            if ($item['mode'] === 'reps') {
+                $this->assertSame(12, $item['value']);
+            } else {
+                // Un gainage garde la durée de l'objectif.
+                $this->assertSame(40, $item['value']);
+            }
+        }
+
+        $this->assertEqualsWithDelta(45 * 60, $proposal['seconds'], 45 * 60 * 0.15);
+    }
+
+    public function test_shorter_rests_fit_more_exercises_in_the_same_time(): void
+    {
+        $muscles = [Muscle::Chest, Muscle::UpperBack, Muscle::Quadriceps, Muscle::Hamstring];
+        $count = fn (int $rest): int => count($this->suggest($muscles, 60, settings: ['rest_sets' => $rest, 'rest_after' => $rest])['items']);
+
+        $this->assertGreaterThan($count(150), $count(30));
+
+        foreach ([30, 90, 150] as $rest) {
+            $proposal = $this->suggest($muscles, 60, settings: ['rest_sets' => $rest, 'rest_after' => $rest]);
+            $this->assertEqualsWithDelta(60 * 60, $proposal['seconds'], 60 * 60 * 0.15, "Repos {$rest} s");
         }
     }
 

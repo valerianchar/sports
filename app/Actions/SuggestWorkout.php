@@ -70,8 +70,13 @@ final class SuggestWorkout
 
     private Randomizer $random;
 
+    /** @var array{reps?: int, rest_sets?: int, rest_after?: int} réglages choisis à la place de ceux de l'objectif */
+    private array $settings = [];
+
     /**
      * @param  list<Muscle>  $muscles
+     * @param  array{reps?: int|null, rest_sets?: int|null, rest_after?: int|null}  $settings  répétitions et repos
+     *                                                                                         voulus, à la place de ceux de l'objectif
      * @return array{name: string, items: list<array<string, mixed>>, seconds: int}
      */
     public function handle(
@@ -82,8 +87,10 @@ final class SuggestWorkout
         bool $warmup = false,
         bool $stretch = false,
         int $variant = 0,
+        array $settings = [],
     ): array {
         $this->random = new Randomizer(new Mt19937($variant));
+        $this->settings = array_filter($settings, fn ($value): bool => $value !== null);
         $targets = array_map(fn (Muscle $muscle): string => $muscle->value, $muscles);
         $budget = $minutes * 60;
 
@@ -179,9 +186,13 @@ final class SuggestWorkout
         $served = [];
         $chosen = [];
 
-        // Mieux vaut quatre séries de six bons exercices que trois de dix : environ
-        // un exercice par tranche de sept minutes, et jamais moins que de muscles visés.
-        $limit = max(2, min(10, max(count($targets), (int) round($budget / 420))));
+        // Mieux vaut quatre séries de six bons exercices que trois de dix : autant
+        // d'exercices que le temps en loge avec les répétitions et les repos choisis
+        // — moins de repos, plus d'exercices —, jamais moins que de muscles visés.
+        $one = $this->prescribe($goal, ExerciseMode::Reps);
+        $perExercise = $one['sets'] * $one['value'] * (float) config('sport.seconds_per_rep')
+            + ($one['sets'] - 1) * $one['rest_sets'] + $one['rest_after'];
+        $limit = max(2, min(12, max(count($targets), (int) round($budget / max(60, $perExercise)))));
 
         while ($pool->isNotEmpty() && count($chosen) < $limit) {
             $best = $pool
@@ -313,19 +324,50 @@ final class SuggestWorkout
             $gain -= 0.5;
         }
 
+        $twin = 0.0;
+        $twins = 0;
+
         foreach ($chosen as $item) {
             $other = ExerciseCatalog::find($item['exercise']);
 
-            // Deux variantes du même geste (mêmes muscles principaux) : une suffit,
-            // a fortiori sur le même matériel.
+            // Deux variantes du même geste (mêmes muscles principaux) : on s'en
+            // méfie, a fortiori sur le même matériel. Avec des repos courts, la
+            // séance a de la place pour deux ou trois exercices d'un même muscle,
+            // pourvu qu'ils diffèrent — la méfiance grandit doucement avec leur nombre.
             if ($other['primary'] == $exercise['primary']) {
-                $gain -= $other['equipment'] === $exercise['equipment'] ? 1.5 : 0.8;
+                $twin = max($twin, $other['equipment'] === $exercise['equipment'] ? 1.5 : 0.8);
+                $twins++;
             } elseif ($other['equipment'] === $exercise['equipment']) {
                 $gain -= 0.25;
             }
         }
 
+        $gain -= $twin + 0.4 * max(0, $twins - 1);
+
         return $gain + $this->random->getFloat(0, 0.35);
+    }
+
+    /**
+     * Les réglages d'un exercice : ceux de l'objectif, remplacés par ceux qu'on
+     * a choisis — les répétitions ne concernent que les exercices comptés en
+     * répétitions, un gainage garde sa durée.
+     *
+     * @param  array{reps?: int, rest_sets?: int, rest_after?: int}|null  $settings
+     * @return array{value: int, sets: int, rest_sets: int, rest_after: int}
+     */
+    public function prescribe(WorkoutGoal $goal, ExerciseMode $mode, ?array $settings = null): array
+    {
+        $settings ??= $this->settings;
+        $prescription = $goal->prescription($mode);
+
+        if ($mode === ExerciseMode::Reps && isset($settings['reps'])) {
+            $prescription['value'] = $settings['reps'];
+        }
+
+        return [
+            ...$prescription,
+            ...array_intersect_key($settings, ['rest_sets' => true, 'rest_after' => true]),
+        ];
     }
 
     /**
@@ -360,7 +402,7 @@ final class SuggestWorkout
     {
         $mode = ExerciseMode::from($exercise['mode']);
 
-        return ['exercise' => $exercise['slug'], 'mode' => $mode->value, ...$goal->prescription($mode)];
+        return ['exercise' => $exercise['slug'], 'mode' => $mode->value, ...$this->prescribe($goal, $mode)];
     }
 
     /**

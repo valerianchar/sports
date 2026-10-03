@@ -76,6 +76,22 @@ class WorkoutAssistantTest extends TestCase
             ->assertJsonCount(365, 'props.library');
     }
 
+    public function test_chosen_reps_and_rests_reach_the_proposal(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/seances/assistant/proposition?'.http_build_query([
+                'muscles' => ['biceps'], 'minutes' => 20, 'goal' => 'volume', 'reps' => 8, 'rest_sets' => 90, 'rest_after' => 45,
+            ]))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('proposal.items.0.value', 8)
+                ->where('proposal.items.0.rest_sets', 90)
+                ->where('proposal.prescriptions.reps.value', 8)
+                ->where('input.reps', 8)
+                ->where('input.rest_after', 45)
+                ->where('goals.1.prescription.rest_sets', 75));
+    }
+
     public function test_at_least_one_muscle_is_required(): void
     {
         $this->actingAs(User::factory()->create())

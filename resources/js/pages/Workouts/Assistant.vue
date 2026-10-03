@@ -7,9 +7,10 @@ import BottomSheet from '../../components/BottomSheet.vue';
 import ExerciseLibrary from '../../components/ExerciseLibrary.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
 import MuscleSummary from '../../components/MuscleSummary.vue';
+import Stepper from '../../components/Stepper.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
-import { bySlug, formatShort, summary } from '../../workout';
+import { bySlug, clamp, formatShort, stepRest, summary } from '../../workout';
 
 const props = defineProps({
     proposal: { type: Object, default: null },
@@ -46,10 +47,15 @@ const presets = [
 
 const choosable = regions.flatMap((region) => region.muscles);
 
+const goalDefaults = (goal) => props.goals.find((g) => g.value === goal).prescription;
+
 const form = reactive({
     muscles: props.input.muscles.filter((muscle) => choosable.includes(muscle)),
     minutes: props.input.minutes,
     goal: props.input.goal,
+    reps: props.input.reps ?? goalDefaults(props.input.goal).value,
+    rest_sets: props.input.rest_sets ?? goalDefaults(props.input.goal).rest_sets,
+    rest_after: props.input.rest_after ?? goalDefaults(props.input.goal).rest_after,
     equipment: props.input.equipment ?? '',
     warmup: props.input.warmup,
     stretch: props.input.stretch,
@@ -77,6 +83,26 @@ function applyPreset(preset) {
     form.muscles = presetActive(preset) ? [] : [...preset.muscles];
 }
 
+/* Changer d'objectif repart de ses réglages ; on les retouche ensuite à volonté. */
+function chooseGoal(goal) {
+    const defaults = goalDefaults(goal);
+    Object.assign(form, { goal, reps: defaults.value, rest_sets: defaults.rest_sets, rest_after: defaults.rest_after });
+}
+
+const restStep = (value, direction) => clamp(stepRest(value, direction), 0, 600);
+
+/*
+ * Ce que le temps permet, à la louche, avec ces réglages : le même calcul que
+ * le serveur pour décider du nombre d'exercices.
+ */
+const expected = computed(() => {
+    const sets = goalDefaults(form.goal).sets;
+    const perExercise = sets * form.reps * page.props.seconds_per_rep + (sets - 1) * form.rest_sets + form.rest_after;
+    const reserved = (form.warmup ? 360 : 0) + (form.stretch ? 180 : 0);
+
+    return clamp(Math.round((form.minutes * 60 - reserved) / Math.max(60, perExercise)), 2, 12);
+});
+
 function setMinutes(value) {
     form.minutes = Math.min(150, Math.max(10, value));
 }
@@ -91,6 +117,9 @@ function suggest(variant = 0) {
             equipment: form.equipment || undefined,
             warmup: form.warmup ? 1 : 0,
             stretch: form.stretch ? 1 : 0,
+            reps: form.reps,
+            rest_sets: form.rest_sets,
+            rest_after: form.rest_after,
             variant,
         },
         {
@@ -324,7 +353,7 @@ const prescription = (item) => {
                         :aria-checked="form.goal === goal.value"
                         class="flex flex-col items-start gap-1 rounded-2xl p-3 text-left"
                         :class="form.goal === goal.value ? 'bg-accent text-on-accent' : 'bg-surface-2 text-text'"
-                        @click="form.goal = goal.value"
+                        @click="chooseGoal(goal.value)"
                     >
                         <span class="font-display text-[20px] leading-none font-extrabold uppercase">{{ goal.label }}</span>
                         <span class="text-[11.5px] leading-tight font-semibold" :class="form.goal === goal.value ? 'text-on-accent/75' : 'text-text-muted'">
@@ -332,6 +361,44 @@ const prescription = (item) => {
                         </span>
                     </button>
                 </div>
+            </section>
+
+            <section class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
+                <div class="flex items-baseline justify-between gap-3">
+                    <h2 class="display text-[22px] font-bold">Séries et repos</h2>
+                    <span class="text-[12px] font-bold text-accent" aria-live="polite">jusqu’à {{ expected }} exercices</span>
+                </div>
+                <Stepper
+                    label="Répétitions par série"
+                    :display="String(form.reps)"
+                    :can-decrease="form.reps > 1"
+                    :can-increase="form.reps < 50"
+                    @decrease="form.reps--"
+                    @increase="form.reps++"
+                />
+                <div class="grid grid-cols-2 gap-x-3">
+                    <Stepper
+                        label="Repos entre séries"
+                        tone="rest"
+                        :display="formatShort(form.rest_sets)"
+                        :can-decrease="form.rest_sets > 0"
+                        :can-increase="form.rest_sets < 600"
+                        @decrease="form.rest_sets = restStep(form.rest_sets, -1)"
+                        @increase="form.rest_sets = restStep(form.rest_sets, 1)"
+                    />
+                    <Stepper
+                        label="Repos entre exos"
+                        tone="rest"
+                        :display="formatShort(form.rest_after)"
+                        :can-decrease="form.rest_after > 0"
+                        :can-increase="form.rest_after < 600"
+                        @decrease="form.rest_after = restStep(form.rest_after, -1)"
+                        @increase="form.rest_after = restStep(form.rest_after, 1)"
+                    />
+                </div>
+                <p class="text-[12.5px] font-medium text-text-muted">
+                    Moins de repos, plus d'exercices dans le même temps. Les séries s'ajustent pour tenir {{ form.minutes }} min.
+                </p>
             </section>
 
             <section class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">

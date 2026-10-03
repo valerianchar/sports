@@ -12,13 +12,15 @@ const props = defineProps({
     groups: { type: Array, required: true },
     picking: { type: Boolean, default: false },
     picked: { type: Array, default: () => [] },
+    // Groupe présélectionné à l'ouverture (« Choisir un remplaçant » : celui de l'exercice remplacé).
+    initialGroup: { type: String, default: 'all' },
 });
 
 const emit = defineEmits(['info', 'toggle']);
 
 const query = ref('');
 const byMuscle = ref(true);
-const group = ref('all');
+const group = ref(props.initialGroup);
 
 const machines = computed(() =>
     [...new Map(props.exercises.map((e) => [e.equipment, e.equipment_label])).entries()]

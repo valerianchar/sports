@@ -38,7 +38,42 @@ class WorkoutAssistantTest extends TestCase
                 ->where('input.muscles', ['chest', 'triceps'])
                 ->where('input.warmup', true)
                 ->where('input.variant', 3)
-                ->has('exercises'));
+                ->has('exercises')
+                ->where('proposal.prescriptions.reps.value', 5)
+                ->where('proposal.prescriptions.time.value', 30)
+                ->has('proposal.alternatives')
+                // La bibliothèque entière ne voyage que sur demande.
+                ->missing('library'));
+    }
+
+    public function test_every_proposed_exercise_comes_with_replacements_the_page_can_show(): void
+    {
+        $response = $this->actingAs(User::factory()->create())
+            ->get('/seances/assistant/proposition?'.http_build_query(['muscles' => ['quadriceps', 'hamstring'], 'minutes' => 45, 'goal' => 'volume']));
+
+        $props = $response->viewData('page')['props'];
+        $known = array_column($props['exercises'], 'slug');
+
+        foreach ($props['proposal']['items'] as $item) {
+            $alternatives = $props['proposal']['alternatives'][$item['exercise']];
+
+            $this->assertNotEmpty($alternatives, $item['exercise']);
+            $this->assertSame([], array_values(array_diff($alternatives, $known)), 'Remplaçants sans fiche envoyée');
+        }
+    }
+
+    public function test_the_full_library_loads_on_demand(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/seances/assistant/proposition?'.http_build_query(['muscles' => ['chest'], 'minutes' => 30, 'goal' => 'volume']), [
+                'X-Inertia' => 'true',
+                // La version des assets, calculée comme le middleware (absente en CI : pas de build).
+                'X-Inertia-Version' => file_exists($manifest = public_path('build/manifest.json')) ? hash_file('xxh128', $manifest) : '',
+                'X-Inertia-Partial-Component' => 'Workouts/Assistant',
+                'X-Inertia-Partial-Data' => 'library',
+            ])
+            ->assertOk()
+            ->assertJsonCount(365, 'props.library');
     }
 
     public function test_at_least_one_muscle_is_required(): void

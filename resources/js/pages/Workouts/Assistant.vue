@@ -1,8 +1,10 @@
 <script setup>
-import { computed, reactive, ref } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { SwitchRoot, SwitchThumb } from 'reka-ui';
 import BodyMap from '../../components/BodyMap.vue';
+import BottomSheet from '../../components/BottomSheet.vue';
+import ExerciseLibrary from '../../components/ExerciseLibrary.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
 import MuscleSummary from '../../components/MuscleSummary.vue';
 import { unlockAudio } from '../../audio';
@@ -15,11 +17,13 @@ const props = defineProps({
     input: { type: Object, required: true },
     goals: { type: Array, required: true },
     equipments: { type: Array, required: true },
+    groups: { type: Array, required: true },
+    library: { type: Array, default: null },
 });
 
 const page = usePage();
 const labels = computed(() => page.props.muscles);
-const catalog = computed(() => bySlug(props.exercises));
+const catalog = computed(() => bySlug([...props.exercises, ...(props.library ?? [])]));
 
 /*
  * Les muscles proposés au choix, par région. Tibias et cou restent hors de
@@ -107,13 +111,116 @@ function save(options = {}) {
         unlockAudio();
     }
 
-    router.post(routes.workouts, { name: props.proposal.name, items: props.proposal.items, ...options }, {
+    const payload = items.value.map(({ origin, ...item }) => item);
+
+    router.post(routes.workouts, { name: props.proposal.name, items: payload, ...options }, {
         onStart: () => (loading.value = true),
         onFinish: () => (loading.value = false),
     });
 }
 
-const proposalSummary = computed(() => (props.proposal ? summary(props.proposal.items, page.props.seconds_per_rep) : ''));
+/*
+ * La proposition se retouche sur place : chaque ligne garde l'exercice
+ * d'origine, dont le serveur a classé les remplaçants — le bouton « changer »
+ * les fait défiler, puis revient à l'original.
+ */
+const items = ref([]);
+
+watch(
+    () => props.proposal,
+    (proposal) => {
+        items.value = (proposal?.items ?? []).map((item) => ({ ...item, origin: item.exercise }));
+    },
+    { immediate: true },
+);
+
+const inSession = (slug, except) => items.value.some((item, index) => index !== except && item.exercise === slug);
+
+function toast(message) {
+    document.dispatchEvent(new CustomEvent('seance:toast', { detail: { message, error: false } }));
+}
+
+function replace(index, slug) {
+    const item = items.value[index];
+    const exercise = catalog.value[slug];
+
+    if (!exercise || item.exercise === slug) {
+        return;
+    }
+
+    let value = item.value;
+
+    if (exercise.mode !== item.mode) {
+        value = exercise.group === 'cardio' ? 300 : props.proposal.prescriptions[exercise.mode].value;
+    }
+
+    items.value[index] = { ...item, exercise: slug, mode: exercise.mode, value };
+}
+
+function cycle(index) {
+    const item = items.value[index];
+    const order = [...(props.proposal.alternatives[item.origin] ?? []), item.origin];
+    const start = order.indexOf(item.exercise);
+
+    for (let step = 1; step <= order.length; step++) {
+        const slug = order[(start + step) % order.length];
+
+        if (!inSession(slug, index)) {
+            const before = catalog.value[item.exercise].name;
+            replace(index, slug);
+            toast(`${before} → ${catalog.value[slug].name}`);
+
+            return;
+        }
+    }
+
+    toast('Pas d’autre équivalent pour cet exercice.');
+}
+
+// Feuille « Changer cet exercice », puis, au besoin, toute la bibliothèque.
+const swapping = ref(null);
+const swapOpen = computed({
+    get: () => swapping.value !== null,
+    set: (open) => {
+        if (!open) {
+            swapping.value = null;
+        }
+    },
+});
+const browsing = ref(null);
+
+const swapChoices = computed(() => {
+    if (swapping.value === null) {
+        return [];
+    }
+
+    const item = items.value[swapping.value];
+    const slugs = [item.origin, ...(props.proposal.alternatives[item.origin] ?? [])];
+
+    return slugs.filter((slug) => slug !== item.exercise && !inSession(slug, swapping.value)).map((slug) => catalog.value[slug]);
+});
+
+const muscleNames = (muscles) => muscles.map((muscle) => labels.value[muscle]).join(', ');
+
+function choose(slug) {
+    const index = swapping.value ?? browsing.value;
+    replace(index, slug);
+    swapping.value = null;
+    browsing.value = null;
+}
+
+function browse() {
+    browsing.value = swapping.value;
+    swapping.value = null;
+
+    if (!props.library) {
+        router.reload({ only: ['library'] });
+    }
+}
+
+const browsingGroup = computed(() => (browsing.value === null ? 'all' : catalog.value[items.value[browsing.value].exercise].group));
+
+const proposalSummary = computed(() => (props.proposal ? summary(items.value, page.props.seconds_per_rep) : ''));
 
 const prescription = (item) => {
     const effort = item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value);
@@ -275,25 +382,35 @@ const prescription = (item) => {
             <h1 class="display text-[38px] leading-[0.92] font-extrabold text-balance">{{ props.proposal.name }}</h1>
             <p class="mb-1 text-[13px] font-semibold text-text-muted">{{ proposalSummary }}</p>
 
-            <MuscleSummary :items="props.proposal.items" :catalog="catalog" :height="200" />
+            <MuscleSummary :items="items" :catalog="catalog" :height="200" />
+            <p class="px-1 text-[12.5px] font-medium text-text-faint">
+                Un exercice ne te plaît pas ? ⟳ le remplace par un équivalent, ou touche-le pour choisir toi-même.
+            </p>
 
             <ol class="flex flex-col gap-2">
-                <li v-for="(item, index) in props.proposal.items" :key="item.exercise" class="flex items-center gap-3 rounded-2xl bg-surface p-2.5">
+                <li v-for="(item, index) in items" :key="index" class="flex items-center gap-2 rounded-2xl bg-surface p-2.5">
                     <span class="w-6 shrink-0 text-center font-display text-[20px] font-extrabold text-accent">{{ index + 1 }}</span>
-                    <span class="size-12 shrink-0 overflow-hidden rounded-[10px]">
-                        <img :src="catalog[item.exercise].images[0]" alt="" class="size-full object-cover" />
-                    </span>
-                    <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <span class="text-[14.5px] leading-tight font-bold">{{ catalog[item.exercise].name }}</span>
-                        <span class="text-[12.5px] font-medium text-text-muted">{{ prescription(item) }}</span>
-                    </span>
                     <button
                         type="button"
-                        class="iconbtn size-9 bg-surface-2! font-serif text-[15px] font-extrabold text-text-soft italic"
-                        :aria-label="`Comment faire : ${catalog[item.exercise].name}`"
-                        @click="detail = item.exercise"
+                        class="flex min-w-0 flex-1 items-center gap-3 rounded-xl text-left hover:bg-surface-hover"
+                        :aria-label="`Changer ${catalog[item.exercise].name}`"
+                        @click="swapping = index"
                     >
-                        i
+                        <span class="size-12 shrink-0 overflow-hidden rounded-[10px]">
+                            <img :key="item.exercise" :src="catalog[item.exercise].images[0]" alt="" class="animate-pop size-full object-cover" />
+                        </span>
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span class="text-[14.5px] leading-tight font-bold">{{ catalog[item.exercise].name }}</span>
+                            <span class="text-[12.5px] font-medium text-text-muted">{{ prescription(item) }}</span>
+                        </span>
+                    </button>
+                    <button
+                        type="button"
+                        class="iconbtn size-10 bg-surface-2! text-accent"
+                        :aria-label="`Remplacer ${catalog[item.exercise].name} par un équivalent`"
+                        @click="cycle(index)"
+                    >
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14.3-3.3M20 4v5h-5M20 15a8 8 0 0 1-14.3 3.3M4 20v-5h5" /></svg>
                     </button>
                 </li>
             </ol>
@@ -325,6 +442,59 @@ const prescription = (item) => {
             </template>
         </div>
     </div>
+
+    <!-- Choisir soi-même un remplaçant dans toute la bibliothèque. -->
+    <div v-if="browsing !== null" class="absolute inset-0 z-10 flex flex-col bg-bg pt-[env(safe-area-inset-top)]">
+        <ExerciseLibrary
+            v-if="props.library"
+            :exercises="props.library"
+            :groups="props.groups"
+            :picked="[items[browsing].exercise]"
+            :initial-group="browsingGroup"
+            picking
+            @toggle="choose"
+            @info="detail = $event"
+        >
+            <template #header>
+                <div class="flex items-center gap-3">
+                    <button type="button" class="iconbtn size-10" aria-label="Retour à la proposition" @click="browsing = null">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
+                    </button>
+                    <h1 class="display text-[30px] font-extrabold">Choisir un remplaçant</h1>
+                </div>
+            </template>
+        </ExerciseLibrary>
+        <p v-else class="m-auto text-[14px] font-semibold text-text-muted">Chargement de la bibliothèque…</p>
+    </div>
+
+    <BottomSheet
+        v-model:open="swapOpen"
+        title="Changer d'exercice"
+        :description="swapping !== null ? `À la place de « ${catalog[items[swapping].exercise].name} » : des exercices qui travaillent les mêmes muscles.` : ''"
+    >
+        <ul class="flex flex-col gap-2">
+            <li v-for="choice in swapChoices" :key="choice.slug">
+                <button type="button" class="flex w-full items-center gap-3 rounded-2xl bg-surface p-2 text-left hover:bg-surface-hover" @click="choose(choice.slug)">
+                    <span class="size-12 shrink-0 overflow-hidden rounded-[10px]">
+                        <img :src="choice.images[0]" alt="" class="size-full object-cover" />
+                    </span>
+                    <span class="flex min-w-0 flex-col gap-0.5">
+                        <span class="text-[14.5px] leading-tight font-bold">{{ choice.name }}</span>
+                        <span class="text-[12px] font-medium text-text-muted">{{ choice.equipment_label }} · {{ muscleNames(choice.primary) }}</span>
+                    </span>
+                </button>
+            </li>
+        </ul>
+        <button type="button" class="btn-soft h-12 text-[14px]" @click="browse">Parcourir toute la bibliothèque</button>
+        <button
+            v-if="swapping !== null"
+            type="button"
+            class="h-10 text-[14px] font-bold text-accent"
+            @click="detail = items[swapping].exercise; swapping = null"
+        >
+            Comment faire cet exercice ?
+        </button>
+    </BottomSheet>
 
     <ExerciseSheet v-if="detailExercise" :exercise="detailExercise" @close="detail = null" />
 </template>

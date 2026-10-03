@@ -103,6 +103,71 @@ final class SuggestWorkout
     }
 
     /**
+     * Les remplaçants d'un exercice, du meilleur au moins bon : ceux qui
+     * travaillent les mêmes muscles principaux, avec le matériel choisi, les
+     * classiques en premier. Un échauffement se remplace par un autre cardio,
+     * un étirement par un autre étirement.
+     *
+     * @param  list<string>  $exclude  exercices déjà dans la séance
+     * @return list<string>
+     */
+    public function alternatives(string $slug, ?EquipmentKind $equipment = null, array $exclude = [], int $limit = 8): array
+    {
+        $original = ExerciseCatalog::find($slug);
+        $group = MuscleGroup::from($original['group']);
+        $sameFamily = fn (array $exercise): bool => in_array($group, self::EXCLUDED_GROUPS, true)
+            ? $exercise['group'] === $group->value
+            : ! in_array(MuscleGroup::from($exercise['group']), self::EXCLUDED_GROUPS, true);
+
+        $candidates = ExerciseCatalog::all()
+            ->except([$slug, ...$exclude])
+            ->filter($sameFamily)
+            ->filter(fn (array $exercise): bool => array_intersect($exercise['primary'], $original['primary']) !== []);
+
+        if ($equipment !== null) {
+            $kept = $candidates->filter(fn (array $exercise): bool => ExerciseCatalog::equipment($exercise['slug'])->kind() === $equipment);
+            // Trop peu de choix dans ce matériel : on ouvre plutôt que de laisser l'exercice sans remplaçant.
+            $candidates = $kept->count() >= 3 ? $kept : $candidates;
+        }
+
+        return $candidates
+            ->sortByDesc(fn (array $exercise): float => $this->likeness($exercise, $original, $equipment))
+            ->keys()
+            ->take($limit)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * À quel point un exercice peut en remplacer un autre.
+     */
+    private function likeness(array $exercise, array $original, ?EquipmentKind $equipment): float
+    {
+        $score = 2 * count(array_intersect($exercise['primary'], $original['primary'])) / count($original['primary'])
+            - 0.5 * count(array_diff($exercise['primary'], $original['primary']))
+            + 0.3 * count(array_intersect($exercise['secondary'], $original['secondary']));
+
+        if (in_array($exercise['slug'], self::STAPLES, true)) {
+            $score += 0.4;
+        }
+
+        if (in_array($exercise['slug'], self::ADVANCED, true)) {
+            $score -= 0.7;
+        }
+
+        if ($equipment !== EquipmentKind::Bodyweight && in_array($exercise['equipment'], self::ACCESSORY_EQUIPMENT, true)) {
+            $score -= 0.5;
+        }
+
+        // Une autre machine pour une machine, une barre pour une barre : on garde l'esprit de la séance.
+        if (ExerciseCatalog::equipment($exercise['slug'])->kind() === ExerciseCatalog::equipment($original['slug'])->kind()) {
+            $score += 0.2;
+        }
+
+        return $score;
+    }
+
+    /**
      * @param  list<string>  $targets
      * @return list<array<string, mixed>>
      */

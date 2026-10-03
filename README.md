@@ -28,7 +28,9 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   matériel (machines, charges libres, poids du corps), avec en option un échauffement et des
   étirements. Il propose une séance qui couvre chaque muscle demandé et tient dans le temps
   (à ±15 %), les classiques de salle et les gros mouvements en tête ; « Autre proposition »
-  en tire une nouvelle. On la lance tout de suite, on l'enregistre ou on la retouche dans
+  en tire une nouvelle. Un exercice qui ne plaît pas se change d'un toucher (⟳ : l'équivalent
+  suivant, qui travaille les mêmes muscles) ou se choisit parmi les équivalents classés, voire
+  dans toute la bibliothèque. On la lance tout de suite, on l'enregistre ou on la retouche dans
   l'éditeur. Le choix vit dans `app/Actions/SuggestWorkout.php`.
 - **Éditeur** — nom, exercices dans l'ordre, et pour chacun : répétitions ou durée, séries,
   repos entre séries, repos après l'exercice. Le brouillon reste dans le navigateur jusqu'à

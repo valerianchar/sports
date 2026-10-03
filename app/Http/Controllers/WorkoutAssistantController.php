@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\SuggestWorkout;
 use App\Enums\EquipmentKind;
+use App\Enums\ExerciseMode;
 use App\Enums\Muscle;
 use App\Enums\WorkoutGoal;
 use App\Http\Requests\SuggestWorkoutRequest;
@@ -35,6 +36,21 @@ class WorkoutAssistantController extends Controller
             variant: $request->integer('variant'),
         );
 
+        $equipment = EquipmentKind::tryFrom((string) $request->validated('equipment'));
+        $inSession = array_column($proposal['items'], 'exercise');
+
+        // Pour chaque exercice proposé, ses remplaçants classés : le bouton « changer »
+        // les fait défiler sans aller-retour, la feuille de choix les liste.
+        $proposal['alternatives'] = collect($inSession)
+            ->mapWithKeys(fn (string $slug): array => [$slug => $suggestWorkout->alternatives($slug, $equipment, $inSession)])
+            ->all();
+
+        $goal = WorkoutGoal::from($request->validated('goal'));
+        $proposal['prescriptions'] = [
+            'reps' => $goal->prescription(ExerciseMode::Reps),
+            'time' => $goal->prescription(ExerciseMode::Time),
+        ];
+
         return $this->page($proposal, $request->validated());
     }
 
@@ -46,7 +62,13 @@ class WorkoutAssistantController extends Controller
     {
         return Inertia::render('Workouts/Assistant', [
             'proposal' => $proposal,
-            'exercises' => $proposal === null ? [] : ExerciseCatalog::forClient(array_column($proposal['items'], 'exercise')),
+            'exercises' => $proposal === null ? [] : ExerciseCatalog::forClient([
+                ...array_column($proposal['items'], 'exercise'),
+                ...array_merge(...array_values($proposal['alternatives'] ?? [[]])),
+            ]),
+            // Toute la bibliothèque, chargée seulement quand on veut choisir soi-même un remplaçant.
+            'library' => Inertia::optional(fn (): array => ExerciseCatalog::forClient()),
+            'groups' => ExerciseCatalog::groups(),
             'input' => [
                 'muscles' => array_values(array_filter((array) ($input['muscles'] ?? []), fn ($muscle): bool => Muscle::tryFrom((string) $muscle) !== null)),
                 'minutes' => (int) ($input['minutes'] ?? 45),

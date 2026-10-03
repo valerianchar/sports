@@ -137,6 +137,44 @@ class SuggestWorkoutTest extends TestCase
         }
     }
 
+    public function test_alternatives_work_the_same_muscles(): void
+    {
+        $alternatives = app(SuggestWorkout::class)->alternatives('developpe-couche', exclude: ['pompes']);
+
+        $this->assertNotEmpty($alternatives);
+        $this->assertNotContains('developpe-couche', $alternatives);
+        $this->assertNotContains('pompes', $alternatives);
+
+        foreach ($alternatives as $slug) {
+            $this->assertContains('chest', ExerciseCatalog::find($slug)['primary'], $slug);
+        }
+
+        // Les classiques d'abord : le haut de la liste n'est pas une variante exotique.
+        $this->assertContains($alternatives[0], ['developpe-incline-halteres', 'developpe-couche-smith', 'chest-press', 'presse-pectorale-convergente', 'developpe-incline-machine', 'dips-pectoraux', 'ecarte-halteres']);
+    }
+
+    public function test_alternatives_keep_the_equipment_choice(): void
+    {
+        foreach (app(SuggestWorkout::class)->alternatives('leg-extension', EquipmentKind::Machine) as $slug) {
+            $this->assertSame(EquipmentKind::Machine, ExerciseCatalog::equipment($slug)->kind(), $slug);
+        }
+    }
+
+    public function test_a_warmup_is_replaced_by_cardio_and_a_stretch_by_a_stretch(): void
+    {
+        $suggest = app(SuggestWorkout::class);
+
+        foreach ($suggest->alternatives('velo') as $slug) {
+            $this->assertSame('cardio', ExerciseCatalog::find($slug)['group'], $slug);
+        }
+
+        $stretch = ExerciseCatalog::all()->first(fn (array $e): bool => str_starts_with($e['slug'], 'etirement-'));
+
+        foreach ($suggest->alternatives($stretch['slug']) as $slug) {
+            $this->assertSame('mobilite', ExerciseCatalog::find($slug)['group'], $slug);
+        }
+    }
+
     public function test_the_name_tells_what_and_how_long(): void
     {
         $this->assertSame('Dos · Bras — 45 min', $this->suggest([Muscle::UpperBack, Muscle::Biceps])['name']);

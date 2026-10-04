@@ -17,6 +17,7 @@ const props = defineProps({
     exercises: { type: Array, required: true },
     input: { type: Object, required: true },
     goals: { type: Array, required: true },
+    styles: { type: Array, required: true },
     equipments: { type: Array, required: true },
     groups: { type: Array, required: true },
     library: { type: Array, default: null },
@@ -49,6 +50,18 @@ const choosable = regions.flatMap((region) => region.muscles);
 
 const goalDefaults = (goal) => props.goals.find((g) => g.value === goal).prescription;
 
+/*
+ * Trois façons de s'entraîner : la musculation (on choisit les muscles et
+ * l'objectif de charge), la perte de poids (un circuit, muscles facultatifs)
+ * et le cardio (ni muscles ni séries : des blocs sur les machines).
+ */
+const kinds = [
+    { value: 'muscu', label: 'Muscu', description: 'Force, volume ou endurance' },
+    { value: 'perte-de-poids', label: 'Perte de poids', description: props.goals.find((g) => g.value === 'perte-de-poids').description },
+    { value: 'cardio', label: 'Cardio', description: props.goals.find((g) => g.value === 'cardio').description },
+];
+const strengthGoals = props.goals.filter((goal) => goal.strength);
+
 const form = reactive({
     muscles: props.input.muscles.filter((muscle) => choosable.includes(muscle)),
     minutes: props.input.minutes,
@@ -59,6 +72,7 @@ const form = reactive({
     rest_sets: props.input.rest_sets ?? goalDefaults(props.input.goal).rest_sets,
     rest_after: props.input.rest_after ?? goalDefaults(props.input.goal).rest_after,
     equipment: props.input.equipment ?? '',
+    style: props.input.style,
     warmup: props.input.warmup,
     stretch: props.input.stretch,
 });
@@ -91,6 +105,41 @@ function chooseGoal(goal) {
     Object.assign(form, { goal, reps: defaults.value, rest_sets: defaults.rest_sets, rest_after: defaults.rest_after });
 }
 
+const kind = computed(() => (strengthGoals.some((goal) => goal.value === form.goal) ? 'muscu' : form.goal));
+// L'objectif de musculation choisi en dernier, retrouvé quand on revient à la muscu.
+let lastStrengthGoal = kind.value === 'muscu' ? form.goal : 'volume';
+
+function chooseKind(value) {
+    if (value === kind.value) {
+        return;
+    }
+
+    if (kind.value === 'muscu') {
+        lastStrengthGoal = form.goal;
+    }
+
+    chooseGoal(value === 'muscu' ? lastStrengthGoal : value);
+
+    // Le cardio n'a pas de matériel « charges libres » : on repart de « Tout ».
+    if (value === 'cardio' && form.equipment === 'free') {
+        form.equipment = '';
+    }
+}
+
+const isCardio = computed(() => kind.value === 'cardio');
+const needsMuscles = computed(() => kind.value === 'muscu');
+const canSuggest = computed(() => !needsMuscles.value || form.muscles.length > 0);
+
+const equipmentChoices = computed(() =>
+    isCardio.value
+        ? [
+              { value: '', label: 'Tout' },
+              { value: 'machine', label: 'Machines cardio' },
+              { value: 'bodyweight', label: 'Sans machine' },
+          ]
+        : [{ value: '', label: 'Tout' }, ...props.equipments],
+);
+
 const restStep = (value, direction) => clamp(stepRest(value, direction), 0, 600);
 
 /*
@@ -100,7 +149,8 @@ const restStep = (value, direction) => clamp(stepRest(value, direction), 0, 600)
 const expected = computed(() => {
     const sets = form.sets ?? goalDefaults(form.goal).sets;
     const perExercise = sets * form.reps * page.props.seconds_per_rep + (sets - 1) * form.rest_sets + form.rest_after;
-    const reserved = (form.warmup ? 360 : 0) + (form.stretch ? 180 : 0);
+    const finisher = kind.value === 'perte-de-poids' ? (form.minutes < 25 ? 240 : form.minutes < 40 ? 480 : 600) + 90 : 0;
+    const reserved = (form.warmup ? 360 : 0) + (form.stretch ? 180 : 0) + finisher;
 
     return clamp(Math.round((form.minutes * 60 - reserved) / Math.max(60, perExercise)), 2, form.sets ? 16 : 12);
 });
@@ -110,19 +160,26 @@ function setMinutes(value) {
 }
 
 function suggest(variant = 0) {
+    // Le cardio se compose en blocs : ni muscles, ni séries, ni répétitions.
+    const strength = isCardio.value
+        ? { style: form.style }
+        : {
+              muscles: form.muscles,
+              warmup: form.warmup ? 1 : 0,
+              reps: form.reps,
+              sets: form.sets ?? undefined,
+              rest_sets: form.rest_sets,
+              rest_after: form.rest_after,
+          };
+
     router.get(
         routes.assistantSuggest,
         {
-            muscles: form.muscles,
             minutes: form.minutes,
             goal: form.goal,
             equipment: form.equipment || undefined,
-            warmup: form.warmup ? 1 : 0,
             stretch: form.stretch ? 1 : 0,
-            reps: form.reps,
-            sets: form.sets ?? undefined,
-            rest_sets: form.rest_sets,
-            rest_after: form.rest_after,
+            ...strength,
             variant,
         },
         {
@@ -256,6 +313,11 @@ const proposalSummary = computed(() => (props.proposal ? summary(items.value, pa
 
 const prescription = (item) => {
     const effort = item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value);
+
+    // Un bloc de cardio d'une traite : sa durée suffit.
+    if (item.sets === 1) {
+        return effort;
+    }
     const rest = item.sets > 1 && item.rest_sets ? ` · repos ${formatShort(item.rest_sets)}` : '';
 
     return `${item.sets} × ${effort}${rest}`;
@@ -280,9 +342,30 @@ const prescription = (item) => {
                 Dis ce que tu veux travailler et le temps que tu as : je propose une séance que tu pourras retoucher.
             </p>
 
-            <section class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
+            <section class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
+                <h2 class="display text-[22px] font-bold">Type de séance</h2>
+                <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Type de séance">
+                    <button
+                        v-for="choice in kinds"
+                        :key="choice.value"
+                        type="button"
+                        role="radio"
+                        :aria-checked="kind === choice.value"
+                        class="flex flex-col items-start gap-1 rounded-2xl p-3 text-left"
+                        :class="kind === choice.value ? 'bg-accent text-on-accent' : 'bg-surface-2 text-text'"
+                        @click="chooseKind(choice.value)"
+                    >
+                        <span class="font-display text-[19px] leading-[0.95] font-extrabold uppercase">{{ choice.label }}</span>
+                        <span class="text-[11.5px] leading-tight font-semibold" :class="kind === choice.value ? 'text-on-accent/75' : 'text-text-muted'">
+                            {{ choice.description }}
+                        </span>
+                    </button>
+                </div>
+            </section>
+
+            <section v-if="!isCardio" class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
                 <div class="flex items-baseline justify-between">
-                    <h2 class="display text-[22px] font-bold">Muscles</h2>
+                    <h2 class="display text-[22px] font-bold">Muscles<span v-if="!needsMuscles" class="ml-2 font-sans text-[13px] font-bold text-text-muted normal-case">facultatif</span></h2>
                     <button v-if="form.muscles.length" type="button" class="text-[13px] font-bold text-text-muted" @click="form.muscles = []">
                         Effacer
                     </button>
@@ -303,7 +386,9 @@ const prescription = (item) => {
                 </div>
 
                 <BodyMap :intensity="intensity" :height="240" interactive label="" @toggle="toggle" />
-                <p class="-mt-2 text-center text-[12px] font-semibold text-text-faint">Touche un muscle pour le choisir</p>
+                <p class="-mt-2 text-center text-[12px] font-semibold text-text-faint">
+                    {{ needsMuscles || form.muscles.length ? 'Touche un muscle pour le choisir' : 'Sans choix, la séance fait travailler tout le corps' }}
+                </p>
 
                 <div v-for="region in regions" :key="region.label" class="flex flex-col gap-2">
                     <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">{{ region.label }}</span>
@@ -345,11 +430,11 @@ const prescription = (item) => {
                 </div>
             </section>
 
-            <section class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
+            <section v-if="kind === 'muscu'" class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
                 <h2 class="display text-[22px] font-bold">Objectif</h2>
                 <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Objectif">
                     <button
-                        v-for="goal in props.goals"
+                        v-for="goal in strengthGoals"
                         :key="goal.value"
                         type="button"
                         role="radio"
@@ -366,7 +451,31 @@ const prescription = (item) => {
                 </div>
             </section>
 
-            <section class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
+            <section v-if="isCardio" class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
+                <h2 class="display text-[22px] font-bold">Format</h2>
+                <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Format du cardio">
+                    <button
+                        v-for="style in props.styles"
+                        :key="style.value"
+                        type="button"
+                        role="radio"
+                        :aria-checked="form.style === style.value"
+                        class="flex flex-col items-start gap-1 rounded-2xl p-3 text-left"
+                        :class="form.style === style.value ? 'bg-accent text-on-accent' : 'bg-surface-2 text-text'"
+                        @click="form.style = style.value"
+                    >
+                        <span class="font-display text-[19px] leading-none font-extrabold uppercase">{{ style.label }}</span>
+                        <span class="text-[11.5px] leading-tight font-semibold" :class="form.style === style.value ? 'text-on-accent/75' : 'text-text-muted'">
+                            {{ style.description }}
+                        </span>
+                    </button>
+                </div>
+                <p class="text-[12.5px] font-medium text-text-muted">
+                    Échauffement et retour au calme compris. Le fractionné alterne efforts et récupération : 30 s / 30 s, 40 s / 20 s, Tabata…
+                </p>
+            </section>
+
+            <section v-else class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
                 <div class="flex items-baseline justify-between gap-3">
                     <h2 class="display text-[22px] font-bold">Séries et repos</h2>
                     <span class="text-[12px] font-bold text-accent" aria-live="polite">jusqu’à {{ expected }} exercices</span>
@@ -423,6 +532,7 @@ const prescription = (item) => {
                     <template v-else>
                         Moins de repos, plus d'exercices dans le même temps. En « Auto », les séries s'ajustent pour tenir {{ form.minutes }} min.
                     </template>
+                    <template v-if="kind === 'perte-de-poids'"> La séance finit par un bloc de fractionné.</template>
                 </p>
             </section>
 
@@ -430,7 +540,7 @@ const prescription = (item) => {
                 <h2 class="display text-[22px] font-bold">Matériel</h2>
                 <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Matériel">
                     <button
-                        v-for="choice in [{ value: '', label: 'Tout' }, ...props.equipments]"
+                        v-for="choice in equipmentChoices"
                         :key="choice.value"
                         type="button"
                         role="radio"
@@ -448,7 +558,7 @@ const prescription = (item) => {
                 <label v-for="option in [
                     { key: 'warmup', title: 'Échauffement', text: '5 minutes de cardio pour commencer' },
                     { key: 'stretch', title: 'Étirements', text: 'Deux étirements des muscles travaillés à la fin' },
-                ]" :key="option.key" class="flex cursor-pointer items-center justify-between gap-4">
+                ].filter((o) => !isCardio || o.key !== 'warmup')" :key="option.key" class="flex cursor-pointer items-center justify-between gap-4">
                     <span class="flex flex-col gap-0.5">
                         <span class="text-[15px] font-bold">{{ option.title }}</span>
                         <span class="text-[12.5px] font-medium text-text-muted">{{ option.text }}</span>
@@ -518,8 +628,8 @@ const prescription = (item) => {
 
         <div class="bottom-bar flex flex-col gap-2">
             <template v-if="editing">
-                <button type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="!form.muscles.length || loading" @click="suggest()">
-                    {{ form.muscles.length ? 'Proposer une séance' : 'Choisis des muscles' }}
+                <button type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="!canSuggest || loading" @click="suggest()">
+                    {{ canSuggest ? 'Proposer une séance' : 'Choisis des muscles' }}
                 </button>
             </template>
             <template v-else>

@@ -251,6 +251,7 @@ function finish(at) {
         planned_sets: plannedSets,
     }).then((response) => {
         records.value = response?.records ?? [];
+        kcal.value = response?.kcal ?? null;
     });
 }
 
@@ -283,6 +284,8 @@ const sessionTonnage = computed(() => state.performed.reduce((total, set) => tot
 
 // Fin de séance : records battus (réponse du serveur) et difficulté ressentie.
 const records = ref(null);
+// Calories estimées par le serveur, au poids de la dernière pesée.
+const kcal = ref(null);
 const rpe = ref(null);
 
 function rate(value) {
@@ -826,6 +829,9 @@ onUnmounted(() => {
                     <div class="mt-1.5 text-[11px] font-bold text-text-muted">{{ stat.label }}</div>
                 </div>
             </div>
+            <p v-if="kcal" class="-mt-3 mb-6 text-center text-[13px] font-semibold text-text-muted">
+                ≈ <span class="font-bold text-text">{{ kcal.toLocaleString('fr-FR') }} kcal</span> dépensées (estimation)
+            </p>
             <button type="button" class="btn-accent h-[58px] text-[22px]" @click="quit">Retour aux séances</button>
         </div>
 

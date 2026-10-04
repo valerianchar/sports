@@ -8,6 +8,7 @@ use App\Enums\Muscle;
 use App\Enums\MuscleGroup;
 use App\Enums\WorkoutGoal;
 use App\Support\ExerciseCatalog;
+use App\Support\Stretches;
 use App\Support\WorkoutEstimate;
 use Illuminate\Support\Collection;
 use Random\Engine\Mt19937;
@@ -24,6 +25,10 @@ use Random\Randomizer;
  * coller au chrono. Une petite part de hasard, réglée par `variant`, donne une
  * autre proposition à chaque fois qu'on la demande — et la même pour la même
  * variante.
+ *
+ * Pour perdre du poids, la séance prend aussi les mouvements fonctionnels,
+ * préfère ceux qui mettent beaucoup de muscles en jeu, et garde la fin pour un
+ * bloc de fractionné (voir SuggestCardio).
  */
 final class SuggestWorkout
 {
@@ -33,6 +38,9 @@ final class SuggestWorkout
     private const WARMUP_EXERCISES = ['velo', 'rameur', 'elliptique', 'marche-inclinee'];
 
     private const MAX_SETS = 5;
+
+    /** Sans muscles choisis, une séance de perte de poids fait travailler tout le corps. */
+    public const FULL_BODY = ['chest', 'upper-back', 'front-deltoids', 'quadriceps', 'hamstring', 'gluteal', 'abs'];
 
     /**
      * Les classiques d'une salle : la base de la première version du catalogue
@@ -70,6 +78,10 @@ final class SuggestWorkout
 
     private Randomizer $random;
 
+    private WorkoutGoal $goal = WorkoutGoal::Hypertrophy;
+
+    public function __construct(private readonly SuggestCardio $cardio) {}
+
     /** @var array{reps?: int, sets?: int, rest_sets?: int, rest_after?: int} réglages choisis à la place de ceux de l'objectif */
     private array $settings = [];
 
@@ -90,20 +102,24 @@ final class SuggestWorkout
         array $settings = [],
     ): array {
         $this->random = new Randomizer(new Mt19937($variant));
+        $this->goal = $goal;
         $this->settings = array_filter($settings, fn ($value): bool => $value !== null);
         $targets = array_map(fn (Muscle $muscle): string => $muscle->value, $muscles);
+        $chosenMuscles = $targets !== [];
+        $targets = $chosenMuscles || $goal !== WorkoutGoal::WeightLoss ? $targets : self::FULL_BODY;
         $budget = $minutes * 60;
 
         $opening = $warmup ? [$this->warmup()] : [];
-        $closing = $stretch ? $this->stretches($targets) : [];
-        $reserved = WorkoutEstimate::seconds([...$opening, ...$closing]);
+        $closing = $stretch ? Stretches::pick($targets, $this->random) : [];
+        $finisher = $goal === WorkoutGoal::WeightLoss ? [$this->cardio->finisher($this->finisherSeconds($minutes), $equipment, $this->random, array_column($opening, 'exercise'))] : [];
+        $reserved = WorkoutEstimate::seconds([...$opening, ...$finisher, ...$closing]) + ($finisher === [] ? 0 : $finisher[0]['rest_after']);
 
         $main = $this->pick($targets, $budget - $reserved, $goal, $equipment);
         $main = $this->fill($main, $budget - $reserved, $goal);
-        $items = [...$opening, ...$this->order($main), ...$closing];
+        $items = [...$opening, ...$this->order($main), ...$finisher, ...$closing];
 
         return [
-            'name' => $this->name($targets, $minutes),
+            'name' => $this->name($chosenMuscles ? $targets : [], $minutes),
             'items' => array_map(fn (array $item): array => array_diff_key($item, ['_score' => true]), $items),
             'seconds' => WorkoutEstimate::seconds($items),
         ];
@@ -122,6 +138,10 @@ final class SuggestWorkout
     {
         $original = ExerciseCatalog::find($slug);
         $group = MuscleGroup::from($original['group']);
+        // Un cardio se remplace par n'importe quel autre, pourvu qu'il se mesure pareil
+        // (un effort de 30 s ne devient pas 30 burpees) ; ses machines comptent comme machines.
+        $cardio = $group === MuscleGroup::Cardio;
+        $equipment = $cardio && $equipment !== EquipmentKind::Bodyweight && $equipment !== null ? EquipmentKind::Conditioning : $equipment;
         $sameFamily = fn (array $exercise): bool => in_array($group, self::EXCLUDED_GROUPS, true)
             ? $exercise['group'] === $group->value
             : ! in_array(MuscleGroup::from($exercise['group']), self::EXCLUDED_GROUPS, true);
@@ -129,7 +149,9 @@ final class SuggestWorkout
         $candidates = ExerciseCatalog::all()
             ->except([$slug, ...$exclude])
             ->filter($sameFamily)
-            ->filter(fn (array $exercise): bool => array_intersect($exercise['primary'], $original['primary']) !== []);
+            ->filter(fn (array $exercise): bool => $cardio
+                ? $exercise['mode'] === $original['mode']
+                : array_intersect($exercise['primary'], $original['primary']) !== []);
 
         if ($equipment !== null) {
             $kept = $candidates->filter(fn (array $exercise): bool => ExerciseCatalog::equipment($exercise['slug'])->kind() === $equipment);
@@ -197,7 +219,14 @@ final class SuggestWorkout
         $limit = max(2, min($ceiling, max(count($targets), (int) round($budget / max(60, $perExercise)))));
 
         while ($pool->isNotEmpty() && count($chosen) < $limit) {
-            $best = $pool
+            // Plus que les places qu'il faut pour les muscles qui attendent encore : on les sert d'abord.
+            $waiting = array_diff($targets, $served);
+            $candidates = count($waiting) >= $limit - count($chosen)
+                ? $pool->filter(fn (array $exercise): bool => array_intersect($exercise['primary'], $waiting) !== [])
+                : $pool;
+            $candidates = $candidates->isEmpty() ? $pool : $candidates;
+
+            $best = $candidates
                 ->map(fn (array $exercise): array => [$exercise, $this->score($exercise, $targets, $coverage, $chosen, $equipment)])
                 // Séries fixées : seul le nombre d'exercices remplit le temps, on accepte
                 // alors les variantes moins bien classées plutôt qu'une séance trop courte.
@@ -263,8 +292,10 @@ final class SuggestWorkout
      */
     private function pool(array $targets, ?EquipmentKind $equipment): Collection
     {
+        // Pour perdre du poids, les mouvements fonctionnels (thruster, wall ball…) sont les bienvenus.
+        $excluded = $this->goal === WorkoutGoal::WeightLoss ? [MuscleGroup::Cardio, MuscleGroup::Mobilite] : self::EXCLUDED_GROUPS;
         $usable = ExerciseCatalog::all()
-            ->reject(fn (array $exercise): bool => in_array(MuscleGroup::from($exercise['group']), self::EXCLUDED_GROUPS, true))
+            ->reject(fn (array $exercise): bool => in_array(MuscleGroup::from($exercise['group']), $excluded, true))
             ->filter(fn (array $exercise): bool => array_intersect($exercise['primary'], $targets) !== []);
 
         if ($equipment === null) {
@@ -322,6 +353,11 @@ final class SuggestWorkout
 
         if (in_array($exercise['slug'], self::ADVANCED, true)) {
             $gain -= 0.7;
+        }
+
+        // Pour perdre du poids, un mouvement qui met tout le corps en jeu dépense davantage.
+        if ($this->goal === WorkoutGoal::WeightLoss) {
+            $gain += 0.04 * min(6, $this->regions($exercise)) + ($exercise['group'] === MuscleGroup::Fonctionnel->value ? 0.15 : 0);
         }
 
         // Au poids du corps, les accessoires sont justement ce qu'on cherche.
@@ -488,6 +524,18 @@ final class SuggestWorkout
     }
 
     /**
+     * La part du finisher : un Tabata pour une séance éclair, dix minutes au plus.
+     */
+    private function finisherSeconds(int $minutes): int
+    {
+        return match (true) {
+            $minutes < 25 => 240,
+            $minutes < 40 => 480,
+            default => 600,
+        };
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function warmup(): array
@@ -498,27 +546,8 @@ final class SuggestWorkout
     }
 
     /**
-     * Deux étirements des muscles travaillés, tenus 30 secondes, deux fois.
-     *
-     * @param  list<string>  $targets
-     * @return list<array<string, mixed>>
-     */
-    private function stretches(array $targets): array
-    {
-        return ExerciseCatalog::all()
-            ->filter(fn (array $exercise): bool => $exercise['group'] === MuscleGroup::Mobilite->value
-                && str_starts_with($exercise['slug'], 'etirement-')
-                && array_intersect($exercise['primary'], $targets) !== [])
-            ->sortByDesc(fn (array $exercise): float => count(array_intersect($exercise['primary'], $targets)) + $this->random->getFloat(0, 0.5))
-            ->take(2)
-            ->map(fn (array $exercise): array => ['exercise' => $exercise['slug'], 'mode' => 'time', 'value' => 30, 'sets' => 2, 'rest_sets' => 10, 'rest_after' => 15])
-            ->values()
-            ->all();
-    }
-
-    /**
      * « Dos · Bras — 45 min » : les groupes de la bibliothèque, dans l'ordre des
-     * muscles choisis.
+     * muscles choisis ; « Perte de poids · Full body — 45 min » sans muscles.
      *
      * @param  list<string>  $targets
      */
@@ -535,6 +564,10 @@ final class SuggestWorkout
         }, $targets)));
 
         $title = count($groups) > 3 ? implode(' · ', array_slice($groups, 0, 3)).'…' : implode(' · ', $groups);
+
+        if ($this->goal === WorkoutGoal::WeightLoss) {
+            $title = 'Perte de poids · '.($groups === [] ? 'Full body' : $title);
+        }
 
         return "{$title} — {$minutes} min";
     }

@@ -8,6 +8,7 @@ export const routes = {
     progress: '/progres',
     progressExercise: (slug) => `/progres/exercices/${slug}`,
     bodyWeights: '/progres/poids',
+    targetWeight: '/progres/objectif-poids',
     newWorkout: '/seances/nouvelle',
     assistant: '/seances/assistant',
     assistantSuggest: '/seances/assistant/proposition',

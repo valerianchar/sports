@@ -36,6 +36,8 @@ export const formatKg = (kg, digits = 1) => (kg === null || kg === undefined ? '
 
 export const formatNumber = number;
 
+export const formatKcal = (kcal) => `${number(kcal, 0)} kcal`;
+
 /** « 60 × 8 » ; « 45 s » au chrono ; « PdC × 12 » au poids du corps. */
 export function formatSet(set) {
     if (set.reps === null || set.reps === undefined) {

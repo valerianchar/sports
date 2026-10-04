@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import BarChart from './charts/BarChart.vue';
 import StatTile from './charts/StatTile.vue';
-import { formatDelta, formatMinutesLong, formatTonnage } from '../format';
+import { formatDelta, formatKg, formatMinutesLong, formatNumber, formatTonnage } from '../format';
 import { routes } from '../routes';
 
 /**
@@ -15,6 +15,31 @@ const props = defineProps({
 });
 
 const week = computed(() => props.kpis.week);
+const body = computed(() => props.kpis.body);
+
+// Sans aucune charge soulevée (que du cardio), le graphique montre les minutes de cardio.
+const chart = computed(() =>
+    props.kpis.tonnage_weeks.some((w) => w.value > 0) || !props.kpis.cardio_weeks.some((w) => w.value > 0)
+        ? { title: 'Tonnage par semaine', label: 'Tonnage soulevé par semaine, 8 dernières semaines', data: props.kpis.tonnage_weeks, format: formatTonnage }
+        : { title: 'Cardio par semaine', label: 'Minutes de cardio par semaine, 8 dernières semaines', data: props.kpis.cardio_weeks, format: (v) => `${formatNumber(v)} min` },
+);
+
+// Le poids : ce qui reste jusqu'à l'objectif s'il y en a un, sinon l'évolution du mois.
+const bodyHint = computed(() => {
+    if (body.value.latest === null) {
+        return 'à noter';
+    }
+
+    if (body.value.to_go !== null) {
+        if (Math.abs(body.value.to_go) < 0.1) {
+            return 'objectif atteint';
+        }
+
+        return `encore ${formatNumber(Math.abs(body.value.to_go), 1)} kg`;
+    }
+
+    return body.value.change_30d === null ? 'dernière pesée' : `${body.value.change_30d > 0 ? '+' : ''}${formatNumber(body.value.change_30d, 1)} kg / 30 j`;
+});
 const record = computed(() => props.kpis.latest_record);
 const recordText = computed(() => {
     if (!record.value) {
@@ -64,9 +89,17 @@ const recordText = computed(() => {
                 <StatTile label="Records" :value="String(props.kpis.records_30d)" hint="sur 30 jours" />
             </div>
 
+            <div class="grid grid-cols-3 gap-2">
+                <StatTile label="Cardio" :value="formatMinutesLong(week.cardio_minutes)" :hint="week.cardio_minutes ? 'cette semaine' : 'pas encore'" />
+                <StatTile label="Calories" :value="formatNumber(week.kcal)" :hint="body.latest === null ? 'kcal, estim. à 75 kg' : 'kcal estimées'" />
+                <Link :href="`${routes.progress}?vue=corps`" class="flex min-w-0 rounded-[18px] text-text">
+                    <StatTile class="w-full" label="Poids" :value="body.latest === null ? '—' : formatKg(body.latest)" :hint="bodyHint" />
+                </Link>
+            </div>
+
             <div class="rounded-[22px] bg-surface px-3 pt-3 pb-1">
-                <span class="px-1 text-[11px] font-bold text-text-muted">Tonnage par semaine</span>
-                <BarChart :data="props.kpis.tonnage_weeks" label="Tonnage soulevé par semaine, 8 dernières semaines" :format="formatTonnage" :height="96" :axis="false" />
+                <span class="px-1 text-[11px] font-bold text-text-muted">{{ chart.title }}</span>
+                <BarChart :data="chart.data" :label="chart.label" :format="chart.format" :height="96" :axis="false" />
             </div>
 
             <p v-if="recordText" class="flex items-start gap-2 rounded-2xl bg-surface px-4 py-3 text-[13px] font-semibold">

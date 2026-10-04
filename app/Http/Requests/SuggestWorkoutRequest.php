@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\CardioStyle;
 use App\Enums\EquipmentKind;
 use App\Enums\Muscle;
 use App\Enums\WorkoutGoal;
@@ -16,11 +17,13 @@ class SuggestWorkoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'muscles' => ['required', 'array', 'min:1', 'max:17'],
+            // Le cardio s'en passe ; pour perdre du poids, sans choix, c'est tout le corps.
+            'muscles' => ['required_unless:goal,perte-de-poids,cardio', 'array', 'max:17'],
             'muscles.*' => ['distinct', Rule::enum(Muscle::class)],
             'minutes' => ['required', 'integer', 'min:10', 'max:150'],
             'goal' => ['required', Rule::enum(WorkoutGoal::class)],
             'equipment' => ['nullable', Rule::enum(EquipmentKind::class)->only([EquipmentKind::Machine, EquipmentKind::Free, EquipmentKind::Bodyweight])],
+            'style' => ['nullable', Rule::enum(CardioStyle::class)],
             'warmup' => ['boolean'],
             'stretch' => ['boolean'],
             'variant' => ['integer', 'min:0', 'max:1000000'],
@@ -39,8 +42,7 @@ class SuggestWorkoutRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'muscles.required' => 'Choisis au moins un muscle à travailler.',
-            'muscles.min' => 'Choisis au moins un muscle à travailler.',
+            'muscles.required_unless' => 'Choisis au moins un muscle à travailler.',
             'minutes.min' => 'Une séance dure au moins 10 minutes.',
             'minutes.max' => 'Une séance dure au plus 2 h 30.',
             'reps.max' => 'Au plus 50 répétitions par série.',
@@ -68,6 +70,6 @@ class SuggestWorkoutRequest extends FormRequest
      */
     public function muscles(): array
     {
-        return array_map(fn (string $muscle): Muscle => Muscle::from($muscle), $this->validated('muscles'));
+        return array_map(fn (string $muscle): Muscle => Muscle::from($muscle), $this->validated('muscles') ?? []);
     }
 }

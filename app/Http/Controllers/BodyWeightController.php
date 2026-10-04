@@ -9,7 +9,8 @@ use Illuminate\Http\Request;
 /**
  * Le poids de corps, noté de temps en temps : une pesée par jour au plus, la
  * dernière saisie du jour l'emporte. Il donne la force relative des grands
- * mouvements (développé couché à 1,1 fois son poids…).
+ * mouvements (développé couché à 1,1 fois son poids…), les calories des
+ * séances, et la distance au poids visé.
  */
 class BodyWeightController extends Controller
 {
@@ -36,6 +37,23 @@ class BodyWeightController extends Controller
         }
 
         return back()->with('success', 'Pesée enregistrée.');
+    }
+
+    /**
+     * Le poids visé : vide, on l'oublie.
+     */
+    public function target(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'kg' => ['nullable', 'numeric', 'min:25', 'max:300'],
+        ], [
+            'kg.min' => 'Le poids visé, en kilos : au moins 25.',
+            'kg.max' => 'Le poids visé, en kilos : au plus 300.',
+        ]);
+
+        $request->user()->update(['target_weight' => isset($data['kg']) ? round((float) $data['kg'], 1) : null]);
+
+        return back()->with('success', isset($data['kg']) ? 'Objectif enregistré.' : 'Objectif retiré.');
     }
 
     public function destroy(Request $request, BodyWeight $bodyWeight): RedirectResponse

@@ -20,8 +20,41 @@ class WorkoutAssistantTest extends TestCase
                 ->where('proposal', null)
                 ->where('input.minutes', 45)
                 ->where('input.goal', 'volume')
-                ->has('goals', 3)
+                ->has('goals', 5)
+                ->where('goals.3.value', 'perte-de-poids')
+                ->where('goals.4.value', 'cardio')
+                ->where('goals.4.strength', false)
+                ->where('input.style', 'mixte')
+                ->has('styles', 3)
                 ->has('equipments', 3));
+    }
+
+    public function test_a_cardio_session_needs_no_muscles(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/seances/assistant/proposition?'.http_build_query(['minutes' => 30, 'goal' => 'cardio', 'style' => 'fractionne']))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('proposal.name', 'Cardio fractionné — 30 min')
+                ->where('input.style', 'fractionne')
+                ->has('proposal.alternatives'));
+    }
+
+    public function test_losing_weight_without_choosing_muscles_works_the_whole_body(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/seances/assistant/proposition?'.http_build_query(['minutes' => 45, 'goal' => 'perte-de-poids']))
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('proposal.name', 'Perte de poids · Full body — 45 min')
+                ->where('proposal.prescriptions.reps.value', 15));
+    }
+
+    public function test_an_unknown_cardio_style_is_refused(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->get('/seances/assistant/proposition?minutes=30&goal=cardio&style=sieste')
+            ->assertSessionHasErrors('style');
     }
 
     public function test_it_proposes_a_session(): void

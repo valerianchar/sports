@@ -35,6 +35,11 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   suivant, qui travaille les mêmes muscles) ou se choisit parmi les équivalents classés, voire
   dans toute la bibliothèque. On la lance tout de suite, on l'enregistre ou on la retouche dans
   l'éditeur. Le choix vit dans `app/Actions/SuggestWorkout.php`.
+  Deux autres types de séance : **perte de poids** (muscles facultatifs, tout le corps sinon ;
+  15 répétitions, repos courts, mouvements complets et fonctionnels, puis un bloc de fractionné
+  en finisher) et **cardio** (ni muscles ni séries : échauffement, blocs continus ou fractionnés
+  — 30/30, 40/20, Tabata, 1 min/1 min… — sur les machines ou au poids du corps, retour au calme ;
+  `app/Actions/SuggestCardio.php`).
 - **Éditeur** — nom, exercices dans l'ordre, et pour chacun : charge en kilos (pas de 1 kg
   sous 10 kg puis de 2,5 kg, ou saisie libre) — fixe ou une par série (dégressif, pyramide ;
   « Dégressif auto » baisse de 10 % par série) —, drop set (jusqu'à quatre paliers enchaînés
@@ -56,7 +61,9 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   1RM estimé (Epley) et sa courbe, la tendance sur 4 semaines, les records, l'historique et la
   charge conseillée (surcharge progressive) ; par muscle, les séries de la semaine face au
   repère de 10 à 20, l'évolution de la force et les équilibres poussée/tirage, haut/bas,
-  quadriceps/ischios ; côté corps, le poids et la force relative des grands mouvements. Le
+  quadriceps/ischios ; côté corps, le poids, le poids visé et la force relative des grands
+  mouvements. Le cardio a ses minutes par semaine, et chaque séance ses calories estimées en MET
+  (`app/Support/Energy.php`, au poids de la dernière pesée, 75 kg à défaut). Le
   lecteur rappelle la dernière fois, propose la charge conseillée et annonce les records battus.
 - **Réglages** — bips et vibrations, bips avant la fin d'un repos (3, 5 ou 10 s, le dernier plus aigu
   pour annoncer la reprise), volume des bips avec un bouton « Tester », durée du compte à

@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/progres', [ProgressController::class, 'index'])->name('progress.index');
     Route::get('/progres/exercices/{exercise}', [ProgressController::class, 'exercise'])->name('progress.exercise');
     Route::post('/progres/poids', [BodyWeightController::class, 'store'])->name('body-weights.store');
+    Route::patch('/progres/objectif-poids', [BodyWeightController::class, 'target'])->name('body-weights.target');
     Route::delete('/progres/poids/{bodyWeight}', [BodyWeightController::class, 'destroy'])->name('body-weights.destroy');
 
     Route::put('/reglages', [PreferencesController::class, 'update'])->name('preferences.update');

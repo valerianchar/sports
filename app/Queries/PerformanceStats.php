@@ -7,6 +7,7 @@ use App\Models\BodyWeight;
 use App\Models\SetLog;
 use App\Models\User;
 use App\Models\WorkoutLog;
+use App\Support\Energy;
 use App\Support\ExerciseCatalog;
 use App\Support\Strength;
 use Carbon\CarbonImmutable;
@@ -50,6 +51,12 @@ final class PerformanceStats
     /** @var Collection<int, SetLog>|null */
     private ?Collection $sets = null;
 
+    /** @var Collection<int, BodyWeight>|null */
+    private ?Collection $weights = null;
+
+    /** @var array<int, array{kcal: int, cardio: int}>|null calories et secondes de cardio, par séance */
+    private ?array $energy = null;
+
     private CarbonImmutable $now;
 
     public function __construct(private readonly User $user)
@@ -86,11 +93,16 @@ final class PerformanceStats
                 // ne se mesure pas à une semaine complète.
                 'tonnage_delta' => $this->delta($current['tonnage'], $this->tonnageBetween($lastWeek, $this->now->subWeek())),
                 'sessions_last_week' => $previous['sessions'],
+                'cardio_minutes' => $current['cardio_minutes'],
+                'kcal' => $current['kcal'],
+                'kcal_last_week' => $previous['kcal'],
             ],
+            'body' => $this->bodySummary(),
             'streak' => $this->streak(),
             'records_30d' => count($recent),
             'latest_record' => $recent === [] ? null : $this->presentRecord(end($recent)),
             'tonnage_weeks' => array_map(fn (array $w): array => ['label' => $w['label'], 'value' => $w['tonnage']], $weeks),
+            'cardio_weeks' => array_map(fn (array $w): array => ['label' => $w['label'], 'value' => $w['cardio_minutes']], $weeks),
             'neglected' => $this->neglected(),
             'total_sessions' => $this->logs()->count(),
             'week_start' => $thisWeek->toDateString(),
@@ -122,6 +134,8 @@ final class PerformanceStats
                 'records' => count($this->recordEvents()),
                 'average_minutes' => $logs->isEmpty() ? 0 : (int) round($logs->avg('duration_seconds') / 60),
                 'average_rpe' => $rated->isEmpty() ? null : round($rated->avg('rpe'), 1),
+                'cardio_minutes' => (int) round(array_sum(array_column($this->energy(), 'cardio')) / 60),
+                'kcal' => array_sum(array_column($this->energy(), 'kcal')),
             ],
             'records' => array_map($this->presentRecord(...), array_slice(array_reverse($this->recordEvents()), 0, 8)),
         ];
@@ -308,9 +322,8 @@ final class PerformanceStats
      */
     public function body(): array
     {
-        $weights = $this->user->bodyWeights()->orderBy('measured_on')->get();
+        $weights = $this->weights();
         $latest = $weights->last();
-        $monthAgo = $weights->filter(fn (BodyWeight $w): bool => $w->measured_on->lte($this->now->subDays(30)))->last();
 
         $lifts = collect(self::BIG_LIFTS)->map(function (string $slug) use ($latest): ?array {
             $best = $this->sets()->where('exercise', $slug)->max('e1rm');
@@ -338,13 +351,76 @@ final class PerformanceStats
                 'label' => $w->measured_on->translatedFormat('j M'),
                 'value' => $w->kg,
             ])->values()->all(),
-            'latest' => $latest?->kg,
-            'change_30d' => $latest && $monthAgo ? round($latest->kg - $monthAgo->kg, 1) : null,
+            ...$this->bodySummary(),
             'lifts' => $lifts,
         ];
     }
 
+    /**
+     * Le poids en bref : la dernière pesée, l'évolution sur 30 jours, et ce
+     * qui reste jusqu'au poids visé.
+     *
+     * @return array{latest: float|null, change_30d: float|null, target: float|null, to_go: float|null}
+     */
+    private function bodySummary(): array
+    {
+        $weights = $this->weights();
+        $latest = $weights->last();
+        $monthAgo = $weights->filter(fn (BodyWeight $w): bool => $w->measured_on->lte($this->now->subDays(30)))->last();
+        $target = $this->user->target_weight;
+
+        return [
+            'latest' => $latest?->kg,
+            'change_30d' => $latest && $monthAgo ? round($latest->kg - $monthAgo->kg, 1) : null,
+            'target' => $target,
+            'to_go' => $latest && $target ? round($latest->kg - $target, 1) : null,
+        ];
+    }
+
     // ------------------------------------------------------------------ outils
+
+    /** @return Collection<int, BodyWeight> */
+    private function weights(): Collection
+    {
+        return $this->weights ??= $this->user->bodyWeights()->orderBy('measured_on')->get();
+    }
+
+    /**
+     * Calories estimées et secondes de cardio de chaque séance complète. Le
+     * poids est celui de la dernière pesée avant la séance — ou de la première
+     * après, ou 75 kg tant qu'on ne s'est jamais pesé.
+     *
+     * @return array<int, array{kcal: int, cardio: int}>
+     */
+    private function energy(): array
+    {
+        if ($this->energy !== null) {
+            return $this->energy;
+        }
+
+        $sets = $this->sets()->groupBy('workout_log_id');
+        $this->energy = [];
+
+        foreach ($this->logs() as $log) {
+            $efforts = $sets->get($log->id, collect())
+                ->map(fn (SetLog $s): array => ['exercise' => $s->exercise, 'seconds' => $s->seconds]);
+
+            $this->energy[$log->id] = [
+                'kcal' => Energy::kcal($log->duration_seconds, $efforts, $this->weightOn($log->finished_at->toImmutable())),
+                'cardio' => (int) $efforts->filter(fn (array $e): bool => Energy::isCardio($e['exercise']))->sum('seconds'),
+            ];
+        }
+
+        return $this->energy;
+    }
+
+    private function weightOn(CarbonImmutable $day): float
+    {
+        $weights = $this->weights();
+        $before = $weights->filter(fn (BodyWeight $w): bool => $w->measured_on->lte($day))->last();
+
+        return (float) (($before ?? $weights->first())?->kg ?? Energy::DEFAULT_WEIGHT);
+    }
 
     /** @return Collection<int, WorkoutLog> */
     private function logs(): Collection
@@ -398,6 +474,7 @@ final class PerformanceStats
             $weekSets = $sets->get($key, collect());
             $rated = $weekLogs->whereNotNull('rpe');
             $minutes = (int) round($weekLogs->sum('duration_seconds') / 60);
+            $energy = array_intersect_key($this->energy(), array_flip($weekLogs->pluck('id')->all()));
 
             $weeks[] = [
                 'start' => $key,
@@ -409,6 +486,8 @@ final class PerformanceStats
                 'rpe' => $rated->isEmpty() ? null : round($rated->avg('rpe'), 1),
                 // Charge d'entraînement : difficulté ressentie × minutes (méthode Foster).
                 'load' => (int) round($rated->sum(fn (WorkoutLog $l): float => $l->rpe * $l->duration_seconds / 60)),
+                'cardio_minutes' => (int) round(array_sum(array_column($energy, 'cardio')) / 60),
+                'kcal' => array_sum(array_column($energy, 'kcal')),
             ];
         }
 

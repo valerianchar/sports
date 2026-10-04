@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\SuggestCardio;
 use App\Actions\SuggestWorkout;
+use App\Enums\CardioStyle;
 use App\Enums\EquipmentKind;
 use App\Enums\ExerciseMode;
 use App\Enums\Muscle;
@@ -24,20 +26,30 @@ class WorkoutAssistantController extends Controller
         return $this->page(null, $request->query());
     }
 
-    public function suggest(SuggestWorkoutRequest $request, SuggestWorkout $suggestWorkout): Response
+    public function suggest(SuggestWorkoutRequest $request, SuggestWorkout $suggestWorkout, SuggestCardio $suggestCardio): Response
     {
-        $proposal = $suggestWorkout->handle(
-            muscles: $request->muscles(),
-            minutes: $request->integer('minutes'),
-            goal: WorkoutGoal::from($request->validated('goal')),
-            equipment: EquipmentKind::tryFrom((string) $request->validated('equipment')),
-            warmup: $request->boolean('warmup'),
-            stretch: $request->boolean('stretch'),
-            variant: $request->integer('variant'),
-            settings: $request->settings(),
-        );
-
+        $goal = WorkoutGoal::from($request->validated('goal'));
         $equipment = EquipmentKind::tryFrom((string) $request->validated('equipment'));
+
+        $proposal = $goal === WorkoutGoal::Cardio
+            ? $suggestCardio->handle(
+                minutes: $request->integer('minutes'),
+                style: CardioStyle::tryFrom((string) $request->validated('style')) ?? CardioStyle::Mixed,
+                equipment: $equipment,
+                stretch: $request->boolean('stretch'),
+                variant: $request->integer('variant'),
+            )
+            : $suggestWorkout->handle(
+                muscles: $request->muscles(),
+                minutes: $request->integer('minutes'),
+                goal: $goal,
+                equipment: $equipment,
+                warmup: $request->boolean('warmup'),
+                stretch: $request->boolean('stretch'),
+                variant: $request->integer('variant'),
+                settings: $request->settings(),
+            );
+
         $inSession = array_column($proposal['items'], 'exercise');
 
         // Pour chaque exercice proposé, ses remplaçants classés : le bouton « changer »
@@ -46,7 +58,6 @@ class WorkoutAssistantController extends Controller
             ->mapWithKeys(fn (string $slug): array => [$slug => $suggestWorkout->alternatives($slug, $equipment, $inSession)])
             ->all();
 
-        $goal = WorkoutGoal::from($request->validated('goal'));
         $proposal['prescriptions'] = [
             'reps' => $suggestWorkout->prescribe($goal, ExerciseMode::Reps, array_filter($request->settings(), fn ($v): bool => $v !== null)),
             'time' => $suggestWorkout->prescribe($goal, ExerciseMode::Time, array_filter($request->settings(), fn ($v): bool => $v !== null)),
@@ -75,6 +86,7 @@ class WorkoutAssistantController extends Controller
                 'minutes' => (int) ($input['minutes'] ?? 45),
                 'goal' => WorkoutGoal::tryFrom((string) ($input['goal'] ?? ''))?->value ?? WorkoutGoal::Hypertrophy->value,
                 'equipment' => EquipmentKind::tryFrom((string) ($input['equipment'] ?? ''))?->value,
+                'style' => CardioStyle::tryFrom((string) ($input['style'] ?? ''))?->value ?? CardioStyle::Mixed->value,
                 'warmup' => filter_var($input['warmup'] ?? false, FILTER_VALIDATE_BOOL),
                 'stretch' => filter_var($input['stretch'] ?? false, FILTER_VALIDATE_BOOL),
                 'variant' => (int) ($input['variant'] ?? 0),
@@ -87,9 +99,15 @@ class WorkoutAssistantController extends Controller
                 'value' => $goal->value,
                 'label' => $goal->label(),
                 'description' => $goal->description(),
+                'strength' => $goal->isStrengthTraining(),
                 // Les réglages par défaut de l'objectif, que le formulaire préremplit.
                 'prescription' => $goal->prescription(ExerciseMode::Reps),
             ], WorkoutGoal::cases()),
+            'styles' => array_map(fn (CardioStyle $style): array => [
+                'value' => $style->value,
+                'label' => $style->label(),
+                'description' => $style->description(),
+            ], CardioStyle::cases()),
             'equipments' => array_map(fn (EquipmentKind $kind): array => [
                 'value' => $kind->value,
                 'label' => $kind->label(),

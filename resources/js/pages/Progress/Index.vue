@@ -7,7 +7,7 @@ import BarChart from '../../components/charts/BarChart.vue';
 import CalendarHeat from '../../components/charts/CalendarHeat.vue';
 import LineChart from '../../components/charts/LineChart.vue';
 import StatTile from '../../components/charts/StatTile.vue';
-import { formatDelta, formatKg, formatMinutesLong, formatNumber, formatSet, formatTonnage } from '../../format';
+import { formatDelta, formatKcal, formatKg, formatMinutesLong, formatNumber, formatSet, formatTonnage } from '../../format';
 import { routes } from '../../routes';
 
 const props = defineProps({
@@ -83,6 +83,31 @@ function weigh() {
         .post(routes.bodyWeights, { preserveScroll: true, preserveState: true, only: ['body'] });
 }
 
+// Corps : le poids visé, facultatif — vide, on l'oublie.
+const goal = useForm({ kg: props.body.target ? String(props.body.target).replace('.', ',') : '' });
+
+function saveGoal() {
+    goal.transform((data) => ({ kg: data.kg === '' ? null : String(data.kg).replace(',', '.') })).patch(routes.targetWeight, {
+        preserveScroll: true,
+        preserveState: true,
+        only: ['body'],
+    });
+}
+
+const toGoText = computed(() => {
+    const toGo = props.body.to_go;
+
+    if (toGo === null) {
+        return null;
+    }
+
+    if (Math.abs(toGo) < 0.1) {
+        return 'atteint !';
+    }
+
+    return toGo > 0 ? 'à perdre' : 'à prendre';
+});
+
 const removeWeighing = (entry) => router.delete(`${routes.bodyWeights}/${entry.id}`, { preserveScroll: true, preserveState: true, only: ['body'] });
 
 const trendTone = (trend) => (trend === 'up' ? 'text-accent' : trend === 'down' ? 'text-prep' : 'text-text-soft');
@@ -121,6 +146,8 @@ const trendWord = { up: 'monte', keep: 'garde', down: 'allège' };
                 <StatTile label="Temps d'entraînement" :value="formatMinutesLong(totals.minutes)" :hint="`${totals.average_minutes} min en moyenne`" />
                 <StatTile label="Tonnage total" :value="formatTonnage(totals.tonnage)" :hint="`${formatNumber(totals.reps)} répétitions`" />
                 <StatTile label="Séries" :value="formatNumber(totals.sets)" :hint="`${totals.records} record${totals.records > 1 ? 's' : ''} battu${totals.records > 1 ? 's' : ''}`" />
+                <StatTile label="Cardio" :value="formatMinutesLong(totals.cardio_minutes)" hint="d'effort cardio" />
+                <StatTile label="Calories" :value="formatKcal(totals.kcal)" :hint="body.latest === null ? 'estimées à 75 kg' : 'estimées'" />
             </div>
 
             <section class="rounded-[22px] bg-surface p-4">
@@ -132,6 +159,20 @@ const trendWord = { up: 'monte', keep: 'garde', down: 'allège' };
                 <h2 class="mb-1 text-[15px] font-bold">Tonnage par semaine</h2>
                 <p class="mb-1 text-[12px] font-medium text-text-muted">Charge × répétitions, toutes séries confondues.</p>
                 <BarChart :data="weeks.map((w) => ({ label: w.label, value: w.tonnage }))" label="Tonnage par semaine, 12 dernières semaines" :format="formatTonnage" />
+            </section>
+
+            <section class="rounded-[22px] bg-surface p-4">
+                <h2 class="mb-1 text-[15px] font-bold">Cardio par semaine</h2>
+                <p class="mb-1 text-[12px] font-medium text-text-muted">Minutes d'effort sur les exercices de cardio, échauffements compris.</p>
+                <BarChart :data="weeks.map((w) => ({ label: w.label, value: w.cardio_minutes }))" label="Minutes de cardio par semaine, 12 dernières semaines" :format="(v) => `${formatNumber(v)} min`" />
+            </section>
+
+            <section class="rounded-[22px] bg-surface p-4">
+                <h2 class="mb-1 text-[15px] font-bold">Calories par semaine</h2>
+                <p class="mb-1 text-[12px] font-medium text-text-muted">
+                    Estimées d'après la durée, le type d'effort et ton poids<template v-if="body.latest === null"> (75 kg tant que tu ne t'es pas pesé)</template> : une tendance, pas un compte au gramme.
+                </p>
+                <BarChart :data="weeks.map((w) => ({ label: w.label, value: w.kcal }))" label="Calories estimées par semaine, 12 dernières semaines" :format="(v) => formatNumber(v)" />
             </section>
 
             <section class="rounded-[22px] bg-surface p-4">
@@ -284,7 +325,33 @@ const trendWord = { up: 'monte', keep: 'garde', down: 'allège' };
                     :value="body.change_30d === null ? '—' : `${body.change_30d > 0 ? '+' : ''}${formatNumber(body.change_30d, 1)} kg`"
                     hint="d'écart"
                 />
+                <template v-if="body.target">
+                    <StatTile label="Poids visé" :value="formatKg(body.target)" />
+                    <StatTile label="Reste" :value="toGoText === 'atteint !' ? '0 kg' : formatKg(Math.abs(body.to_go))" :hint="toGoText" />
+                </template>
             </div>
+
+            <form class="flex flex-col gap-3 rounded-[22px] bg-surface p-4" @submit.prevent="saveGoal">
+                <div>
+                    <h2 class="text-[15px] font-bold">Poids visé</h2>
+                    <p class="text-[12px] font-medium text-text-muted">Pour suivre une perte (ou une prise) de poids. Laisse vide pour t'en passer.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="flex flex-1 items-baseline gap-2 rounded-2xl bg-bg px-4 py-2.5">
+                        <input
+                            v-model="goal.kg"
+                            type="text"
+                            inputmode="decimal"
+                            placeholder="70"
+                            aria-label="Poids visé en kilos"
+                            class="w-full min-w-0 border-0 bg-transparent p-0 font-display text-[30px] font-bold text-text outline-none placeholder:text-text-faint"
+                        />
+                        <span class="font-display text-[18px] font-bold text-text-muted">kg</span>
+                    </label>
+                    <button type="submit" class="btn-soft h-14 px-5 text-[16px]" :disabled="goal.processing">Enregistrer</button>
+                </div>
+                <p v-if="goal.errors.kg" class="text-[13px] text-danger">{{ goal.errors.kg }}</p>
+            </form>
 
             <section v-if="body.chart.length > 1" class="rounded-[22px] bg-surface p-4">
                 <h2 class="mb-1 text-[15px] font-bold">Poids de corps</h2>

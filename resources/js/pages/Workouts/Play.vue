@@ -605,7 +605,7 @@ function blockEnd(at) {
  * le nouvel exercice démarre aussitôt — pendant un repos ou le compte à
  * rebours, ceux-ci continuent et y mènent.
  */
-function rearrange(order, { restart = false } = {}) {
+function rearrange(order, { restart = false, redo = null } = {}) {
     const at = state.index;
     const current = state.steps[at];
 
@@ -629,7 +629,14 @@ function rearrange(order, { restart = false } = {}) {
         return;
     }
 
-    let future = upcoming(order, countPassed(state.steps.slice(0, at)));
+    const passed = countPassed(state.steps.slice(0, at));
+
+    // Un exercice sauté qu'on reprend : seules ses séries vraiment faites comptent.
+    if (redo !== null) {
+        passed[redo] = performedByItem.value[redo] ?? 0;
+    }
+
+    let future = upcoming(order, passed);
 
     if (future.length && (current.kind === 'rest' || current.kind === 'prep')) {
         const left = Math.max(1, Math.ceil(remaining.value / 1000));
@@ -684,6 +691,63 @@ function shift(position, direction) {
 }
 
 const programOpen = ref(false);
+
+/*
+ * Ce qui est fait et ce qui reste, exercice par exercice : d'après les séries
+ * réellement validées (pas l'ordre de passage), pour que l'état reste juste
+ * quand l'ordre change ou qu'on saute un exercice.
+ */
+const performedByItem = computed(() => {
+    const counts = {};
+
+    for (const set of state.performed) {
+        if (set.drop === null) {
+            counts[set.position] = (counts[set.position] ?? 0) + 1;
+        }
+    }
+
+    return counts;
+});
+
+/** fait, en cours, commencé, sauté (passé sans être fait) ou à faire. */
+function statusOf(index) {
+    const done = performedByItem.value[index] ?? 0;
+
+    if (done >= items[index].sets) {
+        return 'done';
+    }
+
+    if (step.value && step.value.item === index) {
+        return 'current';
+    }
+
+    if (program.value.done.includes(index)) {
+        return 'skipped';
+    }
+
+    return done > 0 ? 'partial' : 'todo';
+}
+
+const STATUS_LABELS = { done: 'fait', current: 'en cours', partial: 'commencé', skipped: 'sauté', todo: 'à faire' };
+
+/** Un segment par exercice, dans l'ordre où la séance se joue. */
+const strip = computed(() =>
+    [...program.value.done, ...program.value.ahead].map((index) => ({
+        index,
+        status: statusOf(index),
+        progress: Math.min(1, (performedByItem.value[index] ?? 0) / items[index].sets),
+    })),
+);
+
+const doneCount = computed(() => strip.value.filter((segment) => segment.status === 'done').length);
+const leftCount = computed(() => items.length - doneCount.value);
+
+/** Reprendre maintenant un exercice sauté ou laissé en route. */
+function redo(index) {
+    rearrange([index, ...program.value.ahead.filter((other) => other !== index)], { redo: index });
+    programOpen.value = false;
+    toast(`On reprend : ${catalog[items[index].exercise].name}`);
+}
 
 function toast(message) {
     document.dispatchEvent(new CustomEvent('seance:toast', { detail: { message, error: false } }));
@@ -787,7 +851,6 @@ const seconds = computed(() => Math.ceil(remaining.value / 1000));
 const elapsed = computed(() => formatClock((state.elapsedBase + (state.paused ? 0 : now.value - state.startAt)) / 1000));
 const setLabel = computed(() => (item.value ? `Série ${step.value.set} / ${item.value.sets}` : ''));
 const counter = computed(() => (step.value ? `Exercice ${Math.min(items.length, program.value.done.length + 1)} / ${items.length}` : ''));
-const progress = computed(() => `${((state.index / state.steps.length) * 100).toFixed(1)}%`);
 
 const nextLabel = computed(() => {
     const upcoming = state.steps.findIndex((s, index) => index > state.index && s.kind === 'work');
@@ -875,9 +938,32 @@ onUnmounted(() => {
                     {{ formatClock(activeMilliseconds / 1000) }}
                 </span>
             </div>
-            <div class="mx-5 h-1 overflow-hidden rounded-sm bg-surface-2" role="progressbar" :aria-valuenow="state.index" :aria-valuemax="state.steps.length">
-                <div class="h-full rounded-sm bg-text transition-[width] duration-300" :style="{ width: progress }" />
-            </div>
+            <!-- Un segment par exercice : fait (plein), en cours, commencé, sauté (orange), à faire. -->
+            <button
+                type="button"
+                class="mx-5 flex h-3 items-center gap-[2px]"
+                :aria-label="`${doneCount} exercice${doneCount > 1 ? 's' : ''} fait${doneCount > 1 ? 's' : ''} sur ${items.length} : voir le programme`"
+                @click="programOpen = true"
+            >
+                <span
+                    v-for="segment in strip"
+                    :key="segment.index"
+                    class="relative h-1.5 min-w-[3px] flex-1 overflow-hidden rounded-full"
+                    :class="{
+                        'bg-accent': segment.status === 'done',
+                        'bg-text/30': segment.status === 'current',
+                        'bg-prep': segment.status === 'skipped',
+                        'bg-surface-3': segment.status === 'partial' || segment.status === 'todo',
+                    }"
+                    :data-status="segment.status"
+                >
+                    <span
+                        v-if="segment.status === 'current' || segment.status === 'partial'"
+                        class="absolute inset-y-0 left-0 bg-accent transition-[width] duration-300"
+                        :style="{ width: `${segment.progress * 100}%` }"
+                    />
+                </span>
+            </button>
 
             <main class="flex min-h-0 flex-1 flex-col items-center justify-center gap-1.5 px-6 py-3 text-center">
                 <!-- Compte à rebours de départ -->
@@ -1141,6 +1227,13 @@ onUnmounted(() => {
             title="Programme"
             description="Machine prise ? Passe un exercice plus tard, fais-en un autre maintenant, ou prends une variante. Les étirements restent pour la fin."
         >
+            <p class="-mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12.5px] font-bold text-text-soft">
+                <span><span class="text-accent">{{ doneCount }}</span> fait{{ doneCount > 1 ? 's' : '' }} · {{ leftCount }} restant{{ leftCount > 1 ? 's' : '' }}</span>
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-text-muted"><span class="size-2 rounded-full bg-accent" />fait</span>
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-text-muted"><span class="size-2 rounded-full bg-prep" />sauté</span>
+                <span class="flex items-center gap-1 text-[11px] font-semibold text-text-muted"><span class="size-2 rounded-full bg-surface-3" />à faire</span>
+            </p>
+
             <template v-if="program.ahead.length">
                 <div class="flex flex-col gap-2.5 rounded-2xl border-[1.5px] border-accent bg-accent/8 p-3">
                     <div class="flex items-center gap-3">
@@ -1169,7 +1262,7 @@ onUnmounted(() => {
                         </div>
                         <div class="flex items-center gap-1.5 pl-8">
                             <span class="min-w-0 flex-1 truncate text-[11.5px] font-medium text-text-muted">
-                                {{ items[index].sets - (program.passed[index] ?? 0) }} série{{ items[index].sets - (program.passed[index] ?? 0) > 1 ? 's' : '' }} · {{ targetLabel(items[index]) }}<template v-if="itemSettings(index)"> · {{ itemSettings(index) }}</template>
+                                <template v-if="statusOf(index) === 'partial'"><span class="font-bold text-prep">commencé {{ performedByItem[index] }}/{{ items[index].sets }}</span> · </template>{{ items[index].sets - (program.passed[index] ?? 0) }} série{{ items[index].sets - (program.passed[index] ?? 0) > 1 ? 's' : '' }} · {{ targetLabel(items[index]) }}<template v-if="itemSettings(index)"> · {{ itemSettings(index) }}</template>
                             </span>
                             <button type="button" class="iconbtn size-9 bg-surface-2! text-text-soft disabled:opacity-30" :aria-label="`Monter ${catalog[items[index].exercise].name}`" :disabled="position === 0" @click="shift(position + 1, -1)">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6" /></svg>
@@ -1185,10 +1278,27 @@ onUnmounted(() => {
                 </ol>
             </template>
 
-            <p v-if="program.done.length" class="text-[12.5px] font-medium text-text-muted">
-                <span class="font-extrabold text-text-soft">Déjà fait ✓</span>
-                {{ program.done.map((index) => catalog[items[index].exercise].name).join(' · ') }}
-            </p>
+            <section v-if="program.done.length" class="flex flex-col gap-2" aria-label="Exercices passés">
+                <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Passés</span>
+                <ul class="flex flex-col gap-1.5">
+                    <li v-for="index in program.done" :key="index" class="flex items-center gap-2.5 rounded-2xl bg-surface px-3 py-2" :data-status="statusOf(index)">
+                        <span
+                            class="flex size-6 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold"
+                            :class="statusOf(index) === 'done' ? 'bg-accent text-on-accent' : 'bg-prep text-on-accent'"
+                            aria-hidden="true"
+                        >{{ statusOf(index) === 'done' ? '✓' : '!' }}</span>
+                        <span class="flex min-w-0 flex-1 flex-col">
+                            <span data-name class="text-[13.5px] leading-tight font-bold" :class="statusOf(index) === 'done' ? 'text-text-soft' : 'text-text'">{{ catalog[items[index].exercise].name }}</span>
+                            <span class="text-[11.5px] font-semibold" :class="statusOf(index) === 'done' ? 'text-text-muted' : 'text-prep'">
+                                {{ statusOf(index) === 'done' ? 'Fait' : (performedByItem[index] ? 'Commencé' : 'Sauté') }} · {{ performedByItem[index] ?? 0 }}/{{ items[index].sets }} séries
+                            </span>
+                        </span>
+                        <button v-if="statusOf(index) !== 'done'" type="button" class="h-9 shrink-0 rounded-full bg-surface-2 px-3.5 text-[12.5px] font-extrabold text-accent" @click="redo(index)">
+                            Reprendre
+                        </button>
+                    </li>
+                </ul>
+            </section>
         </BottomSheet>
 
         <BottomSheet

@@ -30,13 +30,33 @@ const machines = computed(() =>
 
 const stats = computed(() => `${props.exercises.length} exercices · ${machines.value.length} machines et équipements`);
 
+// Clé de recherche : sans accents, sans casse, sans espaces ni ponctuation — « leg press »,
+// « Leg-Press » et « legpress » se valent, comme « Pec Fly / Rear Delt » et « pec fly rear delt ».
+const searchKey = (text) => normalize(text).replace(/[^a-z0-9]/g, '');
+
+/**
+ * L'exercice répond-il à la recherche ? Par son nom ou sa machine d'abord ; sinon par un de ses
+ * autres noms (ce qui est écrit sur la machine, un surnom de salle), qu'on renvoie pour l'afficher.
+ */
+function match(exercise, q) {
+    if (!q || searchKey(`${exercise.name} ${exercise.equipment_label}`).includes(q)) {
+        return { found: true, aka: null };
+    }
+
+    const aka = (exercise.aka ?? []).find((name) => searchKey(name).includes(q));
+
+    return { found: Boolean(aka), aka: aka ?? null };
+}
+
 const sections = computed(() => {
-    const q = normalize(query.value.trim());
-    const list = props.exercises.filter(
-        (e) =>
-            (group.value === 'all' || e.group === group.value) &&
-            (!q || normalize(`${e.name} ${e.equipment_label}`).includes(q)),
-    );
+    const q = searchKey(query.value.trim());
+    const list = props.exercises
+        .filter((e) => group.value === 'all' || e.group === group.value)
+        .map((e) => ({ exercise: e, ...match(e, q) }))
+        .filter((hit) => hit.found)
+        // Dans chaque section, ceux qui répondent par leur propre nom passent devant ceux trouvés par un autre nom.
+        .sort((a, b) => (q ? Number(Boolean(a.aka)) - Number(Boolean(b.aka)) : 0))
+        .map((hit) => ({ ...hit.exercise, matchedAka: hit.aka }));
     const order = byMuscle.value ? props.groups : machines.value;
     const key = byMuscle.value ? 'group' : 'equipment';
 
@@ -133,6 +153,9 @@ const chips = computed(() => [{ value: 'all', label: 'Tous' }, ...props.groups])
                             <span class="text-[15px] font-bold">{{ exercise.name }}</span>
                             <span class="text-[12.5px] font-medium text-text-muted">
                                 {{ byMuscle ? exercise.equipment_label : exercise.group_label }}
+                            </span>
+                            <span v-if="exercise.matchedAka" class="truncate text-[12px] font-medium text-text-faint italic">
+                                aussi appelé « {{ exercise.matchedAka }} »
                             </span>
                         </span>
 

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Enums\Equipment;
+use App\Enums\EquipmentKind;
 use App\Enums\ExerciseMode;
 use App\Enums\Muscle;
 use App\Enums\MuscleGroup;
@@ -68,6 +69,79 @@ class ExerciseCatalogTest extends TestCase
             "Crédit d'image inattendu : {$exercise['credit']}",
         );
         $this->assertGreaterThanOrEqual(3, count($exercise['steps']), 'Une fiche compte au moins trois étapes.');
+
+        // Les autres noms (plaques des machines, surnoms) : une liste de libellés, sans doublon.
+        $this->assertIsList($exercise['aka']);
+        $this->assertSame(array_unique($exercise['aka']), $exercise['aka']);
+
+        foreach ($exercise['aka'] as $alias) {
+            $this->assertIsString($alias);
+            $this->assertNotSame('', trim($alias));
+        }
+    }
+
+    /**
+     * Les machines photographiées en salle (plaques Matrix) se retrouvent par le
+     * nom écrit dessus — dans le nom de la fiche ou dans ses autres noms.
+     */
+    public function test_the_machines_of_the_gym_are_findable_by_their_plate(): void
+    {
+        $plates = [
+            'Calf Press' => 'presse-a-mollets',
+            'Seated Leg Curl' => 'leg-curl-assis',
+            'Hip Abduction' => 'abducteurs',
+            'Hip Adduction' => 'adducteurs',
+            'Prone Leg Curl' => 'leg-curl',
+            'Converging Chest Press' => 'presse-pectorale-convergente',
+            'Diverging Lat Pulldown' => 'tirage-vertical-divergent',
+            'Diverging Seated Row' => 'rowing-machine',
+            'Pectoral Fly / Rear Delt' => 'oiseau-inverse',
+            'Dip/Chin Assist' => 'tractions-assistees',
+            'Rotary Torso' => 'rotation-du-buste-machine',
+            'Abdominal Crunch' => 'crunch-machine',
+            'Triceps Press' => 'dips-machine',
+            'Kneeling Leg Curl' => 'leg-curl-debout',
+        ];
+
+        foreach ($plates as $plate => $slug) {
+            $exercise = ExerciseCatalog::find($slug);
+            $names = array_map(mb_strtolower(...), [$exercise['name'], ...$exercise['aka']]);
+
+            $this->assertNotEmpty(
+                array_filter($names, fn (string $name): bool => str_contains($name, mb_strtolower($plate))),
+                "{$plate} → {$slug}",
+            );
+        }
+    }
+
+    public function test_the_machines_added_from_the_gym_are_complete(): void
+    {
+        $added = [
+            'presse-a-mollets' => Equipment::CalfPress,
+            'reverse-hyper' => Equipment::ReverseHyper,
+            'shrugs-machine-iso-laterale' => Equipment::ShrugMachine,
+            'fentes-machine' => Equipment::SquatLunge,
+            'hip-thrust-debout-machine' => Equipment::HipThrustMachine,
+        ];
+
+        foreach ($added as $slug => $equipment) {
+            $this->assertSame($equipment, ExerciseCatalog::equipment($slug), $slug);
+            $this->assertSame(EquipmentKind::Machine, $equipment->kind(), $slug);
+            $this->assertNotEmpty(ExerciseCatalog::find($slug)['aka'], $slug);
+        }
+
+        // La presse à mollets est une machine à part, pas les mollets à la presse à cuisses.
+        $this->assertNotSame(ExerciseCatalog::equipment('mollets-presse'), ExerciseCatalog::equipment('presse-a-mollets'));
+        $this->assertSame(['calves'], ExerciseCatalog::find('presse-a-mollets')['primary']);
+    }
+
+    public function test_every_equipment_is_used(): void
+    {
+        $used = ExerciseCatalog::all()->pluck('equipment')->unique();
+
+        foreach (Equipment::cases() as $equipment) {
+            $this->assertContains($equipment->value, $used, $equipment->label());
+        }
     }
 
     #[DataProvider('slugs')]
@@ -83,7 +157,7 @@ class ExerciseCatalogTest extends TestCase
 
     public function test_cardio_defaults_to_one_long_set(): void
     {
-        $this->assertSame(['exercise' => 'rameur', 'mode' => 'time', 'value' => 300, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => 60], WorkoutDefaults::for('rameur'));
+        $this->assertSame(['exercise' => 'rameur', 'mode' => 'time', 'value' => 300, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => 60, 'level' => 5], WorkoutDefaults::for('rameur'));
         $this->assertSame(10, WorkoutDefaults::for('squat')['value']);
         $this->assertSame(30, WorkoutDefaults::for('gainage-planche')['value']);
     }

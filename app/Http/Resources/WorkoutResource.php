@@ -28,6 +28,9 @@ class WorkoutResource extends JsonResource
                 'set_weights' => $item->set_weights,
                 'drops' => $item->drops,
                 'drop_on' => $item->drop_on,
+                'speed' => $item->speed,
+                'incline' => $item->incline,
+                'level' => $item->level,
                 'sets' => $item->sets,
                 'rest_sets' => $item->rest_sets,
                 'rest_after' => $item->rest_after,
@@ -41,6 +44,7 @@ class WorkoutResource extends JsonResource
                 'log' => route('workouts.logs.store', $this->resource),
                 'feeling' => url('/journal/__client__/ressenti'),
                 'weight' => route('workouts.weight.update', $this->resource),
+                'settings' => route('workouts.settings.update', $this->resource),
             ],
         ];
     }

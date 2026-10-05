@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Actions\SaveWorkout;
+use App\Actions\SuggestWorkout;
 use App\Http\Requests\SaveWorkoutRequest;
 use App\Http\Resources\WorkoutResource;
 use App\Models\Workout;
@@ -75,7 +76,7 @@ class WorkoutController extends Controller
      * Le lecteur : tout se joue ensuite dans le navigateur, minuteurs compris.
      * Une séance vide n'a rien à lancer — on la renvoie à l'éditeur.
      */
-    public function play(Request $request, Workout $workout): Response|RedirectResponse
+    public function play(Request $request, Workout $workout, SuggestWorkout $suggestWorkout): Response|RedirectResponse
     {
         Gate::authorize('view', $workout);
 
@@ -85,9 +86,16 @@ class WorkoutController extends Controller
             return redirect()->route('workouts.edit', $workout)->with('error', 'Ajoute un exercice avant de lancer la séance.');
         }
 
+        $slugs = $workout->items->pluck('exercise')->all();
+        // Les variantes de chaque exercice, prêtes hors réseau : la machine est prise, on en change sur place.
+        $alternatives = collect($slugs)->unique()
+            ->mapWithKeys(fn (string $slug): array => [$slug => $suggestWorkout->alternatives($slug, exclude: $slugs)])
+            ->all();
+
         return Inertia::render('Workouts/Play', [
             'workout' => new WorkoutResource($workout),
-            'exercises' => ExerciseCatalog::forClient($workout->items->pluck('exercise')),
+            'exercises' => ExerciseCatalog::forClient([...$slugs, ...array_merge([], ...array_values($alternatives))]),
+            'alternatives' => $alternatives,
             // La dernière fois sur chaque exercice, et la charge conseillée cette fois-ci.
             'history' => (new PerformanceStats($request->user()))->lastTimes($workout->items->pluck('exercise')->unique()->values()->all()),
             'preferences' => [

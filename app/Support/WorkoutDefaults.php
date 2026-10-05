@@ -34,6 +34,7 @@ final class WorkoutDefaults
             'sets' => $values[1],
             'rest_sets' => $values[2],
             'rest_after' => $values[3],
+            ...MachineSettings::defaults($slug),
         ];
     }
 }

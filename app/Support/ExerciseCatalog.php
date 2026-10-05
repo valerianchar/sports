@@ -99,6 +99,8 @@ final class ExerciseCatalog
             'tip' => $exercise['tip'],
             'images' => self::images($exercise['slug']),
             'credit' => $exercise['credit'],
+            // Les noms écrits sur les machines (souvent en anglais) et les surnoms de salle, pour la recherche.
+            'aka' => $exercise['aka'] ?? [],
         ])->values()->all();
     }
 

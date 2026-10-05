@@ -12,6 +12,8 @@ export const routes = {
     newWorkout: '/seances/nouvelle',
     assistant: '/seances/assistant',
     assistantSuggest: '/seances/assistant/proposition',
+    assistantComplete: '/seances/assistant/completer',
+    exerciseEquivalents: (slug) => `/exercices/${slug}/equivalents`,
     workouts: '/seances',
     workout: (id) => `/seances/${id}`,
     preferences: '/reglages',

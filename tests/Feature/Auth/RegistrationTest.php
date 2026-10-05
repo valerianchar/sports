@@ -30,21 +30,15 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'marie@exemple.fr']);
     }
 
-    public function test_a_new_account_starts_with_the_three_sample_workouts(): void
+    public function test_a_new_account_starts_without_sample_workouts(): void
     {
         $this->post('/inscription', [
             'name' => 'Marie Dupont',
             'email' => 'marie@exemple.fr',
             'password' => 'motdepasse',
-        ]);
+        ])->assertSessionHas('success', "Bienvenue Marie ! L'assistant compose ta première séance.");
 
-        $user = User::query()->where('email', 'marie@exemple.fr')->sole();
-
-        $this->assertSame(
-            ['Push — haut du corps', 'Jambes', 'HIIT 20 minutes'],
-            $user->workouts()->oldest('id')->pluck('name')->all(),
-        );
-        $this->assertSame(6, $user->workouts()->first()->items()->count());
+        $this->assertSame(0, User::query()->where('email', 'marie@exemple.fr')->sole()->workouts()->count());
     }
 
     public function test_an_existing_email_is_refused(): void

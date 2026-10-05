@@ -10,6 +10,10 @@
  * principaux et secondaires, au sens de App\Enums\Muscle — et ses images :
  * position de départ puis d'arrivée, que l'application fait alterner.
  *
+ * « aka » : les autres noms sous lesquels on cherche l'exercice — ce qui est
+ * écrit sur la machine (Matrix, Hammer Strength, Technogym… en anglais) et les
+ * surnoms de salle. La recherche de la bibliothèque les parcourt aussi.
+ *
  * Images (public/images/exercices/<slug>/) : photos de free-exercise-db
  * (https://github.com/yuhonas/free-exercise-db, domaine public) ; images de wger
  * (https://wger.de) sous licence Creative Commons, créditées dans « credit » ;
@@ -35,6 +39,13 @@ return [
         'tip' => 'Ne verrouille pas complètement les coudes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Chest Press',
+            'Seated Chest Press',
+            'Multi Press',
+            'Développé couché machine',
+            'Presse pecs',
+        ],
     ],
     [
         'slug' => 'presse-pectorale-convergente',
@@ -52,6 +63,7 @@ return [
         'tip' => 'Garde les épaules basses, loin des oreilles.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Converging Chest Press', 'Chest Press convergent'],
     ],
     [
         'slug' => 'presse-pectorale-iso-laterale',
@@ -69,6 +81,15 @@ return [
         'tip' => 'Les bras sont indépendants : pousse aussi fort des deux côtés.',
         'images' => ['0.jpg'],
         'credit' => 'roneydya — CC BY-SA 4.0 (wger)',
+        'aka' => [
+            'Iso-Lateral Bench Press',
+            'Iso-Lateral Horizontal Bench Press',
+            'Iso-Lateral Chest/Back',
+            'Supine Bench Press',
+            'Vertical Bench Press',
+            'Plate-Loaded Chest Press',
+            'Hammer Strength',
+        ],
     ],
     [
         'slug' => 'presse-pectorale-unilaterale',
@@ -86,6 +107,7 @@ return [
         'tip' => 'Tiens la poignée libre ou le siège pour ne pas tourner le buste.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Independent Chest Press', 'Single Arm Chest Press'],
     ],
     [
         'slug' => 'developpe-incline-machine',
@@ -103,6 +125,7 @@ return [
         'tip' => 'Garde les coudes un peu sous les poignées, pas à 90°.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Chest Press', 'Incline Press', 'Multi Press'],
     ],
     [
         'slug' => 'developpe-incline-iso-lateral',
@@ -120,6 +143,7 @@ return [
         'tip' => 'Travaille un bras à la fois pour corriger un déséquilibre.',
         'images' => ['0.jpg'],
         'credit' => 'hans — CC BY-SA 4.0 (wger)',
+        'aka' => ['Iso-Lateral Incline Press', 'Plate-Loaded Incline Press', 'Hammer Strength'],
     ],
     [
         'slug' => 'super-incline',
@@ -137,6 +161,7 @@ return [
         'tip' => 'Plus le siège est bas, plus les épaules prennent le relais.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Iso-Lateral Super Incline Press', 'Super Incline Press', 'Hammer Strength'],
     ],
     [
         'slug' => 'wide-chest',
@@ -154,6 +179,7 @@ return [
         'tip' => 'Charge modérée : l\'amplitude en étirement prime sur le poids.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Iso-Lateral Wide Chest', 'Wide Chest Press', 'Hammer Strength'],
     ],
     [
         'slug' => 'developpe-decline-machine',
@@ -171,6 +197,7 @@ return [
         'tip' => 'Cible le bas des pectoraux, épaules moins sollicitées.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Decline Chest Press', 'Decline Press'],
     ],
     [
         'slug' => 'developpe-decline-iso-lateral',
@@ -188,6 +215,12 @@ return [
         'tip' => 'Bloque les cuisses sous les boudins pour rester stable.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [
+            'Iso-Lateral Decline Press',
+            'Vertical Decline Bench Press',
+            'Plate-Loaded Decline Press',
+            'Hammer Strength',
+        ],
     ],
     [
         'slug' => 'butterfly',
@@ -205,6 +238,14 @@ return [
         'tip' => 'Le mouvement vient des épaules, pas des coudes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Pectoral Fly',
+            'Pec Fly',
+            'Pectoral Fly / Rear Delt',
+            'Chest Fly',
+            'Decline Pec Fly',
+            'Super Fly',
+        ],
     ],
     [
         'slug' => 'ecarte-vis-a-vis',
@@ -222,6 +263,7 @@ return [
         'tip' => 'Poulies hautes = bas des pectoraux.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Crossover', 'Cable Fly', 'High to Low Cable Fly', 'Functional Trainer'],
     ],
     [
         'slug' => 'ecarte-poulie-basse',
@@ -239,6 +281,7 @@ return [
         'tip' => 'Poulies basses = haut des pectoraux.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Low to High Cable Fly', 'Low Cable Fly', 'Functional Trainer'],
     ],
     [
         'slug' => 'ecarte-poulie-milieu',
@@ -256,6 +299,7 @@ return [
         'tip' => 'Garde la poitrine sortie, les épaules en arrière.',
         'images' => ['0.jpg'],
         'credit' => 'shushu — CC BY-SA 4.0 (wger)',
+        'aka' => ['Standing Cable Fly', 'Mid Cable Fly', 'Functional Trainer'],
     ],
     [
         'slug' => 'ecarte-poulie-unilateral',
@@ -273,6 +317,7 @@ return [
         'tip' => 'Buste fixe : seul le bras bouge.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Single Arm Cable Fly', 'Functional Trainer'],
     ],
     [
         'slug' => 'ecarte-poulie-banc-plat',
@@ -290,6 +335,7 @@ return [
         'tip' => 'La poulie garde la tension en haut du mouvement, contrairement aux haltères.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Flat Bench Cable Fly', 'Lying Cable Fly'],
     ],
     [
         'slug' => 'ecarte-poulie-incline',
@@ -307,6 +353,7 @@ return [
         'tip' => 'Cible le haut des pectoraux.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Cable Fly'],
     ],
     [
         'slug' => 'developpe-poulie-debout',
@@ -324,6 +371,7 @@ return [
         'tip' => 'Gaine les abdos pour ne pas être tiré vers l\'arrière.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Standing Cable Chest Press', 'Cable Chest Press', 'Functional Trainer'],
     ],
     [
         'slug' => 'developpe-couche',
@@ -341,6 +389,7 @@ return [
         'tip' => 'Garde les poignets droits au-dessus des coudes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Bench Press', 'DC', 'Barbell Bench Press'],
     ],
     [
         'slug' => 'developpe-couche-prise-large',
@@ -358,6 +407,7 @@ return [
         'tip' => 'Amplitude plus courte mais plus d\'étirement : charge un peu moins.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Wide Grip Bench Press'],
     ],
     [
         'slug' => 'developpe-incline-barre',
@@ -375,6 +425,7 @@ return [
         'tip' => 'Un banc trop incliné transfère le travail sur les épaules.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Bench Press', 'Barbell Incline Press'],
     ],
     [
         'slug' => 'developpe-decline-barre',
@@ -392,6 +443,7 @@ return [
         'tip' => 'Fais-toi aider pour sortir et ranger la barre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Decline Bench Press'],
     ],
     [
         'slug' => 'developpe-couche-smith',
@@ -409,6 +461,7 @@ return [
         'tip' => 'Pratique pour travailler seul en sécurité.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Bench Press', 'DC Smith'],
     ],
     [
         'slug' => 'developpe-incline-smith',
@@ -426,6 +479,7 @@ return [
         'tip' => 'Règle les butées de sécurité juste au-dessus de la poitrine.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Incline Press'],
     ],
     [
         'slug' => 'developpe-decline-smith',
@@ -443,6 +497,7 @@ return [
         'tip' => 'Règle les butées de sécurité avant de commencer.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Decline Press'],
     ],
     [
         'slug' => 'developpe-couche-halteres',
@@ -460,6 +515,7 @@ return [
         'tip' => 'Pose les haltères sur les cuisses puis bascule en arrière pour te placer.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Bench Press', 'DC haltères'],
     ],
     [
         'slug' => 'developpe-incline-halteres',
@@ -477,6 +533,7 @@ return [
         'tip' => 'Un banc trop incliné transfère le travail sur les épaules.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Dumbbell Press'],
     ],
     [
         'slug' => 'developpe-decline-halteres',
@@ -494,6 +551,7 @@ return [
         'tip' => 'Monte les haltères un par un une fois les jambes calées.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Decline Dumbbell Press'],
     ],
     [
         'slug' => 'ecarte-halteres',
@@ -511,6 +569,7 @@ return [
         'tip' => 'Utilise des charges légères, l\'étirement suffit.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Fly', 'Dumbbell Flyes'],
     ],
     [
         'slug' => 'ecarte-incline-halteres',
@@ -528,6 +587,7 @@ return [
         'tip' => 'Ne descends pas les coudes sous le niveau du banc.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Dumbbell Fly'],
     ],
     [
         'slug' => 'pullover-haltere',
@@ -545,6 +605,7 @@ return [
         'tip' => 'Garde le bassin bas et descends seulement jusqu\'où tes épaules le permettent.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Pullover'],
     ],
     [
         'slug' => 'pompes',
@@ -562,6 +623,7 @@ return [
         'tip' => 'Sur les genoux pour débuter, pieds surélevés pour corser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Push-up', 'Push up'],
     ],
     [
         'slug' => 'pompes-inclinees',
@@ -579,6 +641,7 @@ return [
         'tip' => 'Plus le support est haut, plus c\'est facile : idéal pour débuter.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Push-up'],
     ],
     [
         'slug' => 'pompes-declinees',
@@ -596,6 +659,7 @@ return [
         'tip' => 'Cible le haut des pectoraux ; plus les pieds sont hauts, plus c\'est dur.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Decline Push-up'],
     ],
     [
         'slug' => 'pompes-prise-large',
@@ -613,6 +677,7 @@ return [
         'tip' => 'N\'écarte pas trop : les épaules doivent rester confortables.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Wide Push-up'],
     ],
     [
         'slug' => 'pompes-explosives',
@@ -630,6 +695,7 @@ return [
         'tip' => 'Qualité avant quantité : arrête dès que tu perds l\'explosivité.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Plyo Push-up', 'Clap Push-up'],
     ],
     [
         'slug' => 'pompes-trx',
@@ -647,6 +713,7 @@ return [
         'tip' => 'Plus tes pieds sont loin de l\'ancrage, plus c\'est dur.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['TRX Push-up', 'TRX Chest Press'],
     ],
     [
         'slug' => 'dips-pectoraux',
@@ -664,6 +731,7 @@ return [
         'tip' => 'Plus le buste est penché, plus les pectoraux travaillent.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Chest Dips', 'Parallel Bar Dips'],
     ],
     [
         'slug' => 'dips-anneaux',
@@ -681,6 +749,7 @@ return [
         'tip' => 'Maîtrise d\'abord l\'appui fixe bras tendus avant de descendre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Ring Dips'],
     ],
     [
         'slug' => 'landmine-press',
@@ -698,6 +767,7 @@ return [
         'tip' => 'Gaine les abdos et garde les genoux souples.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'developpe-epaules-machine',
@@ -715,6 +785,13 @@ return [
         'tip' => 'Dos bien collé au dossier.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Shoulder Press',
+            'Converging Shoulder Press',
+            'Seated Shoulder Press',
+            'Multi Press',
+            'Presse épaules',
+        ],
     ],
     [
         'slug' => 'presse-epaules-iso-laterale',
@@ -732,6 +809,11 @@ return [
         'tip' => 'Ne cambre pas pour finir la répétition : allège plutôt.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Iso-Lateral Shoulder Press',
+            'Plate-Loaded Shoulder Press',
+            'Hammer Strength',
+        ],
     ],
     [
         'slug' => 'developpe-militaire',
@@ -749,6 +831,7 @@ return [
         'tip' => 'Gaine les abdos pour ne pas cambrer.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Overhead Press', 'Military Press', 'OHP'],
     ],
     [
         'slug' => 'developpe-militaire-assis',
@@ -766,6 +849,7 @@ return [
         'tip' => 'Garde le dos collé au dossier, sans cambrer.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Seated Barbell Shoulder Press'],
     ],
     [
         'slug' => 'developpe-halteres-assis',
@@ -783,6 +867,7 @@ return [
         'tip' => 'Monte les haltères en t\'aidant des cuisses pour te placer.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Seated Dumbbell Shoulder Press', 'Dumbbell Shoulder Press'],
     ],
     [
         'slug' => 'developpe-halteres-debout',
@@ -800,6 +885,7 @@ return [
         'tip' => 'Serre les fessiers et les abdos pour protéger le bas du dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Standing Dumbbell Shoulder Press'],
     ],
     [
         'slug' => 'developpe-arnold',
@@ -817,6 +903,7 @@ return [
         'tip' => 'Mouvement fluide, charges modérées.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'developpe-epaules-smith',
@@ -834,6 +921,7 @@ return [
         'tip' => 'Recule légèrement le banc pour ne pas toucher le nez.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Shoulder Press'],
     ],
     [
         'slug' => 'landmine-press-unilateral',
@@ -851,6 +939,7 @@ return [
         'tip' => 'Doux pour les épaules qui supportent mal le développé vertical.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'handstand-push-up',
@@ -868,6 +957,7 @@ return [
         'tip' => 'Place un tapis sous la tête et maîtrise d\'abord le pike push-up.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'pike-push-up',
@@ -885,6 +975,7 @@ return [
         'tip' => 'Pieds sur une box pour corser et préparer le handstand push-up.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'elevations-laterales',
@@ -902,6 +993,7 @@ return [
         'tip' => 'Pense à pousser les haltères vers les murs, pas vers le plafond.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Lateral Raise', 'Dumbbell Lateral Raise'],
     ],
     [
         'slug' => 'elevations-laterales-poulie',
@@ -919,6 +1011,7 @@ return [
         'tip' => 'Tension constante, idéal en finition.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Lateral Raise'],
     ],
     [
         'slug' => 'elevations-laterales-machine',
@@ -936,6 +1029,7 @@ return [
         'tip' => 'Pousse avec les coudes, pas avec les mains.',
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
+        'aka' => ['Lateral Raise', 'Seated Lateral Raise', 'Deltoid Raise'],
     ],
     [
         'slug' => 'elevations-frontales',
@@ -953,6 +1047,7 @@ return [
         'tip' => 'Pas d\'élan avec le buste.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Front Raise', 'Dumbbell Front Raise'],
     ],
     [
         'slug' => 'elevations-frontales-poulie',
@@ -970,6 +1065,7 @@ return [
         'tip' => 'Garde les coudes légèrement fléchis et le buste immobile.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Front Raise'],
     ],
     [
         'slug' => 'elevations-frontales-disque',
@@ -987,6 +1083,7 @@ return [
         'tip' => 'Un disque de 5 à 10 kg suffit largement.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Plate Front Raise'],
     ],
     [
         'slug' => 'elevations-frontales-barre',
@@ -1004,6 +1101,7 @@ return [
         'tip' => 'Une barre EZ ou une barre légère suffit.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Barbell Front Raise'],
     ],
     [
         'slug' => 'y-raise',
@@ -1021,6 +1119,7 @@ return [
         'tip' => 'Aussi à plat ventre sur un banc incliné pour isoler le bas des trapèzes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Y Raise'],
     ],
     [
         'slug' => 'oiseau-halteres',
@@ -1038,6 +1137,7 @@ return [
         'tip' => 'Garde le dos plat et la nuque dans l\'alignement.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Reverse Dumbbell Fly', 'Bent Over Lateral Raise'],
     ],
     [
         'slug' => 'oiseau-banc-incline',
@@ -1055,6 +1155,7 @@ return [
         'tip' => 'Le banc supprime la triche avec le buste.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Chest Supported Reverse Fly'],
     ],
     [
         'slug' => 'oiseau-inverse',
@@ -1072,6 +1173,13 @@ return [
         'tip' => 'Ne serre pas trop les omoplates, isole l\'épaule.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Rear Delt Fly',
+            'Reverse Fly',
+            'Pectoral Fly / Rear Delt',
+            'Butterfly reverse',
+            'Delts Machine',
+        ],
     ],
     [
         'slug' => 'oiseau-poulie',
@@ -1089,6 +1197,7 @@ return [
         'tip' => 'Garde les coudes légèrement fléchis et fixes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Reverse Fly', 'Rear Delt Cable Fly'],
     ],
     [
         'slug' => 'face-pull',
@@ -1106,6 +1215,7 @@ return [
         'tip' => 'Excellent pour la posture.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'band-pull-apart',
@@ -1123,6 +1233,7 @@ return [
         'tip' => 'Parfait en échauffement avant le développé.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'rotation-externe-poulie',
@@ -1140,6 +1251,7 @@ return [
         'tip' => 'Charge légère : c\'est un travail des rotateurs de l\'épaule.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable External Rotation'],
     ],
     [
         'slug' => 'rotation-externe-elastique',
@@ -1157,6 +1269,7 @@ return [
         'tip' => 'Une serviette roulée sous le coude aide à le garder collé.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'rowing-menton-barre',
@@ -1174,6 +1287,7 @@ return [
         'tip' => 'Ne monte pas les coudes au-dessus des épaules si ça pince.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Upright Row'],
     ],
     [
         'slug' => 'rowing-menton-poulie',
@@ -1191,6 +1305,7 @@ return [
         'tip' => 'Prise un peu plus large = moins de stress pour l\'épaule.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Upright Row'],
     ],
     [
         'slug' => 'shrugs',
@@ -1208,6 +1323,7 @@ return [
         'tip' => 'Ne roule pas les épaules.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Shrug', 'Haussements d\'épaules'],
     ],
     [
         'slug' => 'shrugs-barre',
@@ -1225,6 +1341,7 @@ return [
         'tip' => 'Des sangles aident si la prise lâche avant les trapèzes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Barbell Shrug', 'Haussements d\'épaules'],
     ],
     [
         'slug' => 'shrugs-smith',
@@ -1242,6 +1359,7 @@ return [
         'tip' => 'Barre devant ou derrière toi : derrière, le haut du dos travaille davantage.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Shrug'],
     ],
     [
         'slug' => 'shrugs-machine',
@@ -1259,6 +1377,32 @@ return [
         'tip' => 'Garde les genoux verrouillés : seules les épaules bougent.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Calf Machine Shrug'],
+    ],
+    [
+        'slug' => 'shrugs-machine-iso-laterale',
+        'name' => 'Shrugs machine iso-latérale',
+        'group' => 'epaules',
+        'equipment' => 'shrug-machine',
+        'mode' => 'reps',
+        'primary' => ['trapezius'],
+        'secondary' => ['forearm'],
+        'steps' => [
+            'Entre les leviers, saisis les poignées bras tendus, épaules basses.',
+            'Hausse les épaules vers les oreilles sans plier les coudes.',
+            'Tiens 1 s en haut, puis redescends lentement.',
+        ],
+        'tip' => 'Ne roule pas les épaules : monte et descends en ligne droite.',
+        'images' => ['0.jpg', '1.jpg'],
+        'credit' => 'free-exercise-db',
+        'aka' => [
+            'Seated/Standing Shrug',
+            'Iso-Lateral Shrug',
+            'Shrug machine',
+            'Plate-Loaded Shrug',
+            'Hammer Strength',
+            'Haussements d\'épaules',
+        ],
     ],
     [
         'slug' => 'tirage-vertical-prise-large',
@@ -1276,6 +1420,13 @@ return [
         'tip' => 'Pense à ramener les coudes vers les hanches, jamais derrière la nuque.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Lat Pulldown',
+            'Wide Grip Lat Pulldown',
+            'Lat Machine',
+            'Pulldown',
+            'Tirage poitrine',
+        ],
     ],
     [
         'slug' => 'tirage-vertical-prise-serree',
@@ -1293,6 +1444,7 @@ return [
         'tip' => 'Évite de te balancer vers l\'arrière.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Close Grip Lat Pulldown', 'Tirage poitrine prise serrée'],
     ],
     [
         'slug' => 'tirage-vertical-supination',
@@ -1310,6 +1462,7 @@ return [
         'tip' => 'Les biceps aident davantage : pense à tirer avec les coudes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Reverse Grip Lat Pulldown', 'Underhand Pulldown'],
     ],
     [
         'slug' => 'tirage-vertical-triangle',
@@ -1327,6 +1480,7 @@ return [
         'tip' => 'Garde la poitrine haute, sans arrondir le dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['V-Bar Pulldown', 'Neutral Grip Pulldown'],
     ],
     [
         'slug' => 'tirage-vertical-unilateral',
@@ -1344,6 +1498,7 @@ return [
         'tip' => 'Ne pivote pas le buste : c\'est le dos qui tire.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Single Arm Lat Pulldown', 'One Arm Pulldown'],
     ],
     [
         'slug' => 'tirage-vertical-divergent',
@@ -1361,6 +1516,7 @@ return [
         'tip' => 'Chaque bras a son levier : garde les deux côtés synchronisés.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Diverging Lat Pulldown', 'Lat Pulldown', 'Lat Pulldown / Seated Row'],
     ],
     [
         'slug' => 'tirage-iso-lateral',
@@ -1378,6 +1534,14 @@ return [
         'tip' => 'Idéal pour corriger un déséquilibre entre le côté gauche et le droit.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [
+            'Iso-Lateral Front Lat Pulldown',
+            'Iso-Lateral Wide Pulldown',
+            'Iso-Lateral Pulldown',
+            'Front Pulldown',
+            'Plate-Loaded Lat Pulldown',
+            'Hammer Strength',
+        ],
     ],
     [
         'slug' => 'tractions-assistees',
@@ -1395,6 +1559,13 @@ return [
         'tip' => 'Réduis l\'assistance au fil des semaines.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [
+            'Dip/Chin Assist',
+            'Chin/Dip Assist',
+            'Assisted Pull-up',
+            'Vertical Traction',
+            'Gravitron',
+        ],
     ],
     [
         'slug' => 'tractions-assistees-supination',
@@ -1412,6 +1583,7 @@ return [
         'tip' => 'Coudes vers l\'avant et le bas, sans hausser les épaules.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Dip/Chin Assist', 'Assisted Chin-up', 'Gravitron'],
     ],
     [
         'slug' => 'tractions-assistees-elastique',
@@ -1429,6 +1601,7 @@ return [
         'tip' => 'Passe à un élastique plus fin à mesure que tu progresses.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'tractions',
@@ -1446,6 +1619,7 @@ return [
         'tip' => 'Évite l\'élan avec les jambes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Pull-up', 'Pull up', 'Barre fixe'],
     ],
     [
         'slug' => 'tractions-supination',
@@ -1463,6 +1637,7 @@ return [
         'tip' => 'Souvent plus accessible que la pronation : bon point de départ.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Chin up'],
     ],
     [
         'slug' => 'tractions-prise-neutre',
@@ -1480,6 +1655,7 @@ return [
         'tip' => 'La prise la plus douce pour les épaules et les coudes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Neutral Grip Pull-up'],
     ],
     [
         'slug' => 'tractions-lestees',
@@ -1497,6 +1673,7 @@ return [
         'tip' => 'Leste-toi seulement quand tu enchaînes 8 à 10 tractions propres.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Weighted Pull-up'],
     ],
     [
         'slug' => 'rowing-assis',
@@ -1514,6 +1691,7 @@ return [
         'tip' => 'Le buste reste quasiment immobile.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Seated Cable Row', 'Seated Row', 'Low Row', 'Tirage horizontal triangle'],
     ],
     [
         'slug' => 'rowing-assis-prise-large',
@@ -1531,6 +1709,7 @@ return [
         'tip' => 'Coudes ouverts : le haut du dos et l\'arrière des épaules travaillent plus.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Wide Grip Seated Row', 'Wide Grip Cable Row'],
     ],
     [
         'slug' => 'rowing-assis-unilateral',
@@ -1548,6 +1727,7 @@ return [
         'tip' => 'Garde les épaules face à la poulie.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Single Arm Seated Cable Row'],
     ],
     [
         'slug' => 'rowing-machine',
@@ -1565,6 +1745,14 @@ return [
         'tip' => 'Sur une machine divergente, tire les coudes vers l\'arrière et l\'extérieur.',
         'images' => ['0.jpg'],
         'credit' => 'barry — CC BY-SA 4.0 (wger)',
+        'aka' => [
+            'Seated Row',
+            'Diverging Seated Row',
+            'Lat Pulldown / Seated Row',
+            'Chest Supported Row',
+            'Upper Back',
+            'Tirage horizontal machine',
+        ],
     ],
     [
         'slug' => 'low-row-iso-lateral',
@@ -1582,6 +1770,13 @@ return [
         'tip' => 'Ne décolle pas la poitrine de l\'appui pour tricher.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Iso-Lateral Low Row',
+            'Iso-Lateral Row',
+            'Iso-Lateral D.Y. Row',
+            'DY Row',
+            'Hammer Strength',
+        ],
     ],
     [
         'slug' => 'high-row-iso-lateral',
@@ -1599,6 +1794,7 @@ return [
         'tip' => 'Serre les omoplates en fin de mouvement.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Iso-Lateral High Row', 'Hammer Strength'],
     ],
     [
         'slug' => 't-bar-row',
@@ -1616,6 +1812,7 @@ return [
         'tip' => 'Regarde légèrement devant toi pour garder le dos neutre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['T-Bar Row', 'Iso-Lateral T-Bar Row', 'Lever Row'],
     ],
     [
         'slug' => 'rowing-t-bar-buste-appuye',
@@ -1633,6 +1830,7 @@ return [
         'tip' => 'L\'appui soulage les lombaires : tire sans élan.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Chest Supported T-Bar Row', 'Incline Lever Row', 'Lever Row'],
     ],
     [
         'slug' => 'rowing-t-bar-landmine',
@@ -1650,6 +1848,7 @@ return [
         'tip' => 'Sans poignée, croise les mains juste sous les disques.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Landmine T-Bar Row'],
     ],
     [
         'slug' => 'rowing-landmine-un-bras',
@@ -1667,6 +1866,7 @@ return [
         'tip' => 'Appuie l\'avant-bras libre sur ta cuisse pour soulager le dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Meadows Row', 'Single Arm Landmine Row'],
     ],
     [
         'slug' => 'rowing-barre',
@@ -1684,6 +1884,7 @@ return [
         'tip' => 'Gaine fort pour protéger les lombaires.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Barbell Row', 'Bent Over Row'],
     ],
     [
         'slug' => 'rowing-barre-supination',
@@ -1701,6 +1902,7 @@ return [
         'tip' => 'Gaine fort et garde le dos plat.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Reverse Grip Barbell Row', 'Yates Row'],
     ],
     [
         'slug' => 'rowing-pendlay',
@@ -1718,6 +1920,7 @@ return [
         'tip' => 'Si ton buste se relève pour tirer, allège la charge.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Pendlay Row'],
     ],
     [
         'slug' => 'rowing-haltere-un-bras',
@@ -1735,6 +1938,7 @@ return [
         'tip' => 'Ne tourne pas le buste pour tricher.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['One Arm Dumbbell Row', 'Single Arm Dumbbell Row'],
     ],
     [
         'slug' => 'rowing-halteres-buste-penche',
@@ -1752,6 +1956,7 @@ return [
         'tip' => 'Regarde le sol un peu devant toi pour garder la nuque neutre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Bent Over Dumbbell Row'],
     ],
     [
         'slug' => 'rowing-halteres-banc-incline',
@@ -1769,6 +1974,7 @@ return [
         'tip' => 'Poitrine collée au banc : aucune charge sur les lombaires.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Dumbbell Row', 'Chest Supported Dumbbell Row'],
     ],
     [
         'slug' => 'rowing-smith',
@@ -1786,6 +1992,7 @@ return [
         'tip' => 'La trajectoire guidée te laisse te concentrer sur le dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Row'],
     ],
     [
         'slug' => 'rowing-inverse',
@@ -1803,6 +2010,7 @@ return [
         'tip' => 'Plie les genoux pour faciliter, surélève les pieds pour corser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Inverted Row', 'Australian Pull-up'],
     ],
     [
         'slug' => 'rowing-trx',
@@ -1820,6 +2028,7 @@ return [
         'tip' => 'Avance les pieds pour augmenter la difficulté.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['TRX Row'],
     ],
     [
         'slug' => 'rowing-anneaux',
@@ -1837,6 +2046,7 @@ return [
         'tip' => 'Plus ton corps est proche de l\'horizontale, plus c\'est dur.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Ring Row'],
     ],
     [
         'slug' => 'pullover-machine',
@@ -1854,6 +2064,7 @@ return [
         'tip' => 'Pousse avec les coudes, pas avec les mains.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Plate-Loaded Pullover'],
     ],
     [
         'slug' => 'pull-over-poulie',
@@ -1871,6 +2082,7 @@ return [
         'tip' => 'Aussi appelé tirage bras tendus : les coudes ne se plient pas.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Straight Arm Pulldown', 'Cable Pullover'],
     ],
     [
         'slug' => 'pull-over-poulie-corde',
@@ -1888,6 +2100,7 @@ return [
         'tip' => 'Pense à pousser les mains vers les hanches.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Rope Straight Arm Pulldown', 'Rope Pullover'],
     ],
     [
         'slug' => 'pull-over-poulie-allonge',
@@ -1905,6 +2118,7 @@ return [
         'tip' => 'Garde le bas du dos plaqué contre le banc.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Lying Cable Pullover'],
     ],
     [
         'slug' => 'lombaires-machine',
@@ -1922,6 +2136,12 @@ return [
         'tip' => 'Amplitude modérée : ne pars pas en hyper-extension.',
         'images' => ['0.jpg'],
         'credit' => 'Franpol — CC BY-SA 4.0 (wger)',
+        'aka' => [
+            'Back Extension',
+            'Lower Back',
+            'Abdominal / Back Extension',
+            'Banc à lombaires',
+        ],
     ],
     [
         'slug' => 'extensions-lombaires',
@@ -1939,6 +2159,13 @@ return [
         'tip' => 'Bras croisés sur la poitrine, ou un disque pour corser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Back Extension',
+            'Hyperextension',
+            '45° Back Extension',
+            'Back Trainer',
+            'Banc à lombaires',
+        ],
     ],
     [
         'slug' => 'extensions-lombaires-ghd',
@@ -1956,6 +2183,7 @@ return [
         'tip' => 'Tiens un disque contre la poitrine pour ajouter de la charge.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['GHD Back Extension', 'Glute Ham Developer'],
     ],
     [
         'slug' => 'good-morning',
@@ -1973,6 +2201,7 @@ return [
         'tip' => 'Commence léger : le dos doit rester parfaitement plat.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'souleve-de-terre',
@@ -1990,6 +2219,7 @@ return [
         'tip' => 'La barre reste collée aux jambes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Deadlift', 'SDT'],
     ],
     [
         'slug' => 'souleve-de-terre-sumo',
@@ -2007,6 +2237,7 @@ return [
         'tip' => 'Genoux dans l\'axe des pieds tout au long du mouvement.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Sumo Deadlift'],
     ],
     [
         'slug' => 'souleve-de-terre-barre-hexagonale',
@@ -2024,6 +2255,7 @@ return [
         'tip' => 'Plus facile à apprendre que le soulevé classique, et moins dur pour le dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Trap Bar Deadlift', 'Hex Bar Deadlift'],
     ],
     [
         'slug' => 'rack-pull',
@@ -2041,6 +2273,7 @@ return [
         'tip' => 'Ne penche pas le buste en arrière en fin de mouvement.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'superman',
@@ -2058,6 +2291,7 @@ return [
         'tip' => 'Regarde le sol pour garder la nuque dans l\'axe.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'curl-barre',
@@ -2075,6 +2309,7 @@ return [
         'tip' => 'Les coudes ne bougent pas.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Barbell Curl'],
     ],
     [
         'slug' => 'curl-barre-ez',
@@ -2092,6 +2327,7 @@ return [
         'tip' => 'Plus confortable pour les poignets que la barre droite.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['EZ Bar Curl'],
     ],
     [
         'slug' => 'curl-halteres',
@@ -2109,6 +2345,7 @@ return [
         'tip' => 'Ne balance pas le buste pour monter la charge.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Curl'],
     ],
     [
         'slug' => 'curl-halteres-alterne',
@@ -2126,6 +2363,7 @@ return [
         'tip' => 'Reste droit : pas de bascule du buste d\'un côté à l\'autre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Alternating Dumbbell Curl'],
     ],
     [
         'slug' => 'curl-marteau',
@@ -2143,6 +2381,7 @@ return [
         'tip' => 'Travaille aussi le brachial et l\'avant-bras.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Hammer Curl'],
     ],
     [
         'slug' => 'curl-marteau-poulie-corde',
@@ -2160,6 +2399,7 @@ return [
         'tip' => 'Les coudes restent collés au buste.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Rope Hammer Curl'],
     ],
     [
         'slug' => 'curl-incline',
@@ -2177,6 +2417,7 @@ return [
         'tip' => 'Prends plus léger qu\'en curl debout : l\'étirement est intense.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Dumbbell Curl'],
     ],
     [
         'slug' => 'curl-concentration',
@@ -2194,6 +2435,7 @@ return [
         'tip' => 'Seul l\'avant-bras bouge.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Concentration Curl'],
     ],
     [
         'slug' => 'curl-pupitre',
@@ -2211,6 +2453,7 @@ return [
         'tip' => 'Élimine toute triche.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Preacher Curl', 'Larry Scott', 'Standing Arm Curl'],
     ],
     [
         'slug' => 'curl-pupitre-haltere',
@@ -2228,6 +2471,7 @@ return [
         'tip' => 'Idéal pour corriger un bras plus faible.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Preacher Curl', 'Larry Scott'],
     ],
     [
         'slug' => 'curl-biceps-machine',
@@ -2245,6 +2489,15 @@ return [
         'tip' => 'Ne décolle pas les coudes de l\'appui.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Biceps Curl',
+            'Arm Curl',
+            'Independent Biceps Curl',
+            'Elevated Biceps Curl',
+            'Seated Biceps',
+            'Bicep/Tricep',
+            'Machine Preacher Curl',
+        ],
     ],
     [
         'slug' => 'curl-poulie',
@@ -2262,6 +2515,7 @@ return [
         'tip' => 'Tension constante sur tout le mouvement.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Curl'],
     ],
     [
         'slug' => 'curl-poulie-unilateral',
@@ -2279,6 +2533,7 @@ return [
         'tip' => 'Garde l\'autre main sur la hanche pour rester stable.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Single Arm Cable Curl'],
     ],
     [
         'slug' => 'curl-poulie-haute',
@@ -2296,6 +2551,7 @@ return [
         'tip' => 'Les coudes restent fixes, à hauteur d\'épaules.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['High Cable Curl', 'Functional Trainer'],
     ],
     [
         'slug' => 'spider-curl',
@@ -2313,6 +2569,7 @@ return [
         'tip' => 'Marque une pause en haut pour bien contracter.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'curl-inverse',
@@ -2330,6 +2587,7 @@ return [
         'tip' => 'Une barre EZ soulage les poignets.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Reverse Curl'],
     ],
     [
         'slug' => 'curl-biceps-trx',
@@ -2347,6 +2605,7 @@ return [
         'tip' => 'Avance les pieds pour augmenter la difficulté.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'cynomops — CC BY-SA 4.0 (wger)',
+        'aka' => ['TRX Biceps Curl'],
     ],
     [
         'slug' => 'curl-poignets',
@@ -2364,6 +2623,7 @@ return [
         'tip' => 'Charge légère, séries longues.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Wrist Curl'],
     ],
     [
         'slug' => 'extension-poignets',
@@ -2381,6 +2641,7 @@ return [
         'tip' => 'Prends léger : les extenseurs se fatiguent vite.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Reverse Wrist Curl'],
     ],
     [
         'slug' => 'extension-triceps-poulie',
@@ -2398,6 +2659,7 @@ return [
         'tip' => 'Garde le buste droit, sans pencher sur la barre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Triceps Pushdown', 'Triceps Pressdown', 'Pushdown'],
     ],
     [
         'slug' => 'extension-triceps-poulie-corde',
@@ -2415,6 +2677,7 @@ return [
         'tip' => 'Écarte la corde en bas pour plus de contraction.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Rope Pushdown', 'Triceps Pushdown'],
     ],
     [
         'slug' => 'extension-triceps-poulie-barre-v',
@@ -2432,6 +2695,7 @@ return [
         'tip' => 'Prise plus naturelle pour les poignets que la barre droite.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['V-Bar Pushdown'],
     ],
     [
         'slug' => 'extension-triceps-poulie-unilaterale',
@@ -2449,6 +2713,7 @@ return [
         'tip' => 'Paume vers le haut ou vers le bas : essaie les deux.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Single Arm Pushdown'],
     ],
     [
         'slug' => 'extension-nuque-poulie-corde',
@@ -2466,6 +2731,7 @@ return [
         'tip' => 'Coudes serrés, pointés vers l\'avant.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Overhead Cable Triceps Extension'],
     ],
     [
         'slug' => 'extension-nuque-haltere',
@@ -2483,6 +2749,7 @@ return [
         'tip' => 'Coudes serrés vers l\'avant.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Overhead Dumbbell Triceps Extension'],
     ],
     [
         'slug' => 'extension-triceps-halteres-allonge',
@@ -2500,6 +2767,7 @@ return [
         'tip' => 'Coudes serrés, pointés vers le plafond.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Skull Crusher'],
     ],
     [
         'slug' => 'barre-au-front',
@@ -2517,6 +2785,7 @@ return [
         'tip' => 'Coudes fixes, pointés vers le plafond.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Skull Crusher', 'Lying Triceps Extension'],
     ],
     [
         'slug' => 'developpe-couche-prise-serree',
@@ -2534,6 +2803,7 @@ return [
         'tip' => 'Ne serre pas les mains plus qu\'à largeur d\'épaules : tes poignets te diront merci.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Close Grip Bench Press'],
     ],
     [
         'slug' => 'triceps-machine',
@@ -2551,6 +2821,12 @@ return [
         'tip' => 'Garde le dos contre le dossier.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Triceps Extension',
+            'Arm Extension',
+            'Bicep/Tricep',
+            'Seated Triceps Extension',
+        ],
     ],
     [
         'slug' => 'dips-machine',
@@ -2568,6 +2844,7 @@ return [
         'tip' => 'Reste assis bien droit, sans décoller les fesses.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Triceps Press', 'Seated Dip', 'Seated Triceps Press', 'Dip machine'],
     ],
     [
         'slug' => 'dips-assistes',
@@ -2585,6 +2862,7 @@ return [
         'tip' => 'Réduis l\'assistance au fil des semaines.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Dip/Chin Assist', 'Assisted Dip', 'Gravitron'],
     ],
     [
         'slug' => 'dips-triceps',
@@ -2602,6 +2880,7 @@ return [
         'tip' => 'Buste vertical = triceps ; penché en avant = pectoraux.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Triceps Dips'],
     ],
     [
         'slug' => 'dips-entre-bancs',
@@ -2619,6 +2898,7 @@ return [
         'tip' => 'Garde le dos près du banc pour épargner les épaules.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Bench Dips'],
     ],
     [
         'slug' => 'kickback-triceps',
@@ -2636,6 +2916,7 @@ return [
         'tip' => 'Seul l\'avant-bras bouge.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Triceps Kickback'],
     ],
     [
         'slug' => 'kickback-triceps-poulie',
@@ -2653,6 +2934,7 @@ return [
         'tip' => 'La poulie garde la tension même en bas du mouvement.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Cable Triceps Kickback'],
     ],
     [
         'slug' => 'pompes-diamant',
@@ -2670,6 +2952,7 @@ return [
         'tip' => 'Pose les genoux au sol pour faciliter.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Diamond Push-up'],
     ],
     [
         'slug' => 'presse-a-cuisses',
@@ -2687,6 +2970,7 @@ return [
         'tip' => 'Pieds hauts = fessiers, pieds bas = quadriceps. Les fesses ne décollent jamais.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Leg Press', '45° Leg Press', 'Linear Leg Press', 'Presse 45'],
     ],
     [
         'slug' => 'presse-a-cuisses-assise',
@@ -2704,6 +2988,7 @@ return [
         'tip' => 'Garde le bas du dos plaqué au dossier.',
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
+        'aka' => ['Leg Press', 'Seated Leg Press', 'Leg Press / Calf Press'],
     ],
     [
         'slug' => 'presse-a-cuisses-pieds-serres',
@@ -2721,6 +3006,7 @@ return [
         'tip' => 'Descends moins bas si les talons décollent.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Narrow Stance Leg Press'],
     ],
     [
         'slug' => 'presse-a-cuisses-unilaterale',
@@ -2738,6 +3024,7 @@ return [
         'tip' => 'Prends environ la moitié de ta charge habituelle.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Single Leg Press'],
     ],
     [
         'slug' => 'presse-horizontale',
@@ -2755,6 +3042,7 @@ return [
         'tip' => 'Règle la position de départ pour ne pas enrouler le bassin en bas.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Horizontal Leg Press', 'Lying Leg Press'],
     ],
     [
         'slug' => 'hack-squat',
@@ -2772,6 +3060,7 @@ return [
         'tip' => 'Genoux dans l\'axe des pieds.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Squat machine'],
     ],
     [
         'slug' => 'reverse-hack-squat',
@@ -2789,6 +3078,7 @@ return [
         'tip' => 'Garde le buste collé au coussin tout le long.',
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
+        'aka' => ['Reverse V-Squat'],
     ],
     [
         'slug' => 'pendulum-squat',
@@ -2806,6 +3096,7 @@ return [
         'tip' => 'Talons au sol : ce sont les genoux qui avancent.',
         'images' => ['0.jpg'],
         'credit' => 'polloperro — CC BY-SA 4.0 (wger)',
+        'aka' => ['Pendulum X Squat'],
     ],
     [
         'slug' => 'v-squat',
@@ -2823,6 +3114,7 @@ return [
         'tip' => 'Pieds plus avancés = plus de fessiers.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Perfect Squat', 'Super Squat Press', 'Leverage Squat'],
     ],
     [
         'slug' => 'belt-squat',
@@ -2840,6 +3132,7 @@ return [
         'tip' => 'Idéal pour charger les jambes en épargnant le dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Hip Belt Squat'],
     ],
     [
         'slug' => 'squat',
@@ -2857,6 +3150,7 @@ return [
         'tip' => 'Règle les sécurités du rack juste sous ta position basse.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Back Squat', 'Barbell Squat'],
     ],
     [
         'slug' => 'squat-avant',
@@ -2874,6 +3168,7 @@ return [
         'tip' => 'Si les coudes tombent, la barre part : allège la charge.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'box-squat',
@@ -2891,6 +3186,7 @@ return [
         'tip' => 'Effleure la box, ne t\'y laisse pas tomber.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'squat-smith',
@@ -2908,6 +3204,7 @@ return [
         'tip' => 'Idéal pour travailler seul : règle les butées de sécurité.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Squat'],
     ],
     [
         'slug' => 'goblet-squat',
@@ -2925,6 +3222,7 @@ return [
         'tip' => 'Parfait pour apprendre le squat.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'squat-halteres',
@@ -2942,6 +3240,7 @@ return [
         'tip' => 'Garde les bras tendus et relâchés.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Squat'],
     ],
     [
         'slug' => 'squat-sumo-haltere',
@@ -2959,6 +3258,7 @@ return [
         'tip' => 'Monte sur deux steps pour descendre plus bas.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Sumo Squat'],
     ],
     [
         'slug' => 'squat-sumo-kettlebell',
@@ -2976,6 +3276,7 @@ return [
         'tip' => 'Dos plat : c\'est une flexion des jambes, pas du dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
+        'aka' => ['Kettlebell Sumo Squat'],
     ],
     [
         'slug' => 'squat-poids-du-corps',
@@ -2993,6 +3294,7 @@ return [
         'tip' => 'Poids réparti sur tout le pied, talons au sol.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Air Squat', 'Bodyweight Squat'],
     ],
     [
         'slug' => 'jump-squats',
@@ -3010,6 +3312,7 @@ return [
         'tip' => 'Atterris genoux fléchis.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Squat Jump'],
     ],
     [
         'slug' => 'pistol-squat',
@@ -3027,6 +3330,7 @@ return [
         'tip' => 'Commence en t\'asseyant sur un banc ou en tenant une sangle.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'wakanda90 — CC BY-SA 4.0 (wger)',
+        'aka' => [],
     ],
     [
         'slug' => 'sissy-squat',
@@ -3044,6 +3348,7 @@ return [
         'tip' => 'Tiens un disque contre la poitrine pour progresser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'squat-bulgare',
@@ -3061,6 +3366,7 @@ return [
         'tip' => 'Travaille une jambe puis l\'autre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Bulgarian Split Squat', 'Fente bulgare'],
     ],
     [
         'slug' => 'squat-bulgare-smith',
@@ -3078,6 +3384,7 @@ return [
         'tip' => 'Règle les butées avant de commencer.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Bulgarian Split Squat'],
     ],
     [
         'slug' => 'fentes-avant',
@@ -3095,6 +3402,7 @@ return [
         'tip' => 'Buste droit, genou avant au-dessus de la cheville.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'Everkinetic — CC BY-SA 3.0 (wger)',
+        'aka' => ['Forward Lunge'],
     ],
     [
         'slug' => 'fentes-arriere',
@@ -3112,6 +3420,7 @@ return [
         'tip' => 'Plus douce pour les genoux que la fente avant.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Reverse Lunge'],
     ],
     [
         'slug' => 'fentes-marchees',
@@ -3129,6 +3438,7 @@ return [
         'tip' => 'Buste droit, genou avant au-dessus de la cheville.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Walking Lunge'],
     ],
     [
         'slug' => 'fentes-barre',
@@ -3146,6 +3456,7 @@ return [
         'tip' => 'Garde les pieds sur deux rails, pas sur une ligne.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Barbell Lunge'],
     ],
     [
         'slug' => 'fentes-laterales',
@@ -3163,6 +3474,7 @@ return [
         'tip' => 'Hanches en arrière, pied de la jambe tendue à plat.',
         'images' => ['0.jpg'],
         'credit' => 'AlucardEvil40 — CC BY-SA 4.0 (wger)',
+        'aka' => ['Side Lunge', 'Lateral Lunge'],
     ],
     [
         'slug' => 'fentes-smith',
@@ -3180,6 +3492,25 @@ return [
         'tip' => 'Règle les butées sous ta position basse.',
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
+        'aka' => ['Smith Machine Lunge'],
+    ],
+    [
+        'slug' => 'fentes-machine',
+        'name' => 'Fentes à la machine (squat lunge)',
+        'group' => 'jambes',
+        'equipment' => 'squat-lunge',
+        'mode' => 'reps',
+        'primary' => ['quadriceps', 'gluteal'],
+        'secondary' => ['hamstring', 'adductors'],
+        'steps' => [
+            'Épaules sous les boudins, pied avant à plat sur la plateforme, pied arrière en appui sur la pointe.',
+            'Descends le genou arrière vers le sol, buste droit, jusqu\'à la cuisse avant parallèle.',
+            'Remonte en poussant dans le talon avant, puis change de jambe après la série.',
+        ],
+        'tip' => 'Le genou avant reste dans l\'axe du pied : écarte un peu les appuis si tu perds l\'équilibre.',
+        'images' => ['0.svg', '1.svg'],
+        'credit' => 'illustration',
+        'aka' => ['Lunge machine', 'Ground Base Squat Lunge'],
     ],
     [
         'slug' => 'step-up',
@@ -3197,6 +3528,7 @@ return [
         'tip' => 'Une box plus haute sollicite davantage les fessiers.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'leg-extension',
@@ -3214,6 +3546,12 @@ return [
         'tip' => 'Tiens 1 s en haut.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Reclining Leg Extension',
+            'Iso-Lateral Leg Extension',
+            'Leg Extension / Leg Curl',
+            'Chaise à quadriceps',
+        ],
     ],
     [
         'slug' => 'leg-extension-unilateral',
@@ -3231,6 +3569,7 @@ return [
         'tip' => 'Utile pour corriger un déséquilibre entre les jambes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Single Leg Extension'],
     ],
     [
         'slug' => 'leg-curl',
@@ -3248,6 +3587,7 @@ return [
         'tip' => 'Hanches plaquées au banc.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Prone Leg Curl', 'Lying Leg Curl', 'Iso-Lateral Leg Curl', 'Leg curl couché'],
     ],
     [
         'slug' => 'leg-curl-assis',
@@ -3265,6 +3605,7 @@ return [
         'tip' => 'Penche le buste en avant pour étirer davantage les ischios.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Seated Leg Curl', 'Leg Extension / Seated Leg Curl'],
     ],
     [
         'slug' => 'leg-curl-debout',
@@ -3282,6 +3623,12 @@ return [
         'tip' => 'Ne cambre pas le dos pour tricher.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Standing Leg Curl',
+            'Kneeling Leg Curl',
+            'Iso-Lateral Kneeling Leg Curl',
+            'Leg curl à genoux',
+        ],
     ],
     [
         'slug' => 'nordic-curl',
@@ -3299,6 +3646,7 @@ return [
         'tip' => 'Mise sur la descente lente : c\'est elle qui compte.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Nordic Hamstring Curl', 'Assisted Nordic Ham'],
     ],
     [
         'slug' => 'glute-ham-raise',
@@ -3316,6 +3664,7 @@ return [
         'tip' => 'Garde hanches et buste alignés.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['GHR', 'Glute Ham Bench', 'Glute Ham Developer'],
     ],
     [
         'slug' => 'leg-curl-swiss-ball',
@@ -3333,6 +3682,7 @@ return [
         'tip' => 'Ne laisse pas les hanches retomber pendant la série.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Swiss Ball Leg Curl'],
     ],
     [
         'slug' => 'souleve-de-terre-roumain',
@@ -3350,6 +3700,7 @@ return [
         'tip' => 'Arrête-toi quand le dos risque de s\'arrondir.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Romanian Deadlift', 'RDL'],
     ],
     [
         'slug' => 'souleve-de-terre-roumain-halteres',
@@ -3367,6 +3718,7 @@ return [
         'tip' => 'Arrête-toi quand le dos risque de s\'arrondir.',
         'images' => ['0.jpg'],
         'credit' => 'AlucardEvil40 — CC BY-SA 4.0 (wger)',
+        'aka' => ['Dumbbell Romanian Deadlift', 'Dumbbell RDL'],
     ],
     [
         'slug' => 'souleve-de-terre-roumain-smith',
@@ -3384,6 +3736,7 @@ return [
         'tip' => 'Règle les butées à mi-tibias pour sécuriser la descente.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Romanian Deadlift', 'Smith RDL'],
     ],
     [
         'slug' => 'souleve-de-terre-roumain-unilateral',
@@ -3401,6 +3754,7 @@ return [
         'tip' => 'Garde les hanches parallèles au sol.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Single Leg RDL', 'Single Leg Romanian Deadlift'],
     ],
     [
         'slug' => 'souleve-de-terre-jambes-tendues',
@@ -3418,6 +3772,7 @@ return [
         'tip' => 'Plus d\'étirement que le roumain : réduis la charge.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Stiff Leg Deadlift'],
     ],
     [
         'slug' => 'mollets-debout',
@@ -3435,6 +3790,7 @@ return [
         'tip' => 'Amplitude complète, tempo lent.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Standing Calf Raise', 'Standing Calf'],
     ],
     [
         'slug' => 'mollets-assis',
@@ -3452,6 +3808,7 @@ return [
         'tip' => 'Complète les mollets debout.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Seated Calf Raise', 'Seated Calf'],
     ],
     [
         'slug' => 'mollets-presse',
@@ -3469,6 +3826,25 @@ return [
         'tip' => 'Garde les sécurités à portée : les pieds peuvent glisser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Leg Press Calf Raise', 'Leg Press / Calf Press'],
+    ],
+    [
+        'slug' => 'presse-a-mollets',
+        'name' => 'Presse à mollets (calf press)',
+        'group' => 'jambes',
+        'equipment' => 'calf-press',
+        'mode' => 'reps',
+        'primary' => ['calves'],
+        'secondary' => [],
+        'steps' => [
+            'Assis dos calé contre le dossier, avant des pieds sur le bas de la plateforme, talons dans le vide.',
+            'Jambes presque tendues, pousse la plateforme avec la pointe des pieds le plus loin possible.',
+            'Reviens lentement en laissant les talons descendre au maximum.',
+        ],
+        'tip' => 'Règle le siège pour garder les genoux à peine fléchis : ce sont les chevilles qui bougent, pas les cuisses.',
+        'images' => ['0.jpg', '1.jpg'],
+        'credit' => 'free-exercise-db',
+        'aka' => ['Calf Extension', 'Seated Calf Press', 'Mollets assis dos calé'],
     ],
     [
         'slug' => 'mollets-smith',
@@ -3486,6 +3862,7 @@ return [
         'tip' => 'Jambes tendues mais genoux non verrouillés.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Smith Machine Calf Raise'],
     ],
     [
         'slug' => 'donkey-calf',
@@ -3503,6 +3880,7 @@ return [
         'tip' => 'Dos plat, jambes presque tendues.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'mollets-halteres',
@@ -3520,6 +3898,7 @@ return [
         'tip' => 'Fais-le sur une jambe pour plus d\'intensité.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dumbbell Calf Raise'],
     ],
     [
         'slug' => 'elevations-des-orteils',
@@ -3537,6 +3916,7 @@ return [
         'tip' => 'Éloigne les pieds du mur pour augmenter la difficulté.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Tibialis Raise', 'Tib Raise', 'Tibia Dorsi Flexion'],
     ],
     [
         'slug' => 'adducteurs',
@@ -3554,6 +3934,13 @@ return [
         'tip' => 'Dos collé au dossier.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Hip Adduction',
+            'Hip Adductor',
+            'Adductor',
+            'Hip Adductor/Abductor',
+            'Adduction machine',
+        ],
     ],
     [
         'slug' => 'adduction-poulie',
@@ -3571,6 +3958,7 @@ return [
         'tip' => 'Tiens-toi à la machine, buste droit.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Hip Adduction'],
     ],
     [
         'slug' => 'multi-hip-adduction',
@@ -3588,6 +3976,7 @@ return [
         'tip' => 'Tiens les poignées et garde le bassin fixe.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Multi Hip', 'Rotary Hip', '4-Way Hip', 'Standing Hip Adduction'],
     ],
     [
         'slug' => 'multi-hip-flexion',
@@ -3605,6 +3994,7 @@ return [
         'tip' => 'Ne penche pas le buste en arrière.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Multi Hip', 'Rotary Hip', '4-Way Hip', 'Standing Hip Flexion'],
     ],
     [
         'slug' => 'chaise',
@@ -3622,6 +4012,7 @@ return [
         'tip' => 'Respire régulièrement.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Wall Sit'],
     ],
     [
         'slug' => 'gainage-copenhague',
@@ -3639,6 +4030,7 @@ return [
         'tip' => 'Genou sur le banc pour la version facile.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'hip-thrust',
@@ -3656,6 +4048,25 @@ return [
         'tip' => 'Menton rentré, regard vers l\'avant.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Glute Drive', 'Hip & Glute', 'Glute Bridge machine'],
+    ],
+    [
+        'slug' => 'hip-thrust-debout-machine',
+        'name' => 'Hip thrust debout machine',
+        'group' => 'fessiers',
+        'equipment' => 'hip-thrust-machine',
+        'mode' => 'reps',
+        'primary' => ['gluteal'],
+        'secondary' => ['hamstring'],
+        'steps' => [
+            'Debout face à la machine, pieds sur la plateforme, coussin calé devant le bassin, mains sur les poignées.',
+            'Recule les hanches en penchant le buste, dos droit et genoux légèrement fléchis.',
+            'Pousse le bassin vers l\'avant contre le coussin jusqu\'à te tenir droit, serre les fessiers 1 s.',
+        ],
+        'tip' => 'Termine debout, sans cambrer : c\'est le bassin qui avance, pas le bas du dos qui se creuse.',
+        'images' => ['0.svg', '1.svg'],
+        'credit' => 'illustration',
+        'aka' => ['Standing Hip Thrust', 'Standing Glute Drive'],
     ],
     [
         'slug' => 'hip-thrust-barre',
@@ -3673,6 +4084,7 @@ return [
         'tip' => 'Tibias verticaux en haut.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Barbell Hip Thrust'],
     ],
     [
         'slug' => 'hip-thrust-smith',
@@ -3690,6 +4102,7 @@ return [
         'tip' => 'Règle les butées juste sous ta position basse.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Smith Machine Hip Thrust'],
     ],
     [
         'slug' => 'hip-thrust-unilateral',
@@ -3707,6 +4120,7 @@ return [
         'tip' => 'Garde le bassin bien horizontal.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Single Leg Hip Thrust'],
     ],
     [
         'slug' => 'pont-fessier',
@@ -3724,6 +4138,7 @@ return [
         'tip' => 'Ajoute un poids sur les hanches pour progresser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Glute Bridge'],
     ],
     [
         'slug' => 'pont-fessier-unilateral',
@@ -3741,6 +4156,7 @@ return [
         'tip' => 'Les hanches restent à la même hauteur des deux côtés.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Single Leg Glute Bridge'],
     ],
     [
         'slug' => 'pont-fessier-barre',
@@ -3758,6 +4174,7 @@ return [
         'tip' => 'Pousse dans les talons, pas dans la pointe des pieds.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Barbell Glute Bridge'],
     ],
     [
         'slug' => 'presse-a-cuisses-pieds-hauts',
@@ -3775,6 +4192,7 @@ return [
         'tip' => 'Pense à pousser la plateforme avec les talons.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['High Feet Leg Press'],
     ],
     [
         'slug' => 'kickback-machine',
@@ -3792,6 +4210,14 @@ return [
         'tip' => 'Ne cambre pas le bas du dos.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [
+            'Glute',
+            'Glute Machine',
+            'Glute Kickback',
+            'Glute Trainer',
+            'Glute Press',
+            'Rear Kick',
+        ],
     ],
     [
         'slug' => 'kickback-poulie',
@@ -3809,6 +4235,7 @@ return [
         'tip' => 'Tiens-toi à la machine pour rester stable.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Glute Kickback'],
     ],
     [
         'slug' => 'donkey-kick',
@@ -3826,6 +4253,7 @@ return [
         'tip' => 'Ajoute un mini-band ou une chevillère pour progresser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'abducteurs',
@@ -3843,6 +4271,13 @@ return [
         'tip' => 'Penche-toi légèrement en avant pour cibler les fessiers.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Hip Abduction',
+            'Hip Abductor',
+            'Abductor',
+            'Hip Adductor/Abductor',
+            'Abduction machine',
+        ],
     ],
     [
         'slug' => 'multi-hip-abduction',
@@ -3860,6 +4295,13 @@ return [
         'tip' => 'Buste droit : ne te penche pas du côté opposé.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [
+            'Multi Hip',
+            'Rotary Hip',
+            '4-Way Hip',
+            'Standing Hip Abduction',
+            'Standing Hip Abductor',
+        ],
     ],
     [
         'slug' => 'multi-hip-extension',
@@ -3877,6 +4319,7 @@ return [
         'tip' => 'Ne cambre pas le bas du dos en fin de mouvement.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Multi Hip', 'Rotary Hip', '4-Way Hip', 'Standing Hip Extension'],
     ],
     [
         'slug' => 'abduction-poulie',
@@ -3894,6 +4337,7 @@ return [
         'tip' => 'Tiens-toi à la machine et garde le buste droit.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Cable Hip Abduction'],
     ],
     [
         'slug' => 'marche-laterale-mini-band',
@@ -3911,6 +4355,7 @@ return [
         'tip' => 'Pointes des pieds vers l\'avant, bassin à hauteur fixe.',
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
+        'aka' => ['Monster Walk', 'Lateral Band Walk'],
     ],
     [
         'slug' => 'clamshell',
@@ -3928,6 +4373,7 @@ return [
         'tip' => 'Le bassin ne bascule pas vers l\'arrière.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'extension-hanche-chaise-romaine',
@@ -3945,6 +4391,30 @@ return [
         'tip' => 'Coussin bas et dos légèrement enroulé = fessiers, pas lombaires.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'Everkinetic — CC BY-SA 3.0 (wger)',
+        'aka' => ['45° Hip Extension', 'Glute Hyperextension'],
+    ],
+    [
+        'slug' => 'reverse-hyper',
+        'name' => 'Reverse hyper',
+        'group' => 'fessiers',
+        'equipment' => 'reverse-hyper',
+        'mode' => 'reps',
+        'primary' => ['gluteal', 'hamstring'],
+        'secondary' => ['lower-back'],
+        'steps' => [
+            'À plat ventre sur le plateau, hanches au bord, chevilles calées sous le rouleau, mains sur les poignées.',
+            'Monte les jambes tendues jusqu\'à l\'alignement avec le buste en serrant les fessiers.',
+            'Redescends en contrôlant le balancier, sans le laisser t\'entraîner sous le plateau.',
+        ],
+        'tip' => 'Arrête-toi à l\'horizontale : inutile de cambrer pour monter plus haut.',
+        'images' => ['0.jpg', '1.jpg'],
+        'credit' => 'free-exercise-db',
+        'aka' => [
+            'Reverse Hyperextension',
+            'Reverse Back Extension',
+            'Extension inversée',
+            'Glute Ham / Reverse Hyper',
+        ],
     ],
     [
         'slug' => 'frog-pump',
@@ -3962,6 +4432,7 @@ return [
         'tip' => 'Tiens un haltère sur les hanches pour progresser.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'pull-through-poulie',
@@ -3979,6 +4450,7 @@ return [
         'tip' => 'Les bras restent tendus : ce sont les hanches qui tirent.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Pull Through'],
     ],
     [
         'slug' => 'fentes-croisees',
@@ -3996,6 +4468,7 @@ return [
         'tip' => 'Garde les hanches face à l\'avant.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Curtsy Lunge'],
     ],
     [
         'slug' => 'kettlebell-swing',
@@ -4013,6 +4486,7 @@ return [
         'tip' => 'Ce sont les hanches qui travaillent, pas les bras.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['KB Swing'],
     ],
     [
         'slug' => 'crunch',
@@ -4030,6 +4504,7 @@ return [
         'tip' => 'Ne tire pas sur la nuque.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'crunch-banc-decline',
@@ -4047,6 +4522,7 @@ return [
         'tip' => 'Augmente l\'inclinaison pour corser l\'exercice.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Decline Crunch'],
     ],
     [
         'slug' => 'sit-up',
@@ -4064,6 +4540,7 @@ return [
         'tip' => 'Ne tire pas sur la nuque.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'sit-up-decline',
@@ -4081,6 +4558,7 @@ return [
         'tip' => 'Tiens un disque contre la poitrine pour progresser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Decline Sit-up'],
     ],
     [
         'slug' => 'sit-up-ghd',
@@ -4098,6 +4576,7 @@ return [
         'tip' => 'Commence en amplitude réduite : très exigeant pour le bas du dos.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'crunch-machine',
@@ -4115,6 +4594,14 @@ return [
         'tip' => 'Pousse avec les abdos, pas avec les bras.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [
+            'Abdominal Crunch',
+            'Abdominal',
+            'Ab Crunch',
+            'Abdominal / Back Extension',
+            'Ab Crunch Bench',
+            'Abdominal Oblique Crunch',
+        ],
     ],
     [
         'slug' => 'crunch-poulie-haute',
@@ -4132,6 +4619,7 @@ return [
         'tip' => 'Les hanches restent fixes.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Crunch', 'Kneeling Cable Crunch'],
     ],
     [
         'slug' => 'crunch-poulie-debout',
@@ -4149,6 +4637,7 @@ return [
         'tip' => 'Le mouvement vient de l\'enroulement du dos, pas des hanches.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Standing Cable Crunch'],
     ],
     [
         'slug' => 'crunch-swiss-ball',
@@ -4166,6 +4655,7 @@ return [
         'tip' => 'Pieds écartés pour la stabilité.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'crunch-oblique',
@@ -4183,6 +4673,7 @@ return [
         'tip' => 'Tourne les épaules, pas seulement le coude.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'bicycle-crunch',
@@ -4200,6 +4691,7 @@ return [
         'tip' => 'Mouvement lent et contrôlé plutôt que rapide.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'crunch-inverse',
@@ -4217,6 +4709,7 @@ return [
         'tip' => 'Pas d\'élan : c\'est le bassin qui monte.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Reverse Crunch'],
     ],
     [
         'slug' => 'crunch-inverse-banc-decline',
@@ -4234,6 +4727,7 @@ return [
         'tip' => 'Plus le banc est incliné, plus c\'est difficile.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'releves-de-genoux',
@@ -4251,6 +4745,7 @@ return [
         'tip' => 'Enroule le bassin en haut.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Captain\'s Chair', 'Vertical Knee Raise', 'Knee Raise', 'Power Tower'],
     ],
     [
         'slug' => 'releves-de-jambes-suspendu',
@@ -4268,6 +4763,7 @@ return [
         'tip' => 'Genoux fléchis pour débuter.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Hanging Leg Raise'],
     ],
     [
         'slug' => 'releves-de-jambes-allonge',
@@ -4285,6 +4781,7 @@ return [
         'tip' => 'Garde le bas du dos plaqué ; plie les genoux si besoin.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'ciseaux',
@@ -4302,6 +4799,7 @@ return [
         'tip' => 'Remonte les jambes si le dos se creuse.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Flutter Kicks', 'Scissor Kicks'],
     ],
     [
         'slug' => 'v-up',
@@ -4319,6 +4817,7 @@ return [
         'tip' => 'Plie les genoux pour faciliter.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'hollow-hold',
@@ -4336,6 +4835,7 @@ return [
         'tip' => 'Plie les genoux pour faciliter.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'gainage-planche',
@@ -4353,6 +4853,7 @@ return [
         'tip' => 'Ne laisse pas les hanches tomber.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Plank'],
     ],
     [
         'slug' => 'planche-shoulder-taps',
@@ -4370,6 +4871,7 @@ return [
         'tip' => 'Écarte les pieds pour faciliter.',
         'images' => ['0.jpg'],
         'credit' => 'clafal — CC BY-SA 4.0 (wger)',
+        'aka' => [],
     ],
     [
         'slug' => 'planche-commando',
@@ -4387,6 +4889,7 @@ return [
         'tip' => 'Hanches stables, pieds écartés.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'gainage-lateral',
@@ -4404,6 +4907,7 @@ return [
         'tip' => 'Genou inférieur au sol pour faciliter.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Side Plank'],
     ],
     [
         'slug' => 'dead-bug',
@@ -4421,6 +4925,7 @@ return [
         'tip' => 'Le bas du dos ne décolle jamais du sol.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'bird-dog',
@@ -4438,6 +4943,7 @@ return [
         'tip' => 'Imagine un verre d\'eau posé sur ton dos.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'mountain-climbers',
@@ -4455,6 +4961,7 @@ return [
         'tip' => 'Hanches basses et stables.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'roue-abdominale',
@@ -4472,6 +4979,7 @@ return [
         'tip' => 'Réduis l\'amplitude au début.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Ab Wheel', 'Ab Roller'],
     ],
     [
         'slug' => 'roll-out-trx',
@@ -4489,6 +4997,7 @@ return [
         'tip' => 'Plus tes pieds reculent, plus c\'est dur.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'genoux-poitrine-trx',
@@ -4506,6 +5015,7 @@ return [
         'tip' => 'Ne laisse pas les hanches s\'affaisser.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'genoux-poitrine-swiss-ball',
@@ -4523,6 +5033,7 @@ return [
         'tip' => 'Mains bien sous les épaules.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'rotation-du-buste-machine',
@@ -4540,6 +5051,7 @@ return [
         'tip' => 'Charge modérée, mouvement contrôlé.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Rotary Torso', 'Torso Rotation'],
     ],
     [
         'slug' => 'woodchopper-poulie-haut-bas',
@@ -4557,6 +5069,7 @@ return [
         'tip' => 'Pivote sur le pied arrière, bras presque tendus.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Woodchop', 'Wood Chop'],
     ],
     [
         'slug' => 'woodchopper-poulie-bas-haut',
@@ -4574,6 +5087,7 @@ return [
         'tip' => 'Garde les bras presque tendus.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Cable Woodchop', 'Wood Chop'],
     ],
     [
         'slug' => 'pallof-press',
@@ -4591,6 +5105,7 @@ return [
         'tip' => 'Résiste à la rotation.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'russian-twist',
@@ -4608,6 +5123,7 @@ return [
         'tip' => 'Pieds au sol pour faciliter.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'flexions-laterales-haltere',
@@ -4625,6 +5141,7 @@ return [
         'tip' => 'Un seul haltère à la fois.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'windmill-kettlebell',
@@ -4642,6 +5159,7 @@ return [
         'tip' => 'Bras chargé toujours vertical ; commence léger.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'l-sit',
@@ -4659,6 +5177,7 @@ return [
         'tip' => 'Genoux fléchis (tuck) pour débuter.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'dragon-flag',
@@ -4676,6 +5195,7 @@ return [
         'tip' => 'Exercice avancé : genoux fléchis pour débuter.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'course',
@@ -4693,6 +5213,7 @@ return [
         'tip' => 'Mets 1 % d\'inclinaison pour simuler l\'extérieur.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Treadmill', 'Running'],
     ],
     [
         'slug' => 'marche-inclinee',
@@ -4710,6 +5231,7 @@ return [
         'tip' => 'Très efficace et doux pour les articulations.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Incline Walk', '12-3-30'],
     ],
     [
         'slug' => 'sprints-fractionnes',
@@ -4727,6 +5249,7 @@ return [
         'tip' => 'Utilise le clip de sécurité.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Treadmill Intervals', 'HIIT'],
     ],
     [
         'slug' => 'tapis-curve',
@@ -4744,6 +5267,7 @@ return [
         'tip' => 'C\'est toi qui fais tourner le tapis : idéal en sprints courts.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['S-Drive', 'Non-motorized Treadmill', 'Tapis non motorisé'],
     ],
     [
         'slug' => 'velo',
@@ -4761,6 +5285,7 @@ return [
         'tip' => 'Dos droit, épaules relâchées.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Upright Bike', 'Upright Cycle', 'Hybrid Cycle'],
     ],
     [
         'slug' => 'velo-semi-allonge',
@@ -4778,6 +5303,7 @@ return [
         'tip' => 'Idéal pour ménager le dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Recumbent Bike', 'Recumbent Cycle', 'Hybrid Cycle'],
     ],
     [
         'slug' => 'velo-de-biking',
@@ -4795,6 +5321,7 @@ return [
         'tip' => 'Ne pédale jamais sans résistance en danseuse.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Indoor Cycle', 'Spinning', 'Vélo indoor', 'RPM'],
     ],
     [
         'slug' => 'air-bike',
@@ -4812,6 +5339,7 @@ return [
         'tip' => 'Redoutable en intervalles courts.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Assault Bike', 'Echo Bike'],
     ],
     [
         'slug' => 'elliptique',
@@ -4829,6 +5357,7 @@ return [
         'tip' => 'Faible impact pour les articulations.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Elliptical', 'Cross Trainer', 'Ascent Trainer', 'Vélo elliptique'],
     ],
     [
         'slug' => 'stepper',
@@ -4846,6 +5375,7 @@ return [
         'tip' => 'Ne te suspends pas aux poignées.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'escalier',
@@ -4863,6 +5393,7 @@ return [
         'tip' => 'Buste droit.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Climbmill', 'Stair Climber', 'StairMaster'],
     ],
     [
         'slug' => 'rameur',
@@ -4880,6 +5411,7 @@ return [
         'tip' => '60 % jambes, 20 % buste, 20 % bras.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Rower', 'Rowing machine', 'Concept2'],
     ],
     [
         'slug' => 'skierg',
@@ -4897,6 +5429,7 @@ return [
         'tip' => 'Mouvement fluide, comme en ski de fond.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Ski Erg'],
     ],
     [
         'slug' => 'ergometre-a-bras',
@@ -4914,6 +5447,7 @@ return [
         'tip' => 'Utile si tu dois ménager les jambes.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Krankcycle', 'Arm Bike', 'Upper Body Ergometer'],
     ],
     [
         'slug' => 'corde-a-sauter',
@@ -4931,6 +5465,7 @@ return [
         'tip' => 'Règle la corde : poignées aux aisselles pied posé dessus.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Jump Rope', 'Double unders'],
     ],
     [
         'slug' => 'burpees',
@@ -4948,6 +5483,7 @@ return [
         'tip' => 'Garde un rythme que tu peux tenir.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'jumping-jacks',
@@ -4965,6 +5501,7 @@ return [
         'tip' => 'Parfait pour s\'échauffer.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'montees-de-genoux',
@@ -4982,6 +5519,7 @@ return [
         'tip' => 'Garde un rythme rapide et léger.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'talons-fesses',
@@ -4999,6 +5537,7 @@ return [
         'tip' => 'Idéal en échauffement.',
         'images' => ['0.jpg'],
         'credit' => 'painDpice — CC BY-SA 4.0 (wger)',
+        'aka' => [],
     ],
     [
         'slug' => 'shadow-boxing',
@@ -5016,6 +5555,7 @@ return [
         'tip' => 'Ne verrouille pas les coudes en fin de coup.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'sled-push',
@@ -5033,6 +5573,7 @@ return [
         'tip' => 'Dos plat, regard vers le sol devant toi.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Prowler', 'S-Drive'],
     ],
     [
         'slug' => 'sled-pull',
@@ -5050,6 +5591,7 @@ return [
         'tip' => 'Garde les bras tendus : ce sont les jambes qui tirent.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Sled Drag'],
     ],
     [
         'slug' => 'sled-pull-corde',
@@ -5067,6 +5609,7 @@ return [
         'tip' => 'Utilise tes jambes et ton poids, pas seulement les bras.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Sled Rope Pull'],
     ],
     [
         'slug' => 'farmer-carry',
@@ -5084,6 +5627,7 @@ return [
         'tip' => 'Soulève et repose les charges comme un soulevé de terre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Farmer\'s Walk', 'Farmers Carry'],
     ],
     [
         'slug' => 'sandbag-lunges',
@@ -5101,6 +5645,7 @@ return [
         'tip' => 'Genou avant dans l\'axe du pied.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'sandbag-carry',
@@ -5118,6 +5663,7 @@ return [
         'tip' => 'Ramasse le sac jambes fléchies, dos plat.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'sandbag-clean',
@@ -5135,6 +5681,7 @@ return [
         'tip' => 'L\'élan vient des hanches, pas du dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'wall-balls',
@@ -5152,6 +5699,7 @@ return [
         'tip' => 'Coudes sous le ballon, lancer porté par les jambes.',
         'images' => ['0.jpg'],
         'credit' => 'philip — CC BY-SA 4.0 (wger)',
+        'aka' => ['Wall Ball Shots'],
     ],
     [
         'slug' => 'slam-ball',
@@ -5169,6 +5717,7 @@ return [
         'tip' => 'Ramasse le ballon jambes fléchies, dos plat.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Med Ball Slam'],
     ],
     [
         'slug' => 'battle-rope-ondulations',
@@ -5186,6 +5735,7 @@ return [
         'tip' => 'Reste en appui sur les jambes, dos droit.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Battling Ropes'],
     ],
     [
         'slug' => 'battle-rope-slams',
@@ -5203,6 +5753,7 @@ return [
         'tip' => 'Expire à chaque frappe.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Battling Ropes'],
     ],
     [
         'slug' => 'kettlebell-clean',
@@ -5220,6 +5771,7 @@ return [
         'tip' => 'Enroule la main autour de la poignée pour éviter qu\'elle tape.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'kettlebell-snatch',
@@ -5237,6 +5789,7 @@ return [
         'tip' => 'Ramène la kettlebell près du corps pour qu\'elle ne claque pas.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'turkish-get-up',
@@ -5254,6 +5807,7 @@ return [
         'tip' => 'Regard sur la kettlebell, bras toujours vertical.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['TGU'],
     ],
     [
         'slug' => 'thruster',
@@ -5271,6 +5825,7 @@ return [
         'tip' => 'Ne marque pas de pause entre squat et poussée.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'thruster-kettlebell',
@@ -5288,6 +5843,7 @@ return [
         'tip' => 'Coudes hauts en bas du squat.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'devil-press',
@@ -5305,6 +5861,7 @@ return [
         'tip' => 'L\'élan vient des hanches, pas des bras.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'clean-haltere',
@@ -5322,6 +5879,7 @@ return [
         'tip' => 'Garde les haltères proches du corps.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'snatch-haltere',
@@ -5339,6 +5897,7 @@ return [
         'tip' => 'Dos plat au départ, comme un soulevé de terre.',
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
+        'aka' => [],
     ],
     [
         'slug' => 'man-maker',
@@ -5356,6 +5915,7 @@ return [
         'tip' => 'Pieds écartés en planche pour ne pas tourner.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'renegade-row',
@@ -5373,6 +5933,7 @@ return [
         'tip' => 'Plus tes pieds sont écartés, plus c\'est stable.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'box-jump',
@@ -5390,6 +5951,7 @@ return [
         'tip' => 'Descends en marchant plutôt qu\'en sautant pour épargner les tendons.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'step-up-box',
@@ -5407,6 +5969,7 @@ return [
         'tip' => 'Ne t\'aide pas de la jambe au sol.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'burpee-broad-jump',
@@ -5424,6 +5987,7 @@ return [
         'tip' => 'Atterris en souplesse, genoux dans l\'axe des pieds.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'bear-crawl',
@@ -5441,6 +6005,7 @@ return [
         'tip' => 'Petits pas, genoux toujours près du sol.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'sac-de-frappe-enchainements',
@@ -5458,6 +6023,7 @@ return [
         'tip' => 'Protège tes poignets : poing bien serré, poignet aligné.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['Punching Bag', 'Boxing Bag'],
     ],
     [
         'slug' => 'squat-trx',
@@ -5475,6 +6041,7 @@ return [
         'tip' => 'Idéal pour apprendre un squat profond.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => ['TRX Squat'],
     ],
     [
         'slug' => 'fente-bulgare-trx',
@@ -5492,6 +6059,7 @@ return [
         'tip' => 'Genou avant dans l\'axe du pied.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'landmine-rotation',
@@ -5509,6 +6077,7 @@ return [
         'tip' => 'Bras tendus, ce sont les hanches et le buste qui tournent.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Landmine Twist'],
     ],
     [
         'slug' => 'rotations-epaules',
@@ -5526,6 +6095,7 @@ return [
         'tip' => 'Garde la nuque longue, sans hausser la tête.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'cercles-de-bras',
@@ -5543,6 +6113,7 @@ return [
         'tip' => 'Épaules basses, loin des oreilles.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'rotations-de-hanches',
@@ -5561,6 +6132,7 @@ return [
         'tip' => 'Le bassin reste face à l\'avant.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'rotations-de-chevilles',
@@ -5578,6 +6150,7 @@ return [
         'tip' => null,
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'balanciers-de-jambe',
@@ -5595,6 +6168,7 @@ return [
         'tip' => 'Buste droit : c\'est la hanche qui bouge, pas le dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'worlds-greatest-stretch',
@@ -5612,6 +6186,7 @@ return [
         'tip' => 'Genou arrière tendu, hanches basses pendant la rotation.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'cat-cow',
@@ -5629,6 +6204,7 @@ return [
         'tip' => 'Bouge vertèbre par vertèbre, sans à-coups.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'mobilite-hanches-90-90',
@@ -5646,6 +6222,7 @@ return [
         'tip' => 'Aide-toi des mains au sol au début.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'ouverture-thoracique',
@@ -5663,6 +6240,7 @@ return [
         'tip' => 'Les genoux restent collés au sol.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'squat-profond-tenu',
@@ -5680,6 +6258,7 @@ return [
         'tip' => 'Tiens-toi à un montant de cage si les talons décollent.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'mobilite-inchworm',
@@ -5697,6 +6276,7 @@ return [
         'tip' => 'Plie légèrement les genoux si tes ischios tirent trop.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'dislocations-epaules',
@@ -5714,6 +6294,7 @@ return [
         'tip' => 'Élargis la prise si les coudes plient.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'mobilite-cheville-genou-avant',
@@ -5731,6 +6312,7 @@ return [
         'tip' => 'Le talon ne décolle jamais.',
         'images' => ['0.jpg'],
         'credit' => 'Davidgj32 — CC BY-SA 4.0 (wger)',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-pectoraux-mur',
@@ -5748,6 +6330,7 @@ return [
         'tip' => 'Monte ou baisse le coude pour cibler le haut ou le bas des pectoraux.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-epaule-bras-croise',
@@ -5765,6 +6348,7 @@ return [
         'tip' => 'Garde l\'épaule basse, sans tourner le buste.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-triceps',
@@ -5782,6 +6366,7 @@ return [
         'tip' => 'Ne cambre pas le bas du dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-biceps',
@@ -5799,6 +6384,7 @@ return [
         'tip' => 'Coudes tendus, buste droit.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-avant-bras',
@@ -5816,6 +6402,7 @@ return [
         'tip' => 'Reste progressif : le poignet est fragile.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'suspension-passive',
@@ -5833,6 +6420,7 @@ return [
         'tip' => 'Lâche la barre dès que la prise faiblit.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Dead Hang'],
     ],
     [
         'slug' => 'posture-de-l-enfant',
@@ -5850,6 +6438,7 @@ return [
         'tip' => 'Glisse les mains d\'un côté pour étirer davantage un flanc.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-trapezes-cou',
@@ -5867,6 +6456,7 @@ return [
         'tip' => 'Garde l\'épaule opposée basse, sans tirer fort.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-genoux-poitrine',
@@ -5884,6 +6474,7 @@ return [
         'tip' => 'Prends les jambes sous les genoux, pas dessus.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'torsion-lombaire-allongee',
@@ -5901,6 +6492,7 @@ return [
         'tip' => 'Les deux épaules restent au sol.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-figure-4',
@@ -5918,6 +6510,7 @@ return [
         'tip' => 'Pousse le genou croisé vers l\'extérieur pour intensifier.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-pigeon',
@@ -5935,6 +6528,7 @@ return [
         'tip' => 'Si le genou avant tire, ramène le pied vers la hanche.',
         'images' => ['0.jpg'],
         'credit' => 'Davidgj32 — CC BY-SA 4.0 (wger)',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-fente-basse',
@@ -5952,6 +6546,7 @@ return [
         'tip' => 'Ne creuse pas le bas du dos : rentre légèrement le ventre.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-quadriceps-debout',
@@ -5969,6 +6564,7 @@ return [
         'tip' => 'Garde le buste droit, sans cambrer.',
         'images' => ['0.jpg'],
         'credit' => 'Davidgj32 — CC BY-SA 4.0 (wger)',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-quadriceps-allonge',
@@ -5986,6 +6582,7 @@ return [
         'tip' => 'Le genou du dessus reste aligné avec la hanche.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-ischios-assis',
@@ -6003,6 +6600,7 @@ return [
         'tip' => 'Avance le nombril vers la cuisse plutôt que d\'arrondir le dos.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-ischios-debout',
@@ -6020,6 +6618,7 @@ return [
         'tip' => 'Remonte en déroulant le dos, genoux déverrouillés.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-ischios-elastique',
@@ -6037,6 +6636,7 @@ return [
         'tip' => 'Le bassin reste plaqué au sol.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-papillon',
@@ -6054,6 +6654,7 @@ return [
         'tip' => 'Appuie doucement les coudes sur les cuisses, sans forcer.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-grand-ecart-facial',
@@ -6071,6 +6672,7 @@ return [
         'tip' => 'Rotules vers le plafond ; n\'écarte pas au-delà de la douleur.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-mollets-mur',
@@ -6088,6 +6690,7 @@ return [
         'tip' => 'Pointe du pied arrière dirigée vers le mur.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-soleaire',
@@ -6105,6 +6708,7 @@ return [
         'tip' => 'C\'est la flexion du genou qui cible le soléaire.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => [],
     ],
     [
         'slug' => 'etirement-tibias',
@@ -6122,6 +6726,7 @@ return [
         'tip' => 'Arrête si les chevilles ou les genoux font mal.',
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
+        'aka' => [],
     ],
     [
         'slug' => 'rouleau-quadriceps',
@@ -6139,6 +6744,7 @@ return [
         'tip' => 'Ne roule pas sur la rotule.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Foam Roller', 'Foam Rolling'],
     ],
     [
         'slug' => 'rouleau-ischios',
@@ -6156,6 +6762,7 @@ return [
         'tip' => 'Croise l\'autre jambe dessus pour augmenter la pression.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Foam Roller', 'Foam Rolling'],
     ],
     [
         'slug' => 'rouleau-mollets',
@@ -6173,6 +6780,7 @@ return [
         'tip' => 'Tourne le pied à gauche et à droite pour masser tout le mollet.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Foam Roller', 'Foam Rolling'],
     ],
     [
         'slug' => 'rouleau-dorsaux',
@@ -6190,6 +6798,7 @@ return [
         'tip' => null,
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Foam Roller', 'Foam Rolling'],
     ],
     [
         'slug' => 'rouleau-fessiers',
@@ -6207,6 +6816,7 @@ return [
         'tip' => 'Tiens 20 à 30 secondes sur un point sensible.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Foam Roller', 'Foam Rolling'],
     ],
     [
         'slug' => 'rouleau-bandelette-it',
@@ -6224,5 +6834,6 @@ return [
         'tip' => 'Zone souvent sensible : dose la pression avec la jambe d\'appui.',
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
+        'aka' => ['Foam Roller', 'Foam Rolling', 'IT Band'],
     ],
 ];

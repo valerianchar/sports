@@ -9,8 +9,10 @@ use App\Enums\EquipmentKind;
 use App\Enums\ExerciseMode;
 use App\Enums\Muscle;
 use App\Enums\WorkoutGoal;
+use App\Http\Requests\CompleteWorkoutRequest;
 use App\Http\Requests\SuggestWorkoutRequest;
 use App\Support\ExerciseCatalog;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -64,6 +66,23 @@ class WorkoutAssistantController extends Controller
         ];
 
         return $this->page($proposal, $request->validated());
+    }
+
+    /**
+     * Complète la séance de l'éditeur : quelques exercices de plus, dans
+     * l'esprit de ceux qu'elle a déjà. JSON — l'éditeur garde son brouillon.
+     */
+    public function complete(CompleteWorkoutRequest $request, SuggestWorkout $suggestWorkout): JsonResponse
+    {
+        $completion = $suggestWorkout->complete(
+            existing: $request->validated('items'),
+            muscles: $request->muscles(),
+            minutes: $request->integer('minutes'),
+            equipment: EquipmentKind::tryFrom((string) $request->validated('equipment')),
+            variant: $request->integer('variant'),
+        );
+
+        return response()->json($completion);
     }
 
     /**

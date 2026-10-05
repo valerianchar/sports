@@ -31,6 +31,10 @@ class SaveWorkoutRequest extends FormRequest
             'items.*.drops.*.reps' => ['required', 'integer', 'min:1', 'max:100'],
             'items.*.drops.*.weight' => ['nullable', 'numeric', 'min:0', 'max:999'],
             'items.*.drop_on' => ['nullable', 'in:last,all'],
+            // Réglages d'une machine de cardio.
+            'items.*.speed' => ['nullable', 'numeric', 'min:0.5', 'max:25'],
+            'items.*.incline' => ['nullable', 'numeric', 'min:-3', 'max:30'],
+            'items.*.level' => ['nullable', 'integer', 'min:1', 'max:30'],
             'items.*.sets' => ['required', 'integer', 'min:1', 'max:20'],
             'items.*.rest_sets' => ['required', 'integer', 'min:0', 'max:900'],
             'items.*.rest_after' => ['required', 'integer', 'min:0', 'max:900'],
@@ -94,7 +98,7 @@ class SaveWorkoutRequest extends FormRequest
     }
 
     /**
-     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, set_weights: list<float|null>|null, drops: list<array{reps: int, weight: float|null}>|null, drop_on: string|null, sets: int, rest_sets: int, rest_after: int}>
+     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, set_weights: list<float|null>|null, drops: list<array{reps: int, weight: float|null}>|null, drop_on: string|null, speed: float|null, incline: float|null, level: int|null, sets: int, rest_sets: int, rest_after: int}>
      */
     public function items(): array
     {
@@ -106,10 +110,19 @@ class SaveWorkoutRequest extends FormRequest
             'set_weights' => $this->setWeights($item),
             'drops' => $this->drops($item),
             'drop_on' => $this->drops($item) === null ? null : ($item['drop_on'] ?? 'last'),
+            'speed' => self::decimal($item['speed'] ?? null),
+            'incline' => self::decimal($item['incline'] ?? null),
+            'level' => isset($item['level']) && $item['level'] !== '' ? (int) $item['level'] : null,
             'sets' => (int) $item['sets'],
             'rest_sets' => (int) $item['rest_sets'],
             'rest_after' => (int) $item['rest_after'],
         ], $this->validated('items')));
+    }
+
+    /** Vitesse ou inclinaison, au dixième. */
+    private static function decimal(mixed $value): ?float
+    {
+        return $value === null || $value === '' ? null : round((float) $value, 1);
     }
 
     private static function kilos(mixed $value): ?float

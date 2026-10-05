@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Enums\CountdownSound;
 use App\Support\ExerciseCatalog;
+use App\Support\MachineSettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -46,6 +47,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'registration_open' => config('sport.registration_open'),
             'seconds_per_rep' => config('sport.seconds_per_rep'),
+            // Vitesse, inclinaison, niveau : ce que règle chaque machine de cardio.
+            'machine_settings' => fn (): ?array => $request->user() === null ? null : MachineSettings::forClient(),
             // Les sons du compte à rebours, pour les réglages.
             'countdown_sounds' => fn (): array => array_map(
                 fn (CountdownSound $sound): array => ['value' => $sound->value, 'label' => $sound->label()],

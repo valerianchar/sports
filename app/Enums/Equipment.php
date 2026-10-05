@@ -16,6 +16,7 @@ enum Equipment: string
     case PecDeck = 'pec-deck';
     case ShoulderPress = 'shoulder-press';
     case LateralMachine = 'lateral-machine';
+    case ShrugMachine = 'shrug-machine';
     case LatPulldown = 'lat-pulldown';
     case SeatedRow = 'seated-row';
     case PulloverMachine = 'pullover-machine';
@@ -34,14 +35,17 @@ enum Equipment: string
     case MultiHip = 'multi-hip';
     case GluteMachine = 'glute-machine';
     case HipThrustMachine = 'hip-thrust-machine';
+    case ReverseHyper = 'reverse-hyper';
     case CalfStanding = 'calf-standing';
     case CalfSeated = 'calf-seated';
+    case CalfPress = 'calf-press';
     case AbMachine = 'ab-machine';
     case RotaryTorso = 'rotary-torso';
     case HackSquat = 'hack-squat';
     case PendulumSquat = 'pendulum-squat';
     case VSquat = 'v-squat';
     case BeltSquat = 'belt-squat';
+    case SquatLunge = 'squat-lunge';
     case IsoChest = 'iso-chest';
     case IsoShoulder = 'iso-shoulder';
     case IsoRow = 'iso-row';
@@ -103,6 +107,7 @@ enum Equipment: string
             self::PecDeck => 'Pec deck / oiseau',
             self::ShoulderPress => 'Presse épaules',
             self::LateralMachine => 'Élévations latérales machine',
+            self::ShrugMachine => 'Machine à shrugs',
             self::LatPulldown => 'Tirage vertical',
             self::SeatedRow => 'Tirage horizontal',
             self::PulloverMachine => 'Pullover machine',
@@ -121,14 +126,17 @@ enum Equipment: string
             self::MultiHip => 'Multi-hip',
             self::GluteMachine => 'Machine fessiers',
             self::HipThrustMachine => 'Hip thrust machine',
+            self::ReverseHyper => 'Reverse hyper',
             self::CalfStanding => 'Mollets debout machine',
             self::CalfSeated => 'Mollets assis machine',
+            self::CalfPress => 'Calf press',
             self::AbMachine => 'Crunch machine',
             self::RotaryTorso => 'Rotation du buste',
             self::HackSquat => 'Hack squat',
             self::PendulumSquat => 'Pendulum squat',
             self::VSquat => 'V-squat',
             self::BeltSquat => 'Belt squat',
+            self::SquatLunge => 'Machine à fentes (squat lunge)',
             self::IsoChest => 'Développé iso-latéral (Hammer)',
             self::IsoShoulder => 'Presse épaules iso-latérale',
             self::IsoRow => 'Rowing iso-latéral (bas / haut)',
@@ -187,12 +195,13 @@ enum Equipment: string
     {
         return match ($this) {
             self::ChestPress, self::InclinePress, self::DeclinePress, self::PecDeck, self::ShoulderPress,
-            self::LateralMachine, self::LatPulldown, self::SeatedRow, self::PulloverMachine,
+            self::LateralMachine, self::ShrugMachine, self::LatPulldown, self::SeatedRow, self::PulloverMachine,
             self::BackMachine, self::BicepsMachine, self::TricepsMachine, self::DipsMachine, self::Assisted,
             self::LegPress, self::LegPressFortyFive, self::LegExtension, self::LegCurlSeated,
             self::LegCurlLying, self::LegCurlStanding, self::HipMachine, self::MultiHip, self::GluteMachine,
-            self::HipThrustMachine, self::CalfStanding, self::CalfSeated, self::AbMachine, self::RotaryTorso,
-            self::HackSquat, self::PendulumSquat, self::VSquat, self::BeltSquat, self::IsoChest,
+            self::HipThrustMachine, self::ReverseHyper, self::CalfStanding, self::CalfSeated, self::CalfPress,
+            self::AbMachine, self::RotaryTorso, self::HackSquat, self::PendulumSquat, self::VSquat, self::BeltSquat,
+            self::SquatLunge, self::IsoChest,
             self::IsoShoulder, self::IsoRow, self::IsoPulldown, self::TBar, self::Smith, self::Cable,
             self::Crossover => EquipmentKind::Machine,
             self::Rack, self::Barbell, self::Plate, self::EzBar, self::TrapBar, self::Dumbbells, self::Bench,

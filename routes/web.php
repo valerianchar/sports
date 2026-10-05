@@ -7,10 +7,12 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\BodyWeightController;
 use App\Http\Controllers\CustomSoundController;
 use App\Http\Controllers\ExerciseController;
+use App\Http\Controllers\ExerciseEquivalentController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\WorkoutAssistantController;
 use App\Http\Controllers\WorkoutController;
+use App\Http\Controllers\WorkoutItemSettingsController;
 use App\Http\Controllers\WorkoutItemWeightController;
 use App\Http\Controllers\WorkoutLogController;
 use Illuminate\Support\Facades\Route;
@@ -37,11 +39,16 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/', [WorkoutController::class, 'index'])->name('workouts.index');
     Route::get('/exercices', [ExerciseController::class, 'index'])->name('exercises.index');
+    // Variantes d'un exercice, pour le changer dans l'éditeur — JSON.
+    Route::get('/exercices/{exercise}/equivalents', [ExerciseEquivalentController::class, 'index'])->name('exercises.equivalents');
 
     // Avant la route paramétrée : « nouvelle » et « assistant » ne sont pas des identifiants de séance.
     Route::get('/seances/nouvelle', [WorkoutController::class, 'create'])->name('workouts.create');
     Route::get('/seances/assistant', [WorkoutAssistantController::class, 'create'])->name('workouts.assistant');
     Route::get('/seances/assistant/proposition', [WorkoutAssistantController::class, 'suggest'])->name('workouts.assistant.suggest');
+    // Compléter une séance en cours d'édition — JSON.
+    Route::post('/seances/assistant/completer', [WorkoutAssistantController::class, 'complete'])
+        ->middleware('throttle:60,1')->name('workouts.assistant.complete');
     Route::post('/seances', [WorkoutController::class, 'store'])->name('workouts.store');
     Route::get('/seances/{workout}/modifier', [WorkoutController::class, 'edit'])->name('workouts.edit');
     Route::put('/seances/{workout}', [WorkoutController::class, 'update'])->name('workouts.update');
@@ -51,6 +58,9 @@ Route::middleware('auth')->group(function () {
     // Charge changée depuis le lecteur — JSON.
     Route::patch('/seances/{workout}/charge', [WorkoutItemWeightController::class, 'update'])
         ->middleware('throttle:60,1')->name('workouts.weight.update');
+    // Réglages d'une machine de cardio changés depuis le lecteur — JSON.
+    Route::patch('/seances/{workout}/reglages', [WorkoutItemSettingsController::class, 'update'])
+        ->middleware('throttle:60,1')->name('workouts.settings.update');
 
     // Journal d'une séance terminée — JSON, rejouable.
     Route::post('/seances/{workout}/journal', [WorkoutLogController::class, 'store'])

@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Enums\CardioStyle;
 use App\Enums\EquipmentKind;
+use App\Support\MachineSettings;
 use App\Support\Stretches;
 use App\Support\WorkoutEstimate;
 use Random\Engine\Mt19937;
@@ -209,7 +210,9 @@ final class SuggestCardio
      */
     private function easy(array $pool, int $seconds): array
     {
-        return ['exercise' => $this->choose(array_values($pool), []), 'mode' => 'time', 'value' => $seconds, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => self::BETWEEN_BLOCKS];
+        $slug = $this->choose(array_values($pool), []);
+
+        return ['exercise' => $slug, 'mode' => 'time', 'value' => $seconds, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => self::BETWEEN_BLOCKS, ...MachineSettings::defaults($slug, 'easy')];
     }
 
     /**
@@ -227,7 +230,7 @@ final class SuggestCardio
             return ['exercise' => $slug, 'mode' => 'time', 'value' => 180, 'sets' => $sets, 'rest_sets' => 60, 'rest_after' => self::BETWEEN_BLOCKS];
         }
 
-        return ['exercise' => $slug, 'mode' => 'time', 'value' => max(300, (int) round($seconds / 60) * 60), 'sets' => 1, 'rest_sets' => 0, 'rest_after' => self::BETWEEN_BLOCKS];
+        return ['exercise' => $slug, 'mode' => 'time', 'value' => max(300, (int) round($seconds / 60) * 60), 'sets' => 1, 'rest_sets' => 0, 'rest_after' => self::BETWEEN_BLOCKS, ...MachineSettings::defaults($slug, 'steady')];
     }
 
     /**
@@ -257,6 +260,7 @@ final class SuggestCardio
             'sets' => $sets,
             'rest_sets' => $rest,
             'rest_after' => self::BETWEEN_BLOCKS,
+            ...MachineSettings::defaults($slug, 'hard'),
         ];
     }
 

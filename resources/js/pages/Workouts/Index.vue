@@ -104,8 +104,8 @@ function play(workout) {
                 </button>
             </article>
 
-            <p v-if="!cards.length" class="px-2 py-7 text-center text-[14px] leading-normal text-text-muted">
-                Aucune séance pour l'instant.<br />Crée ta première séance.
+            <p v-if="!cards.length" class="px-2 pt-2 pb-1 text-[14px] leading-normal text-text-muted">
+                Aucune séance pour l'instant : dis à l'assistant ce que tu veux travailler, il compose la première.
             </p>
 
             <Link :href="routes.assistant" class="flex items-center gap-4 rounded-3xl border-[1.5px] border-accent bg-accent/8 p-[18px] text-text hover:bg-accent/12">

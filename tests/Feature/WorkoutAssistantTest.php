@@ -106,7 +106,7 @@ class WorkoutAssistantTest extends TestCase
                 'X-Inertia-Partial-Data' => 'library',
             ])
             ->assertOk()
-            ->assertJsonCount(365, 'props.library');
+            ->assertJsonCount(370, 'props.library');
     }
 
     public function test_chosen_reps_and_rests_reach_the_proposal(): void

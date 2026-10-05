@@ -1,15 +1,32 @@
 <script setup>
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import BottomSheet from '../../components/BottomSheet.vue';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import ExerciseImage from '../../components/ExerciseImage.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
+import FlashToast from '../../components/FlashToast.vue';
 import { useWakeLock } from '../../composables/useWakeLock';
 import { beep, countdownSound, goSound, loadCustomSound, restSound, unlockAudio, vibrate } from '../../audio';
 import { sendLog } from '../../pendingLogs';
 import { routes } from '../../routes';
 import { patchJson } from '../../http';
 import { formatKg, formatSet, formatTonnage } from '../../format';
-import { bySlug, clamp, dropsOn, formatClock, formatWeight, setWeight, stepWeight, targetLabel, usesWeight } from '../../workout';
+import {
+    bySlug,
+    clamp,
+    dropsOn,
+    formatClock,
+    formatSetting,
+    formatWeight,
+    machineFields,
+    replaceExercise,
+    setWeight,
+    settingsLabel,
+    stepSetting,
+    stepWeight,
+    targetLabel,
+    usesWeight,
+} from '../../workout';
 
 defineOptions({ layout: null });
 
@@ -18,13 +35,16 @@ const props = defineProps({
     exercises: { type: Array, required: true },
     preferences: { type: Object, required: true },
     history: { type: Object, default: () => ({}) },
+    // Les variantes de chaque exercice : la machine est prise, on en change sur place.
+    alternatives: { type: Object, default: () => ({}) },
 });
 
 useWakeLock();
 
 const catalog = bySlug(props.exercises);
-// Copie modifiable : la charge peut changer en pleine séance.
-const items = reactive(props.workout.items.map((item) => ({ ...item })));
+const machine = usePage().props.machine_settings;
+// Copie modifiable des exercices : charge, variante et réglages changent en pleine séance.
+const items = reactive(props.workout.items.map((item) => ({ ...item, origin: item.exercise })));
 const RING_REST = 722.57;
 const RING_WORK = 753.98;
 
@@ -32,44 +52,73 @@ const RING_WORK = 753.98;
  * La séance se déroule en étapes : compte à rebours, séries, repos entre
  * séries, repos entre exercices. Une série en répétitions attend qu'on la
  * valide ; tout le reste se chronomètre.
+ *
+ * L'ordre des exercices peut changer en route — la machine est prise, on
+ * passe au suivant — : les étapes à venir se reconstruisent alors d'après
+ * l'ordre voulu et les séries déjà passées de chaque exercice. L'indice d'un
+ * exercice reste sa place dans la séance enregistrée.
  */
-function buildSteps() {
-    const steps = [];
+function upcoming(order, passed = {}) {
+    const list = [];
+    const pending = order.filter((index) => (passed[index] ?? 0) < items[index].sets);
 
-    if (props.preferences.prep_seconds > 0) {
-        steps.push({ kind: 'prep', duration: props.preferences.prep_seconds, item: 0, set: 1 });
-    }
+    pending.forEach((index, position) => {
+        const item = items[index];
 
-    items.forEach((item, index) => {
-        for (let set = 1; set <= item.sets; set++) {
-            steps.push({ kind: 'work', item: index, set, mode: item.mode, duration: item.mode === 'time' ? item.value : null });
+        for (let set = (passed[index] ?? 0) + 1; set <= item.sets; set++) {
+            list.push({ kind: 'work', item: index, set, mode: item.mode, duration: item.mode === 'time' ? item.value : null });
 
             // Drop set : les paliers suivent la série sans repos.
             if (dropsOn(item, set)) {
-                item.drops.forEach((_, drop) => steps.push({ kind: 'work', item: index, set, mode: 'reps', duration: null, drop }));
+                item.drops.forEach((_, drop) => list.push({ kind: 'work', item: index, set, mode: 'reps', duration: null, drop }));
             }
 
             if (set < item.sets && item.rest_sets > 0) {
-                steps.push({ kind: 'rest', duration: item.rest_sets, item: index, set: set + 1 });
+                list.push({ kind: 'rest', duration: item.rest_sets, item: index, set: set + 1 });
             }
         }
 
-        if (index < items.length - 1 && item.rest_after > 0) {
-            steps.push({ kind: 'rest', duration: item.rest_after, item: index + 1, set: 1, between: true });
+        const following = pending[position + 1];
+
+        if (following !== undefined && item.rest_after > 0) {
+            list.push({ kind: 'rest', duration: item.rest_after, item: following, set: (passed[following] ?? 0) + 1, between: true });
         }
     });
 
-    return steps;
+    return list;
 }
 
-const steps = buildSteps();
+function buildSteps() {
+    const list = upcoming(items.map((_, index) => index));
+
+    if (props.preferences.prep_seconds > 0 && list.length) {
+        list.unshift({ kind: 'prep', duration: props.preferences.prep_seconds, item: list[0].item, set: 1 });
+    }
+
+    return list;
+}
+
+/** Séries principales passées de chaque exercice (les paliers de drop n'en sont pas). */
+function countPassed(list) {
+    const passed = {};
+
+    for (const s of list) {
+        if (s.kind === 'work' && s.drop === undefined) {
+            passed[s.item] = (passed[s.item] ?? 0) + 1;
+        }
+    }
+
+    return passed;
+}
+
+const initialSteps = buildSteps();
 
 /*
  * Une séance ne compte dans les statistiques que menée au bout : toutes les
  * séries prévues faites (les paliers de drop prolongent une série, ils ne
  * s'ajoutent pas au compte).
  */
-const plannedSets = steps.filter((s) => s.kind === 'work' && s.drop === undefined).length;
+const plannedSets = initialSteps.filter((s) => s.kind === 'work' && s.drop === undefined).length;
 
 /*
  * Tous les instants sont absolus (Date.now) : un onglet endormi ou un écran
@@ -77,6 +126,7 @@ const plannedSets = steps.filter((s) => s.kind === 'work' && s.drop === undefine
  */
 const state = reactive({
     clientId: crypto.randomUUID(),
+    steps: initialSteps,
     index: 0,
     paused: false,
     pausedAt: null,
@@ -109,7 +159,7 @@ let timer = null;
  * séance en cours est gardée sur le téléphone et reprend en pause, là où elle
  * s'était arrêtée. Au-delà de quatre heures, on repart de zéro.
  */
-const STORAGE_KEY = 'seance.player.v1';
+const STORAGE_KEY = 'seance.player.v2';
 const RESUME_WINDOW = 4 * 60 * 60 * 1000;
 let lastSaved = 0;
 
@@ -121,7 +171,7 @@ function persist(force = false) {
     lastSaved = Date.now();
 
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ workoutId: props.workout.id, savedAt: lastSaved, state }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ workoutId: props.workout.id, savedAt: lastSaved, state, items }));
     } catch {
         // Pas de stockage : la séance ne survivra pas à un rechargement, rien de plus.
     }
@@ -143,11 +193,13 @@ function restore() {
             return false;
         }
 
-        if (saved.state.index >= steps.length) {
+        if (!saved.state.steps?.length || saved.state.index >= saved.state.steps.length || saved.items?.length !== items.length) {
             return false;
         }
 
         Object.assign(state, saved.state);
+        // Variantes et charges choisies en route.
+        saved.items.forEach((item, index) => Object.assign(items[index], item));
 
         // Reprise toujours en pause : on ne relance pas un chrono dans le dos de quelqu'un.
         if (!state.paused) {
@@ -182,7 +234,7 @@ function buzz(pattern) {
 
 function goTo(target, countSet = false) {
     const at = Date.now();
-    const current = steps[state.index];
+    const current = state.steps[state.index];
     lastBeep = null;
 
     // Un palier de drop prolonge la série : il ne compte pas comme une série de plus.
@@ -198,13 +250,13 @@ function goTo(target, countSet = false) {
 
     now.value = at;
 
-    if (target >= steps.length) {
+    if (target >= state.steps.length) {
         finish(at);
 
         return;
     }
 
-    const step = steps[target];
+    const step = state.steps[target];
     state.repsDone = null;
     Object.assign(state, {
         index: target,
@@ -335,7 +387,7 @@ function tick() {
     }
 
     const at = Date.now();
-    const step = steps[state.index];
+    const step = state.steps[state.index];
 
     if (step.duration != null) {
         const remaining = state.endAt - at;
@@ -467,6 +519,10 @@ function setWeightTo(weight) {
         payload = { position, weight };
     }
 
+    if (!isOriginal(position)) {
+        return;
+    }
+
     const key = JSON.stringify([position, current.drop, current.set]);
     clearTimeout(weightTimers[key]);
     weightTimers[key] = setTimeout(() => {
@@ -485,7 +541,7 @@ const completeSet = () => {
 const next = () => goTo(state.index + 1);
 const previous = () => goTo(Math.max(0, state.index - 1));
 const restartStep = () => goTo(state.index);
-const finishNow = () => goTo(steps.length);
+const finishNow = () => goTo(state.steps.length);
 
 function quit() {
     forget();
@@ -497,9 +553,197 @@ function openDetail() {
     detail.value = step.value ? items[step.value.item].exercise : null;
 }
 
+// ---------------------------------------------------------------- ordre des exercices
+
+/*
+ * Le programme de la séance : les exercices passés, puis ceux à venir dans
+ * l'ordre où le lecteur les jouera — le premier est celui en cours (ou celui
+ * qui suit le repos).
+ */
+const program = computed(() => {
+    const past = state.steps.slice(0, state.index);
+    const ahead = [...new Set(state.steps.slice(state.index).map((s) => s.item))];
+    const done = [...new Set(past.map((s) => s.item))].filter((index) => !ahead.includes(index));
+
+    return { done, ahead, passed: countPassed(past) };
+});
+
+/** La dernière étape (exclue) du bloc de l'exercice en cours, repos entre séries compris. */
+function blockEnd(at) {
+    const head = state.steps[at].item;
+    let end = at + 1;
+
+    while (end < state.steps.length && state.steps[end].item === head && !state.steps[end].between) {
+        end++;
+    }
+
+    return end;
+}
+
+/*
+ * Rejoue la suite de la séance dans un nouvel ordre. Si l'exercice en cours
+ * reste en tête, on ne touche qu'à ce qui le suit : son chrono continue. Sinon
+ * le nouvel exercice démarre aussitôt — pendant un repos ou le compte à
+ * rebours, ceux-ci continuent et y mènent.
+ */
+function rearrange(order, { restart = false } = {}) {
+    const at = state.index;
+    const current = state.steps[at];
+
+    if (!current) {
+        return;
+    }
+
+    if (order[0] === current.item && !restart) {
+        const end = blockEnd(at);
+        const passed = countPassed(state.steps.slice(0, end));
+        let tail = upcoming(order.slice(1), passed);
+        const head = items[current.item];
+
+        if (tail.length && head.rest_after > 0) {
+            tail = [{ kind: 'rest', duration: head.rest_after, item: tail[0].item, set: tail[0].set, between: true }, ...tail];
+        }
+
+        state.steps = [...state.steps.slice(0, end), ...tail];
+        persist(true);
+
+        return;
+    }
+
+    let future = upcoming(order, countPassed(state.steps.slice(0, at)));
+
+    if (future.length && (current.kind === 'rest' || current.kind === 'prep')) {
+        const left = Math.max(1, Math.ceil(remaining.value / 1000));
+        future = [{ ...current, duration: left, item: future[0].item, set: future[0].set, between: current.kind === 'rest' ? true : undefined }, ...future];
+    }
+
+    state.steps = [...state.steps.slice(0, at), ...future];
+    goTo(at);
+}
+
+/** Cet exercice maintenant : il passe en tête, les autres gardent leur ordre. */
+function doNow(index) {
+    rearrange([index, ...program.value.ahead.filter((other) => other !== index)]);
+    programOpen.value = false;
+    toast(`C'est parti : ${catalog[items[index].exercise].name}`);
+}
+
+/*
+ * La machine est prise : l'exercice passe après les autres, mais avant les
+ * étirements de fin.
+ */
+function later(index) {
+    const others = program.value.ahead.filter((other) => other !== index);
+    let at = others.length;
+
+    while (at > 0 && catalog[items[others[at - 1]].exercise]?.group === 'mobilite') {
+        at--;
+    }
+
+    if (at === 0) {
+        toast('Plus rien d’autre avant : il reste en tête.');
+
+        return;
+    }
+
+    rearrange([...others.slice(0, at), index, ...others.slice(at)]);
+    programOpen.value = false;
+    toast(`${catalog[items[index].exercise].name} : plus tard`);
+}
+
+/** Monte ou descend un exercice à venir, sans toucher à celui en cours. */
+function shift(position, direction) {
+    const ahead = [...program.value.ahead];
+    const target = position + direction;
+
+    if (position < 1 || target < 1 || target >= ahead.length) {
+        return;
+    }
+
+    [ahead[position], ahead[target]] = [ahead[target], ahead[position]];
+    rearrange(ahead);
+}
+
+const programOpen = ref(false);
+
+function toast(message) {
+    document.dispatchEvent(new CustomEvent('seance:toast', { detail: { message, error: false } }));
+}
+
+// ---------------------------------------------------------------- variantes
+
+/*
+ * Changer un exercice pour aujourd'hui : les variantes préparées par le
+ * serveur (mêmes muscles), sans réseau. La séance enregistrée, elle, ne
+ * change pas.
+ */
+const swapping = ref(null);
+const swapOpen = computed({
+    get: () => swapping.value !== null,
+    set: (open) => {
+        if (!open) {
+            swapping.value = null;
+        }
+    },
+});
+
+const swapChoices = computed(() => {
+    if (swapping.value === null) {
+        return [];
+    }
+
+    const item = items[swapping.value];
+    const inSession = items.map((other) => other.exercise);
+
+    return [item.origin, ...(props.alternatives[item.origin] ?? [])]
+        .filter((slug) => slug !== item.exercise && !inSession.includes(slug) && catalog[slug])
+        .map((slug) => catalog[slug]);
+});
+
+function swap(slug) {
+    const index = swapping.value;
+    const item = items[index];
+    const before = catalog[item.exercise].name;
+
+    Object.assign(items[index], replaceExercise(item, catalog[slug], catalog[item.exercise], machine));
+    swapping.value = null;
+    programOpen.value = false;
+
+    // La mesure a pu changer (durée ↔ répétitions) : les étapes de cet exercice se refont.
+    rearrange(program.value.ahead, { restart: state.steps[state.index]?.item === index });
+    toast(`${before} → ${catalog[slug].name}`);
+}
+
+/** Une variante du jour n'est pas l'exercice enregistré : sa charge et ses réglages ne se gardent pas. */
+const isOriginal = (index) => items[index].exercise === items[index].origin;
+
+// ---------------------------------------------------------------- réglages de machine
+
+const settingFields = computed(() => machineFields(exercise.value, machine));
+const settingTimers = {};
+
+function changeSetting(field, direction) {
+    const position = step.value.item;
+    const it = items[position];
+    it[field] = stepSetting(field, it[field], direction, machine);
+
+    if (!isOriginal(position)) {
+        return;
+    }
+
+    clearTimeout(settingTimers[`${position}-${field}`]);
+    settingTimers[`${position}-${field}`] = setTimeout(() => {
+        patchJson(props.workout.urls.settings, { position, [field]: it[field] }).catch(() => {
+            // Hors réseau : le réglage vaut pour aujourd'hui seulement.
+        });
+    }, 700);
+}
+
+const itemSettings = (index) => settingsLabel(items[index], machineFields(catalog[items[index].exercise], machine));
+
 // ---------------------------------------------------------------- affichage
 
-const step = computed(() => (state.done ? null : steps[state.index]));
+const step = computed(() => (state.done ? null : state.steps[state.index]));
 const item = computed(() => (step.value ? items[step.value.item] : null));
 const exercise = computed(() => (item.value ? catalog[item.value.exercise] : null));
 
@@ -521,17 +765,17 @@ const fraction = computed(() => (state.currentDuration ? clamp(remaining.value /
 const seconds = computed(() => Math.ceil(remaining.value / 1000));
 const elapsed = computed(() => formatClock((state.elapsedBase + (state.paused ? 0 : now.value - state.startAt)) / 1000));
 const setLabel = computed(() => (item.value ? `Série ${step.value.set} / ${item.value.sets}` : ''));
-const counter = computed(() => (step.value ? `Exercice ${step.value.item + 1} / ${items.length}` : ''));
-const progress = computed(() => `${((state.index / steps.length) * 100).toFixed(1)}%`);
+const counter = computed(() => (step.value ? `Exercice ${Math.min(items.length, program.value.done.length + 1)} / ${items.length}` : ''));
+const progress = computed(() => `${((state.index / state.steps.length) * 100).toFixed(1)}%`);
 
 const nextLabel = computed(() => {
-    const upcoming = steps.findIndex((s, index) => index > state.index && s.kind === 'work');
+    const upcoming = state.steps.findIndex((s, index) => index > state.index && s.kind === 'work');
 
     if (upcoming === -1) {
         return 'Fin de la séance';
     }
 
-    const s = steps[upcoming];
+    const s = state.steps[upcoming];
     const i = items[s.item];
 
     const label = s.drop !== undefined ? `drop ${s.drop + 1}/${i.drops.length}` : `série ${s.set}/${i.sets}`;
@@ -549,7 +793,7 @@ const detailExercise = computed(() => (detail.value ? catalog[detail.value] : nu
  * Bluetooth.
  */
 function onKey(event) {
-    if (state.done || detail.value || event.code !== 'Space' || /INPUT|TEXTAREA/.test(document.activeElement?.tagName)) {
+    if (state.done || detail.value || programOpen.value || swapping.value !== null || event.code !== 'Space' || /INPUT|TEXTAREA/.test(document.activeElement?.tagName)) {
         return;
     }
 
@@ -592,16 +836,25 @@ onUnmounted(() => {
     >
         <template v-if="!state.done">
             <!-- En-tête : quitter (met en pause), exercice courant, temps total. -->
-            <div class="flex items-center justify-between px-5 pt-2 pb-3">
-                <button type="button" class="iconbtn size-10" aria-label="Mettre en pause" @click="pause">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            <!-- Assez bas et assez gros pour un pouce, sous l'encoche et la barre d'état. -->
+            <div class="flex items-center justify-between px-4 pt-3 pb-2.5">
+                <button type="button" class="iconbtn size-12 bg-surface-2!" aria-label="Mettre en pause ou quitter" @click="pause">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
                 </button>
-                <span class="text-[12px] font-extrabold tracking-[0.12em] text-text-soft uppercase">{{ counter }}</span>
+                <button
+                    type="button"
+                    class="flex h-11 items-center gap-1.5 rounded-full bg-surface px-4 text-[12px] font-extrabold tracking-[0.12em] text-text-soft uppercase"
+                    aria-label="Programme de la séance : changer l'ordre des exercices"
+                    @click="programOpen = true"
+                >
+                    {{ counter }}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
                 <span class="min-w-10 text-right font-display text-[20px] font-semibold text-text-muted tabular-nums">
                     {{ formatClock(activeMilliseconds / 1000) }}
                 </span>
             </div>
-            <div class="mx-5 h-1 overflow-hidden rounded-sm bg-surface-2" role="progressbar" :aria-valuenow="state.index" :aria-valuemax="steps.length">
+            <div class="mx-5 h-1 overflow-hidden rounded-sm bg-surface-2" role="progressbar" :aria-valuenow="state.index" :aria-valuemax="state.steps.length">
                 <div class="h-full rounded-sm bg-text transition-[width] duration-300" :style="{ width: progress }" />
             </div>
 
@@ -613,6 +866,10 @@ onUnmounted(() => {
                     <span class="mt-2.5 text-[13px] font-semibold text-text-muted">Premier exercice</span>
                     <span class="display text-[34px] font-extrabold">{{ exercise.name }}</span>
                     <span class="text-[14px] font-semibold text-text-soft">{{ target(step) }}</span>
+                    <span v-if="itemSettings(step.item)" class="text-[13px] font-bold text-accent">{{ itemSettings(step.item) }}</span>
+                    <button type="button" class="mt-3 h-10 rounded-full bg-surface px-4 text-[13px] font-extrabold text-accent" @click="programOpen = true">
+                        Machine prise ? Changer d'exercice
+                    </button>
                 </template>
 
                 <!-- Repos -->
@@ -649,9 +906,13 @@ onUnmounted(() => {
                             <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-text-muted">À SUIVRE</span>
                             <span class="text-[16px] font-extrabold">{{ exercise.name }}</span>
                             <span class="text-[12.5px] font-semibold text-text-soft">{{ setLabel }} · {{ target({ ...step, kind: 'work' }) }}</span>
+                            <span v-if="itemSettings(step.item)" class="text-[12px] font-bold text-accent">{{ itemSettings(step.item) }}</span>
                         </span>
                         <button type="button" class="iconbtn size-[38px] bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" aria-label="Comment faire" @click="openDetail">i</button>
                     </div>
+                    <button v-if="step.between" type="button" class="mt-2 h-10 rounded-full bg-surface px-4 text-[13px] font-extrabold text-accent" @click="programOpen = true">
+                        Machine prise ? Changer d'exercice
+                    </button>
                 </template>
 
                 <!-- Effort -->
@@ -669,9 +930,28 @@ onUnmounted(() => {
                                 Dernière fois : {{ lastTimeText }}
                             </span>
                         </span>
-                        <button type="button" class="h-[38px] shrink-0 rounded-full bg-surface-2 px-3.5 text-[13px] font-extrabold text-accent" @click="openDetail">
-                            Comment faire ?
+                        <button type="button" class="iconbtn size-[38px] shrink-0 bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" aria-label="Comment faire" @click="openDetail">i</button>
+                        <button
+                            v-if="step.drop === undefined"
+                            type="button"
+                            class="h-[38px] shrink-0 rounded-full bg-surface-2 px-3.5 text-[13px] font-extrabold text-accent"
+                            aria-label="Machine prise : changer d'exercice ou d'ordre"
+                            @click="programOpen = true"
+                        >
+                            Changer
                         </button>
+                    </div>
+
+                    <!-- Réglages de la machine de cardio : vitesse, inclinaison, niveau. -->
+                    <div v-if="settingFields.length" class="mt-2.5 flex w-full justify-center gap-2">
+                        <div v-for="field in settingFields" :key="field" class="flex items-center gap-1 rounded-full bg-surface p-1">
+                            <button type="button" class="iconbtn size-9 bg-surface-2! text-[18px] font-semibold" :aria-label="`${machine.fields[field].label} : moins`" @click="changeSetting(field, -1)">−</button>
+                            <span class="flex min-w-[64px] flex-col items-center leading-none">
+                                <span class="font-display text-[20px] font-extrabold tabular-nums" aria-live="polite">{{ item[field] === null || item[field] === undefined ? '—' : formatSetting(field, item[field]) }}</span>
+                                <span class="mt-0.5 text-[9.5px] font-extrabold tracking-[0.08em] text-text-muted uppercase">{{ machine.fields[field].label }}</span>
+                            </span>
+                            <button type="button" class="iconbtn size-9 bg-surface-2! text-[18px] font-semibold" :aria-label="`${machine.fields[field].label} : plus`" @click="changeSetting(field, 1)">+</button>
+                        </div>
                     </div>
 
                     <template v-if="step.mode === 'reps'">
@@ -834,6 +1114,83 @@ onUnmounted(() => {
             </p>
             <button type="button" class="btn-accent h-[58px] text-[22px]" @click="quit">Retour aux séances</button>
         </div>
+
+        <BottomSheet
+            v-model:open="programOpen"
+            title="Programme"
+            description="Machine prise ? Passe un exercice plus tard, fais-en un autre maintenant, ou prends une variante. Les étirements restent pour la fin."
+        >
+            <template v-if="program.ahead.length">
+                <div class="flex flex-col gap-2.5 rounded-2xl border-[1.5px] border-accent bg-accent/8 p-3">
+                    <div class="flex items-center gap-3">
+                        <span class="size-12 shrink-0 overflow-hidden rounded-[10px]">
+                            <img :src="catalog[items[program.ahead[0]].exercise].images[0]" alt="" class="size-full object-cover" />
+                        </span>
+                        <span class="flex min-w-0 flex-col gap-0.5">
+                            <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-accent uppercase">{{ step?.kind === 'work' ? 'En cours' : 'À suivre' }}</span>
+                            <span class="text-[15px] leading-tight font-extrabold">{{ catalog[items[program.ahead[0]].exercise].name }}</span>
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" class="btn-soft h-11 text-[14px]" :disabled="program.ahead.length < 2" @click="later(program.ahead[0])">Plus tard</button>
+                        <button type="button" class="btn-soft h-11 text-[14px] text-accent" @click="swapping = program.ahead[0]">Une variante</button>
+                    </div>
+                </div>
+
+                <ol v-if="program.ahead.length > 1" class="flex flex-col gap-2" aria-label="Exercices à venir">
+                    <li v-for="(index, position) in program.ahead.slice(1)" :key="index" class="flex flex-col gap-1.5 rounded-2xl bg-surface p-2.5">
+                        <div class="flex items-center gap-2">
+                            <span class="w-6 shrink-0 text-center font-display text-[18px] font-extrabold text-text-muted">{{ program.done.length + position + 2 }}</span>
+                            <span data-name class="min-w-0 flex-1 text-[14px] leading-tight font-bold">{{ catalog[items[index].exercise].name }}</span>
+                            <button type="button" class="h-9 shrink-0 rounded-full bg-accent px-3.5 text-[12.5px] font-extrabold text-on-accent" @click="doNow(index)">Maintenant</button>
+                        </div>
+                        <div class="flex items-center gap-1.5 pl-8">
+                            <span class="min-w-0 flex-1 truncate text-[11.5px] font-medium text-text-muted">
+                                {{ items[index].sets - (program.passed[index] ?? 0) }} série{{ items[index].sets - (program.passed[index] ?? 0) > 1 ? 's' : '' }} · {{ targetLabel(items[index]) }}<template v-if="itemSettings(index)"> · {{ itemSettings(index) }}</template>
+                            </span>
+                            <button type="button" class="iconbtn size-9 bg-surface-2! text-text-soft disabled:opacity-30" :aria-label="`Monter ${catalog[items[index].exercise].name}`" :disabled="position === 0" @click="shift(position + 1, -1)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6" /></svg>
+                            </button>
+                            <button type="button" class="iconbtn size-9 bg-surface-2! text-text-soft disabled:opacity-30" :aria-label="`Descendre ${catalog[items[index].exercise].name}`" :disabled="position === program.ahead.length - 2" @click="shift(position + 1, 1)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+                            </button>
+                            <button type="button" class="iconbtn size-9 bg-surface-2! text-accent" :aria-label="`Variante de ${catalog[items[index].exercise].name}`" @click="swapping = index">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14.3-3.3M20 4v5h-5M20 15a8 8 0 0 1-14.3 3.3M4 20v-5h5" /></svg>
+                            </button>
+                        </div>
+                    </li>
+                </ol>
+            </template>
+
+            <p v-if="program.done.length" class="text-[12.5px] font-medium text-text-muted">
+                <span class="font-extrabold text-text-soft">Déjà fait ✓</span>
+                {{ program.done.map((index) => catalog[items[index].exercise].name).join(' · ') }}
+            </p>
+        </BottomSheet>
+
+        <BottomSheet
+            v-model:open="swapOpen"
+            title="Une variante"
+            :description="swapping !== null ? `À la place de « ${catalog[items[swapping].exercise].name} », pour aujourd'hui : mêmes muscles, autre machine.` : ''"
+        >
+            <p v-if="!swapChoices.length" class="text-[14px] font-semibold text-text-muted">Pas de variante pour cet exercice.</p>
+            <ul class="flex flex-col gap-2">
+                <li v-for="choice in swapChoices" :key="choice.slug">
+                    <button type="button" class="flex w-full items-center gap-3 rounded-2xl bg-surface p-2 text-left hover:bg-surface-hover" @click="swap(choice.slug)">
+                        <span class="size-12 shrink-0 overflow-hidden rounded-[10px]">
+                            <img :src="choice.images[0]" alt="" class="size-full object-cover" />
+                        </span>
+                        <span class="flex min-w-0 flex-col gap-0.5">
+                            <span class="text-[14.5px] leading-tight font-bold">{{ choice.name }}<span v-if="choice.slug === items[swapping].origin" class="text-text-muted"> (prévu)</span></span>
+                            <span class="text-[12px] font-medium text-text-muted">{{ choice.equipment_label }}</span>
+                        </span>
+                    </button>
+                </li>
+            </ul>
+        </BottomSheet>
+
+        <!-- Le lecteur n'a pas de mise en page : il porte lui-même les messages. -->
+        <FlashToast />
 
         <ExerciseSheet
             v-if="detailExercise"

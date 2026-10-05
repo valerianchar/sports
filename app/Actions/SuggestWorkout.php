@@ -8,6 +8,7 @@ use App\Enums\Muscle;
 use App\Enums\MuscleGroup;
 use App\Enums\WorkoutGoal;
 use App\Support\ExerciseCatalog;
+use App\Support\MachineSettings;
 use App\Support\Stretches;
 use App\Support\WorkoutEstimate;
 use Illuminate\Support\Collection;
@@ -52,7 +53,7 @@ final class SuggestWorkout
         'ecarte-vis-a-vis', 'ecarte-halteres', 'dips-pectoraux', 'pompes', 'presse-pectorale-convergente',
         'developpe-incline-machine', 'tirage-vertical-prise-large', 'tirage-vertical-prise-serree', 'rowing-assis',
         't-bar-row', 'rowing-barre', 'rowing-haltere-un-bras', 'tractions', 'tractions-assistees', 'pull-over-poulie',
-        'souleve-de-terre', 'extensions-lombaires', 'low-row-iso-lateral', 'developpe-epaules-machine',
+        'souleve-de-terre', 'extensions-lombaires', 'low-row-iso-lateral', 'presse-a-mollets', 'developpe-epaules-machine',
         'developpe-militaire', 'developpe-arnold', 'elevations-laterales', 'elevations-laterales-poulie',
         'oiseau-inverse', 'face-pull', 'elevations-frontales', 'shrugs', 'curl-barre', 'curl-halteres', 'curl-marteau',
         'curl-poulie', 'curl-pupitre', 'extension-triceps-poulie', 'barre-au-front', 'dips-triceps',
@@ -70,7 +71,7 @@ final class SuggestWorkout
     /** Avancés ou très techniques : à proposer seulement en dernier recours. */
     private const ADVANCED = [
         'handstand-push-up', 'pistol-squat', 'sissy-squat', 'nordic-curl', 'glute-ham-raise', 'l-sit', 'dragon-flag',
-        'turkish-get-up', 'windmill-kettlebell', 'dips-anneaux', 'planche-commando',
+        'turkish-get-up', 'windmill-kettlebell', 'dips-anneaux', 'planche-commando', 'reverse-hyper',
     ];
 
     /** Accessoires d'appoint, peu indiqués pour la charge principale d'une séance en salle. */
@@ -126,6 +127,77 @@ final class SuggestWorkout
     }
 
     /**
+     * Complète une séance commencée à la main : de nouveaux exercices pour
+     * `minutes` de plus, qui travaillent les muscles demandés — à défaut ceux
+     * que la séance travaille déjà — en tenant compte de ce qu'elle contient
+     * (muscles déjà servis, variantes déjà présentes). Les réglages suivent
+     * ceux de la séance : mêmes répétitions, séries et repos.
+     *
+     * @param  list<array<string, mixed>>  $existing  les exercices déjà dans la séance
+     * @param  list<Muscle>  $muscles
+     * @return array{items: list<array<string, mixed>>, muscles: list<string>, seconds: int}
+     */
+    public function complete(array $existing, array $muscles, int $minutes, ?EquipmentKind $equipment = null, int $variant = 0): array
+    {
+        $this->random = new Randomizer(new Mt19937($variant));
+        $strength = array_values(array_filter(
+            $existing,
+            fn (array $item): bool => ExerciseCatalog::find($item['exercise']) !== null
+                && ! in_array(ExerciseCatalog::group($item['exercise']), self::EXCLUDED_GROUPS, true),
+        ));
+        [$this->goal, $this->settings] = $this->inferred($strength);
+
+        $targets = array_map(fn (Muscle $muscle): string => $muscle->value, $muscles);
+
+        if ($targets === []) {
+            $worked = array_merge(...array_map(fn (array $item): array => ExerciseCatalog::find($item['exercise'])['primary'], $strength));
+            $targets = $worked === [] ? self::FULL_BODY : array_values(array_unique($worked));
+        }
+
+        $budget = $minutes * 60;
+        $items = $this->order($this->fill($this->pick($targets, $budget, $this->goal, $equipment, $strength), $budget, $this->goal));
+
+        return [
+            'items' => $items,
+            'muscles' => $targets,
+            'seconds' => WorkoutEstimate::seconds($items),
+        ];
+    }
+
+    /**
+     * L'objectif et les réglages d'une séance d'après ses exercices : les
+     * répétitions les plus fréquentes disent la force (6 et moins), l'endurance
+     * (13 et plus) ou le volume.
+     *
+     * @param  list<array<string, mixed>>  $items
+     * @return array{WorkoutGoal, array{reps?: int, sets?: int, rest_sets?: int, rest_after?: int}}
+     */
+    private function inferred(array $items): array
+    {
+        $repsItems = array_values(array_filter($items, fn (array $item): bool => $item['mode'] === ExerciseMode::Reps->value));
+
+        if ($repsItems === []) {
+            return [WorkoutGoal::Hypertrophy, []];
+        }
+
+        $common = function (string $key) use ($repsItems): int {
+            $counts = array_count_values(array_map(fn (array $item): int => (int) $item[$key], $repsItems));
+            arsort($counts);
+
+            return (int) array_key_first($counts);
+        };
+
+        $reps = $common('value');
+        $goal = match (true) {
+            $reps <= 6 => WorkoutGoal::Strength,
+            $reps >= 13 => WorkoutGoal::Endurance,
+            default => WorkoutGoal::Hypertrophy,
+        };
+
+        return [$goal, ['reps' => $reps, 'sets' => $common('sets'), 'rest_sets' => $common('rest_sets'), 'rest_after' => $common('rest_after')]];
+    }
+
+    /**
      * Les remplaçants d'un exercice, du meilleur au moins bon : ceux qui
      * travaillent les mêmes muscles principaux, avec le matériel choisi, les
      * classiques en premier. Un échauffement se remplace par un autre cardio,
@@ -174,7 +246,9 @@ final class SuggestWorkout
     {
         $score = 2 * count(array_intersect($exercise['primary'], $original['primary'])) / count($original['primary'])
             - 0.5 * count(array_diff($exercise['primary'], $original['primary']))
-            + 0.3 * count(array_intersect($exercise['secondary'], $original['secondary']));
+            + 0.3 * count(array_intersect($exercise['secondary'], $original['secondary']))
+            // Des muscles secondaires en plus trahissent un autre geste : une presse ne remplace pas un écarté.
+            - 0.3 * count(array_diff($exercise['secondary'], $original['secondary'], $original['primary']));
 
         if (in_array($exercise['slug'], self::STAPLES, true)) {
             $score += 0.4;
@@ -198,15 +272,34 @@ final class SuggestWorkout
 
     /**
      * @param  list<string>  $targets
+     * @param  list<array<string, mixed>>  $existing  exercices déjà dans la séance, qu'on complète
      * @return list<array<string, mixed>>
      */
-    private function pick(array $targets, int $budget, WorkoutGoal $goal, ?EquipmentKind $equipment): array
+    private function pick(array $targets, int $budget, WorkoutGoal $goal, ?EquipmentKind $equipment, array $existing = []): array
     {
-        $pool = $this->pool($targets, $equipment);
+        $pool = $this->pool($targets, $equipment)->except(array_column($existing, 'exercise'));
         $coverage = array_fill_keys($targets, 0.0);
         // Muscles visés qui ont déjà un exercice où ils sont principaux.
         $served = [];
         $chosen = [];
+
+        // Une séance qu'on complète : ses exercices comptent déjà.
+        foreach ($existing as $item) {
+            $exercise = ExerciseCatalog::find($item['exercise']);
+
+            foreach ($exercise['primary'] as $muscle) {
+                if (isset($coverage[$muscle])) {
+                    $coverage[$muscle] += $item['sets'];
+                    $served[] = $muscle;
+                }
+            }
+
+            foreach ($exercise['secondary'] as $muscle) {
+                if (isset($coverage[$muscle])) {
+                    $coverage[$muscle] += $item['sets'] / 2;
+                }
+            }
+        }
 
         // Mieux vaut quatre séries de six bons exercices que trois de dix : autant
         // d'exercices que le temps en loge avec les répétitions et les repos choisis
@@ -216,7 +309,11 @@ final class SuggestWorkout
             + ($one['sets'] - 1) * $one['rest_sets'] + $one['rest_after'];
         // Séries fixées : seul le nombre d'exercices peut remplir le temps, d'où un plafond plus haut.
         $ceiling = isset($this->settings['sets']) ? 16 : 12;
-        $limit = max(2, min($ceiling, max(count($targets), (int) round($budget / max(60, $perExercise)))));
+        $limit = $existing === []
+            ? max(2, min($ceiling, max(count($targets), (int) round($budget / max(60, $perExercise)))))
+            // Compléter : autant que le temps ajouté en loge, au moins un.
+            : max(1, min($ceiling, (int) round($budget / max(60, $perExercise))));
+        $minimum = $existing === [] ? 2 : 1;
 
         while ($pool->isNotEmpty() && count($chosen) < $limit) {
             // Plus que les places qu'il faut pour les muscles qui attendent encore : on les sert d'abord.
@@ -227,7 +324,7 @@ final class SuggestWorkout
             $candidates = $candidates->isEmpty() ? $pool : $candidates;
 
             $best = $candidates
-                ->map(fn (array $exercise): array => [$exercise, $this->score($exercise, $targets, $coverage, $chosen, $equipment)])
+                ->map(fn (array $exercise): array => [$exercise, $this->score($exercise, $targets, $coverage, [...$existing, ...$chosen], $equipment)])
                 // Séries fixées : seul le nombre d'exercices remplit le temps, on accepte
                 // alors les variantes moins bien classées plutôt qu'une séance trop courte.
                 ->filter(fn (array $pair): bool => isset($this->settings['sets']) ? $pair[1] > -INF : $pair[1] > 0)
@@ -255,8 +352,8 @@ final class SuggestWorkout
                 $candidate[$index]['sets']--;
             }
 
-            // Au moins deux exercices, même pour une séance éclair.
-            if (count($chosen) >= 2 && WorkoutEstimate::seconds($candidate) > $budget * 1.05) {
+            // Au moins deux exercices, même pour une séance éclair (un pour compléter).
+            if (count($chosen) >= $minimum && WorkoutEstimate::seconds($candidate) > $budget * 1.05) {
                 break;
             }
 
@@ -542,7 +639,7 @@ final class SuggestWorkout
     {
         $slug = self::WARMUP_EXERCISES[$this->random->getInt(0, count(self::WARMUP_EXERCISES) - 1)];
 
-        return ['exercise' => $slug, 'mode' => 'time', 'value' => 300, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => 60];
+        return ['exercise' => $slug, 'mode' => 'time', 'value' => 300, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => 60, ...MachineSettings::defaults($slug, 'easy')];
     }
 
     /**

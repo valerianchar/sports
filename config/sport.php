@@ -33,6 +33,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'max_items' => 40,
+    // De quoi tenir une longue séance de 50 exercices, étirements compris.
+    'max_items' => 60,
 
 ];

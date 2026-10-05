@@ -174,8 +174,10 @@ class WorkoutTest extends TestCase
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Workouts/Play')
                 ->has('workout.items', 2)
-                ->has('exercises', 2)
-                ->where('exercises.0.images.0', '/images/exercices/developpe-couche/0.jpg')
+                ->where('exercises', fn ($exercises) => collect($exercises)->firstWhere('slug', 'developpe-couche')['images'][0] === '/images/exercices/developpe-couche/0.jpg')
+                // Les variantes de chaque exercice voyagent avec, pour en changer hors réseau.
+                ->where('alternatives.developpe-couche', fn ($slugs) => count($slugs) > 0)
+                ->where('exercises', fn ($exercises) => count($exercises) > 2)
                 ->where('preferences', ['sound' => false, 'prep_seconds' => 8, 'countdown_seconds' => 5, 'volume' => 80, 'countdown_sound' => 'bip', 'custom_sound_url' => null]));
     }
 

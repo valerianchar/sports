@@ -1,7 +1,7 @@
 # Séance
 
 Application de séances de salle : on compose ses séances à partir d'une bibliothèque de
-365 exercices — toutes les machines d'une salle comme L'Appart Fitness —, puis le lecteur
+370 exercices — toutes les machines d'une salle comme L'Appart Fitness —, puis le lecteur
 guide série par série — compte à rebours, effort, repos entre
 séries et entre exercices, bips et vibrations, écran maintenu allumé. Mise en œuvre de la
 maquette « Séance » (Barlow Condensed + Manrope, citron sur noir).
@@ -10,12 +10,13 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
 
 ## Ce que fait l'application
 
-- **Mes séances** — l'accueil. Trois séances d'exemple sont offertes à l'inscription (Push,
-  Jambes, HIIT 20 minutes). Chaque carte se modifie ou se supprime d'un geste ; elle donne le nombre d'exercices, de séries, une durée
+- **Mes séances** — l'accueil. Un compte neuf part sans séance : l'assistant compose la
+  première. Chaque carte se modifie ou se supprime d'un geste ; elle donne le nombre d'exercices, de séries, une durée
   estimée (3 s par répétition) et la date de la dernière fois.
-- **Exercices** — la bibliothèque, par muscle ou par machine (83 machines et équipements :
+- **Exercices** — la bibliothèque, par muscle ou par machine (87 machines et équipements :
   guidées Matrix et EGYM, machines assistées, iso-latérales Hammer Strength et Panatta,
-  squats machines, poulies, zone cross-training / Hyrox, cardio), filtrable et cherchable,
+  squats machines, poulies, zone cross-training / Hyrox, cardio), filtrable et cherchable —
+  y compris par le nom écrit sur la machine (« Seated Leg Curl », « Calf Press »… : champ `aka`),
   en dix groupes dont Fonctionnel et Mobilité. Chaque fiche montre deux images qui alternent
   (position de départ, d'arrivée), la silhouette des muscles principaux et secondaires, les
   étapes, un conseil, et un lien vers une démo vidéo.
@@ -45,11 +46,16 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   « Dégressif auto » baisse de 10 % par série) —, drop set (jusqu'à quatre paliers enchaînés
   sans repos, sur la dernière série ou sur chacune), répétitions ou durée, séries, repos entre séries,
   repos après l'exercice. Le lecteur affiche la charge et la laisse ajuster en pleine séance :
-  elle devient celle de l'exercice pour la fois suivante. Le brouillon reste dans le navigateur jusqu'à
-  « Enregistrer ».
+  elle devient celle de l'exercice pour la fois suivante. Une machine de cardio a ses réglages
+  (vitesse et inclinaison du tapis, niveau du vélo, du rameur… : `app/Support/MachineSettings.php`).
+  ⟳ change un exercice pour une variante qui travaille les mêmes muscles ; « Compléter avec
+  l'assistant » ajoute des exercices dans l'esprit de la séance (mêmes répétitions, séries,
+  repos), avant les étirements. Le brouillon reste dans le navigateur jusqu'à « Enregistrer ».
 - **Lecteur** — tout se joue dans le navigateur, sur des instants absolus : un onglet endormi
   ne fait pas dériver les minuteurs. Une séance interrompue (rechargement, appel) reprend en
-  pause. En fin de séance, le journal part au serveur ; sans réseau, il est gardé sur le
+  pause. Le programme (touche le compteur « Exercice n / N » ou « Changer ») réordonne la suite
+  en pleine séance — machine prise : « Plus tard » (avant les étirements), « Maintenant », ↑ ↓ — ou
+  prend une variante pour le jour, sans réseau ; l'exercice en cours garde son chrono. En fin de séance, le journal part au serveur ; sans réseau, il est gardé sur le
   téléphone et renvoyé plus tard, sans jamais être compté deux fois.
 - **Progrès** — seules les séances menées au bout (toutes les séries prévues faites) comptent ;
   une séance interrompue est gardée mais n'entre dans aucune statistique. Chaque série réellement faite est enregistrée (charge, répétitions faites,

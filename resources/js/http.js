@@ -36,3 +36,13 @@ export async function postJson(url, payload, method = 'POST') {
 }
 
 export const patchJson = (url, payload) => postJson(url, payload, 'PATCH');
+
+export async function getJson(url) {
+    const response = await fetch(url, { credentials: 'same-origin', headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' } });
+
+    if (!response.ok) {
+        throw new HttpError(response.status, `Erreur ${response.status}`);
+    }
+
+    return response.json();
+}

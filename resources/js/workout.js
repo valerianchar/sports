@@ -78,8 +78,74 @@ export function defaultsFor(exercise) {
     return { value: 10, sets: 3, rest_sets: 60, rest_after: 90 };
 }
 
-export function newItem(exercise) {
-    return { key: crypto.randomUUID(), exercise: exercise.slug, mode: exercise.mode, weight: null, ...defaultsFor(exercise) };
+/** `machine` : les réglages des machines partagés par le serveur (props `machine_settings`). */
+export function newItem(exercise, machine = null) {
+    return { key: crypto.randomUUID(), exercise: exercise.slug, mode: exercise.mode, weight: null, ...defaultsFor(exercise), ...machineDefaults(exercise, machine) };
+}
+
+/*
+ * Les muscles qu'on choisit dans l'assistant, par région. Tibias et cou
+ * restent à part : on ne bâtit pas une séance autour d'eux.
+ */
+export const MUSCLE_REGIONS = [
+    { label: 'Haut du corps', muscles: ['chest', 'front-deltoids', 'rear-deltoids', 'upper-back', 'trapezius', 'biceps', 'triceps', 'forearm'] },
+    { label: 'Tronc', muscles: ['abs', 'obliques', 'lower-back'] },
+    { label: 'Bas du corps', muscles: ['gluteal', 'quadriceps', 'hamstring', 'adductors', 'calves'] },
+];
+
+// ---------------------------------------------------------------- machines de cardio
+
+/** Ce que règle la machine d'un exercice : vitesse, inclinaison, niveau. */
+export const machineFields = (exercise, machine) => (exercise && machine ? (machine.equipment[exercise.equipment] ?? []) : []);
+
+/** Les réglages conseillés d'un exercice de cardio, à l'ajout. */
+export function machineDefaults(exercise, machine) {
+    const fields = machineFields(exercise, machine);
+    const defaults = machine?.defaults?.[exercise.slug] ?? {};
+
+    return Object.fromEntries(['speed', 'incline', 'level'].map((field) => [field, fields.includes(field) ? (defaults[field] ?? null) : null]));
+}
+
+/** 9.5 → « 9,5 km/h », 1 → « 1 % », 8 → « niv. 8 ». */
+export function formatSetting(field, value) {
+    const number = Number(value).toLocaleString('fr-FR', { maximumFractionDigits: 1 });
+
+    return { speed: `${number} km/h`, incline: `${number} %`, level: `niv. ${number}` }[field];
+}
+
+/** « 9 km/h · 1 % » : les réglages renseignés d'un exercice. */
+export const settingsLabel = (item, fields) =>
+    fields
+        .filter((field) => item[field] !== null && item[field] !== undefined)
+        .map((field) => formatSetting(field, item[field]))
+        .join(' · ');
+
+/** Un cran de plus ou de moins sur un réglage, dans ses bornes ; vide, on part d'une valeur moyenne. */
+export function stepSetting(field, value, direction, machine) {
+    const { min, max, step } = machine.fields[field];
+    const start = value ?? { speed: 8, incline: 1, level: 8 }[field] - direction * step;
+
+    return clamp(Math.round((Number(start) + direction * step) * 10) / 10, min, max);
+}
+
+/**
+ * Remplace l'exercice d'une ligne par une variante : séries et repos restent ;
+ * la mesure, la charge et les réglages de machine repartent de zéro quand
+ * l'exercice ne s'y prête plus.
+ */
+export function replaceExercise(item, exercise, previous, machine) {
+    const next = { ...item, exercise: exercise.slug, mode: exercise.mode, ...machineDefaults(exercise, machine) };
+
+    if (exercise.mode !== item.mode) {
+        Object.assign(next, { value: defaultsFor(exercise).value, set_weights: null, drops: null, drop_on: null });
+    }
+
+    // Une autre machine n'a pas la même pile de poids : la charge est à refaire.
+    if (!usesWeight(exercise) || previous?.equipment !== exercise.equipment) {
+        Object.assign(next, { weight: null, set_weights: null, drops: null, drop_on: null });
+    }
+
+    return next;
 }
 
 /**

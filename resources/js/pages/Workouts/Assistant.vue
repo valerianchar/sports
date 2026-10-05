@@ -10,7 +10,7 @@ import MuscleSummary from '../../components/MuscleSummary.vue';
 import Stepper from '../../components/Stepper.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
-import { bySlug, clamp, formatShort, stepRest, summary } from '../../workout';
+import { MUSCLE_REGIONS, bySlug, clamp, formatShort, machineFields, replaceExercise, settingsLabel, stepRest, summary } from '../../workout';
 
 const props = defineProps({
     proposal: { type: Object, default: null },
@@ -27,15 +27,8 @@ const page = usePage();
 const labels = computed(() => page.props.muscles);
 const catalog = computed(() => bySlug([...props.exercises, ...(props.library ?? [])]));
 
-/*
- * Les muscles proposés au choix, par région. Tibias et cou restent hors de
- * l'assistant : on ne bâtit pas une séance autour d'eux.
- */
-const regions = [
-    { label: 'Haut du corps', muscles: ['chest', 'front-deltoids', 'rear-deltoids', 'upper-back', 'trapezius', 'biceps', 'triceps', 'forearm'] },
-    { label: 'Tronc', muscles: ['abs', 'obliques', 'lower-back'] },
-    { label: 'Bas du corps', muscles: ['gluteal', 'quadriceps', 'hamstring', 'adductors', 'calves'] },
-];
+// Les muscles proposés au choix, par région.
+const regions = MUSCLE_REGIONS;
 
 const presets = [
     { label: 'Push', muscles: ['chest', 'front-deltoids', 'triceps'] },
@@ -237,13 +230,13 @@ function replace(index, slug) {
         return;
     }
 
-    let value = item.value;
+    const next = replaceExercise(item, exercise, catalog.value[item.exercise], page.props.machine_settings);
 
     if (exercise.mode !== item.mode) {
-        value = exercise.group === 'cardio' ? 300 : props.proposal.prescriptions[exercise.mode].value;
+        next.value = exercise.group === 'cardio' ? 300 : props.proposal.prescriptions[exercise.mode].value;
     }
 
-    items.value[index] = { ...item, exercise: slug, mode: exercise.mode, value };
+    items.value[index] = next;
 }
 
 function cycle(index) {
@@ -313,14 +306,11 @@ const proposalSummary = computed(() => (props.proposal ? summary(items.value, pa
 
 const prescription = (item) => {
     const effort = item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value);
+    const settings = settingsLabel(item, machineFields(catalog.value[item.exercise], page.props.machine_settings));
+    const rest = item.sets > 1 && item.rest_sets ? `repos ${formatShort(item.rest_sets)}` : '';
 
     // Un bloc de cardio d'une traite : sa durée suffit.
-    if (item.sets === 1) {
-        return effort;
-    }
-    const rest = item.sets > 1 && item.rest_sets ? ` · repos ${formatShort(item.rest_sets)}` : '';
-
-    return `${item.sets} × ${effort}${rest}`;
+    return [item.sets === 1 ? effort : `${item.sets} × ${effort}`, rest, settings].filter(Boolean).join(' · ');
 };
 </script>
 

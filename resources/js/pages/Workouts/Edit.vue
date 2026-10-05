@@ -65,6 +65,28 @@ const draftSummary = computed(() =>
     items.value.length ? summary(items.value, page.props.seconds_per_rep) : 'Ajoute des exercices pour construire ta séance.',
 );
 
+/*
+ * La fiche d'un exercice (comment s'en servir) s'ouvre aussi depuis une
+ * feuille de choix : la feuille s'efface le temps de la lecture et revient
+ * quand on ferme la fiche.
+ */
+let reopen = null;
+
+function explain(slug, close = null, back = null) {
+    close?.();
+    reopen = back;
+    detail.value = slug;
+}
+
+function closeDetail() {
+    detail.value = null;
+    reopen?.();
+    reopen = null;
+}
+
+// La ligne dont la feuille de variantes revient après la lecture d'une fiche.
+let reopenIndex = null;
+
 function update(index, changes) {
     const next = { ...items.value[index], ...changes };
 
@@ -483,7 +505,7 @@ function destroy() {
         </div>
     </div>
 
-    <ExerciseSheet v-if="detailExercise" :exercise="detailExercise" @close="detail = null" />
+    <ExerciseSheet v-if="detailExercise" :exercise="detailExercise" @close="closeDetail" />
 
     <BottomSheet
         v-model:open="swapOpen"
@@ -493,8 +515,8 @@ function destroy() {
         <p v-if="loadingEquivalents" class="text-[14px] font-semibold text-text-muted">Recherche des variantes…</p>
         <p v-else-if="!equivalents.length" class="text-[14px] font-semibold text-text-muted">Pas de variante proposée : parcours la bibliothèque.</p>
         <ul v-else class="flex flex-col gap-2">
-            <li v-for="slug in equivalents" :key="slug">
-                <button type="button" class="flex w-full items-center gap-3 rounded-2xl bg-surface p-2 text-left hover:bg-surface-hover" @click="chooseEquivalent(slug)">
+            <li v-for="slug in equivalents" :key="slug" class="flex items-center gap-2">
+                <button type="button" class="flex min-w-0 flex-1 items-center gap-3 rounded-2xl bg-surface p-2 text-left hover:bg-surface-hover" @click="chooseEquivalent(slug)">
                     <span class="size-12 shrink-0 overflow-hidden rounded-[10px]">
                         <img :src="catalog[slug].images[0]" alt="" class="size-full object-cover" />
                     </span>
@@ -503,6 +525,7 @@ function destroy() {
                         <span class="text-[12px] font-medium text-text-muted">{{ catalog[slug].equipment_label }} · {{ muscleNames(catalog[slug].primary) }}</span>
                     </span>
                 </button>
+                <button type="button" class="iconbtn size-10 shrink-0 bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" :aria-label="`Comment faire : ${catalog[slug].name}`" @click="explain(slug, () => (reopenIndex = swapping, swapping = null), () => (swapping = reopenIndex))">i</button>
             </li>
         </ul>
         <button type="button" class="btn-soft h-12 text-[14px]" @click="browseAll">Parcourir toute la bibliothèque</button>
@@ -576,12 +599,12 @@ function destroy() {
         <template v-else>
             <p v-if="!completion.proposal.items.length" class="text-[14px] font-semibold text-text-muted">Rien de plus à proposer pour ces muscles : essaie d'en choisir d'autres.</p>
             <ul class="flex flex-col gap-2">
-                <li v-for="(item, index) in completion.proposal.items" :key="`${completion.variant}-${index}`">
+                <li v-for="(item, index) in completion.proposal.items" :key="`${completion.variant}-${index}`" class="flex items-center gap-2">
                     <button
                         type="button"
                         role="checkbox"
                         :aria-checked="completion.chosen.includes(index)"
-                        class="flex w-full items-center gap-3 rounded-2xl p-2 text-left"
+                        class="flex min-w-0 flex-1 items-center gap-3 rounded-2xl p-2 text-left"
                         :class="completion.chosen.includes(index) ? 'bg-surface ring-[1.5px] ring-accent' : 'bg-surface opacity-60'"
                         @click="toggleChosen(index)"
                     >
@@ -598,6 +621,7 @@ function destroy() {
                             aria-hidden="true"
                         >✓</span>
                     </button>
+                    <button type="button" class="iconbtn size-10 shrink-0 bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" :aria-label="`Comment faire : ${catalog[item.exercise].name}`" @click="explain(item.exercise, () => (completing = false), () => (completing = true))">i</button>
                 </li>
             </ul>
             <button type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="!completion.chosen.length" @click="addCompletion">

@@ -548,6 +548,25 @@ function quit() {
     router.visit(routes.home);
 }
 
+/*
+ * La fiche d'un exercice (comment s'en servir) s'ouvre aussi depuis une
+ * feuille de choix : la feuille s'efface le temps de la lecture et revient
+ * quand on ferme la fiche.
+ */
+let reopen = null;
+
+function explain(slug, close = null, back = null) {
+    close?.();
+    reopen = back;
+    detail.value = slug;
+}
+
+function closeDetail() {
+    detail.value = null;
+    reopen?.();
+    reopen = null;
+}
+
 function openDetail() {
     pause();
     detail.value = step.value ? items[step.value.item].exercise : null;
@@ -678,6 +697,8 @@ function toast(message) {
  * change pas.
  */
 const swapping = ref(null);
+// La ligne dont la feuille de variantes revient après la lecture d'une fiche.
+let reopenIndex = null;
 const swapOpen = computed({
     get: () => swapping.value !== null,
     set: (open) => {
@@ -1126,10 +1147,11 @@ onUnmounted(() => {
                         <span class="size-12 shrink-0 overflow-hidden rounded-[10px]">
                             <img :src="catalog[items[program.ahead[0]].exercise].images[0]" alt="" class="size-full object-cover" />
                         </span>
-                        <span class="flex min-w-0 flex-col gap-0.5">
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
                             <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-accent uppercase">{{ step?.kind === 'work' ? 'En cours' : 'À suivre' }}</span>
                             <span class="text-[15px] leading-tight font-extrabold">{{ catalog[items[program.ahead[0]].exercise].name }}</span>
                         </span>
+                        <button type="button" class="iconbtn size-10 shrink-0 bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" :aria-label="`Comment faire : ${catalog[items[program.ahead[0]].exercise].name}`" @click="explain(items[program.ahead[0]].exercise, () => (programOpen = false), () => (programOpen = true))">i</button>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" class="btn-soft h-11 text-[14px]" :disabled="program.ahead.length < 2" @click="later(program.ahead[0])">Plus tard</button>
@@ -1142,6 +1164,7 @@ onUnmounted(() => {
                         <div class="flex items-center gap-2">
                             <span class="w-6 shrink-0 text-center font-display text-[18px] font-extrabold text-text-muted">{{ program.done.length + position + 2 }}</span>
                             <span data-name class="min-w-0 flex-1 text-[14px] leading-tight font-bold">{{ catalog[items[index].exercise].name }}</span>
+                            <button type="button" class="iconbtn size-10 shrink-0 bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" :aria-label="`Comment faire : ${catalog[items[index].exercise].name}`" @click="explain(items[index].exercise, () => (programOpen = false), () => (programOpen = true))">i</button>
                             <button type="button" class="h-9 shrink-0 rounded-full bg-accent px-3.5 text-[12.5px] font-extrabold text-on-accent" @click="doNow(index)">Maintenant</button>
                         </div>
                         <div class="flex items-center gap-1.5 pl-8">
@@ -1175,8 +1198,8 @@ onUnmounted(() => {
         >
             <p v-if="!swapChoices.length" class="text-[14px] font-semibold text-text-muted">Pas de variante pour cet exercice.</p>
             <ul class="flex flex-col gap-2">
-                <li v-for="choice in swapChoices" :key="choice.slug">
-                    <button type="button" class="flex w-full items-center gap-3 rounded-2xl bg-surface p-2 text-left hover:bg-surface-hover" @click="swap(choice.slug)">
+                <li v-for="choice in swapChoices" :key="choice.slug" class="flex items-center gap-2">
+                    <button type="button" class="flex min-w-0 flex-1 items-center gap-3 rounded-2xl bg-surface p-2 text-left hover:bg-surface-hover" @click="swap(choice.slug)">
                         <span class="size-12 shrink-0 overflow-hidden rounded-[10px]">
                             <img :src="choice.images[0]" alt="" class="size-full object-cover" />
                         </span>
@@ -1185,6 +1208,7 @@ onUnmounted(() => {
                             <span class="text-[12px] font-medium text-text-muted">{{ choice.equipment_label }}</span>
                         </span>
                     </button>
+                    <button type="button" class="iconbtn size-10 shrink-0 bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" :aria-label="`Comment faire : ${choice.name}`" @click="explain(choice.slug, () => (reopenIndex = swapping, swapping = null), () => (swapping = reopenIndex))">i</button>
                 </li>
             </ul>
         </BottomSheet>
@@ -1196,7 +1220,7 @@ onUnmounted(() => {
             v-if="detailExercise"
             :exercise="detailExercise"
             :close-label="state.done ? 'Fermer' : 'Retour à la séance'"
-            @close="detail = null"
+            @close="closeDetail"
         />
     </div>
 </template>

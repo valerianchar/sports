@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EquipmentKind;
 use App\Models\User;
 use App\Models\Workout;
 use App\Support\ExerciseCatalog;
@@ -124,6 +125,30 @@ class WorkoutToolsTest extends TestCase
         $this->actingAs(User::factory()->create())
             ->postJson('/seances/assistant/completer', ['items' => [], 'minutes' => 500])
             ->assertJsonValidationErrors('minutes');
+    }
+
+    public function test_completing_can_ask_for_machines_or_bodyweight(): void
+    {
+        $existing = [['exercise' => 'developpe-couche', 'mode' => 'reps', 'value' => 10, 'sets' => 3, 'rest_sets' => 90, 'rest_after' => 90]];
+
+        foreach (['machine' => EquipmentKind::Machine, 'bodyweight' => EquipmentKind::Bodyweight] as $value => $kind) {
+            $items = $this->actingAs(User::factory()->create())
+                ->postJson('/seances/assistant/completer', ['items' => $existing, 'minutes' => 20, 'muscles' => ['chest', 'upper-back'], 'equipment' => $value])
+                ->assertOk()
+                ->json('items');
+
+            $this->assertNotEmpty($items);
+
+            foreach ($items as $item) {
+                $this->assertSame($kind, ExerciseCatalog::equipment($item['exercise'])->kind(), "{$item['exercise']} ({$value})");
+            }
+        }
+    }
+
+    public function test_the_editor_offers_the_equipment_choices(): void
+    {
+        $this->actingAs(User::factory()->create())->get('/seances/nouvelle')
+            ->assertInertia(fn (AssertableInertia $page) => $page->where('equipments.0.value', 'machine')->has('equipments', 3));
     }
 
     public function test_assistant_cardio_blocks_come_with_machine_settings(): void

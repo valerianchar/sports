@@ -33,6 +33,7 @@ const props = defineProps({
     exercises: { type: Array, required: true },
     groups: { type: Array, required: true },
     maxItems: { type: Number, required: true },
+    equipments: { type: Array, default: () => [] },
 });
 
 const page = usePage();
@@ -192,7 +193,7 @@ function browseAll() {
  * les muscles qu'elle travaille — ou d'autres, au choix.
  */
 const completing = ref(false);
-const completion = reactive({ minutes: 15, muscles: [], variant: 0, proposal: null, chosen: [], loading: false, error: null });
+const completion = reactive({ minutes: 15, muscles: [], equipment: '', variant: 0, proposal: null, chosen: [], loading: false, error: null });
 const choosableMuscles = MUSCLE_REGIONS.flatMap((region) => region.muscles);
 
 const sessionMuscles = computed(() => {
@@ -221,6 +222,7 @@ async function proposeCompletion(variant = 0) {
             items: items.value.map(({ exercise, mode, value, sets, rest_sets, rest_after }) => ({ exercise, mode, value, sets, rest_sets, rest_after })),
             minutes: completion.minutes,
             muscles: completion.muscles,
+            equipment: completion.equipment || undefined,
             variant,
         });
 
@@ -526,6 +528,23 @@ function destroy() {
                         @click="completion.minutes = minutes"
                     >
                         + {{ minutes }} min
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2">
+                <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Matériel</span>
+                <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Matériel">
+                    <button
+                        v-for="choice in [{ value: '', label: 'Tout' }, ...props.equipments]"
+                        :key="choice.value"
+                        type="button"
+                        role="radio"
+                        :aria-checked="completion.equipment === choice.value"
+                        class="h-10 rounded-xl px-3 text-[13px] font-bold"
+                        :class="completion.equipment === choice.value ? 'bg-text text-bg' : 'bg-surface-2 text-text-soft'"
+                        @click="completion.equipment = choice.value"
+                    >
+                        {{ choice.label }}
                     </button>
                 </div>
             </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\SaveWorkout;
 use App\Actions\SuggestWorkout;
+use App\Enums\EquipmentKind;
 use App\Http\Requests\SaveWorkoutRequest;
 use App\Http\Resources\WorkoutResource;
 use App\Models\Workout;
@@ -116,6 +117,11 @@ class WorkoutController extends Controller
             'exercises' => ExerciseCatalog::forClient(),
             'groups' => ExerciseCatalog::groups(),
             'maxItems' => config('sport.max_items'),
+            // Le matériel qu'on peut demander à l'assistant pour compléter la séance.
+            'equipments' => array_map(fn (EquipmentKind $kind): array => [
+                'value' => $kind->value,
+                'label' => $kind->label(),
+            ], [EquipmentKind::Machine, EquipmentKind::Free, EquipmentKind::Bodyweight]),
         ]);
     }
 

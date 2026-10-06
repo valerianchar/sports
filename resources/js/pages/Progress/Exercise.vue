@@ -31,7 +31,7 @@ const advice = {
     <div class="no-scrollbar flex-1 overflow-y-auto pb-8">
         <div class="relative aspect-[3/2] max-h-[240px] w-full bg-surface">
             <ExerciseImage :images="props.exercise.images" :alt="props.exercise.name" />
-            <Link :href="`${routes.progress}?vue=exercices`" class="iconbtn absolute top-4 left-5 size-10 bg-[rgb(14_15_12/0.8)]!" aria-label="Retour aux progrès">
+            <Link :href="`${routes.progress}?vue=exercices`" class="iconbtn absolute top-3 left-4 size-12 bg-[rgb(14_15_12/0.85)]! shadow-[0_2px_10px_rgb(0_0_0/0.4)]" aria-label="Retour aux progrès">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
             </Link>
         </div>

@@ -40,17 +40,18 @@ onUnmounted(() => window.removeEventListener('keydown', onKey));
 </script>
 
 <template>
-    <div class="absolute inset-0 z-20 flex flex-col bg-bg" role="dialog" aria-modal="true" :aria-label="props.exercise.name">
+    <!-- La fiche couvre tout l'écran : elle commence sous l'encoche et la barre d'état. -->
+    <div class="absolute inset-0 z-20 flex flex-col bg-bg pt-[env(safe-area-inset-top)]" role="dialog" aria-modal="true" :aria-label="props.exercise.name">
         <div class="no-scrollbar flex-1 overflow-y-auto pb-[110px]">
             <div class="relative aspect-[3/2] max-h-[320px] w-full bg-surface">
                 <ExerciseImage :images="props.exercise.images" :alt="`${props.exercise.name} — ${props.exercise.equipment_label}`" />
                 <button
                     type="button"
-                    class="iconbtn absolute top-4 left-5 size-10 bg-[rgb(14_15_12/0.8)]!"
+                    class="iconbtn absolute top-3 left-4 size-12 bg-[rgb(14_15_12/0.85)]! shadow-[0_2px_10px_rgb(0_0_0/0.4)]"
                     aria-label="Fermer"
                     @click="emit('close')"
                 >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
                 </button>
             </div>
 

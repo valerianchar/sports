@@ -46,3 +46,22 @@ export async function getJson(url) {
 
     return response.json();
 }
+
+/*
+ * Un envoi qui doit partir même si la page s'endort aussitôt (l'appli passe en
+ * arrière-plan) : `keepalive` laisse le navigateur le terminer.
+ */
+export function sendKeepalive(url, method, payload = null) {
+    return fetch(url, {
+        method,
+        keepalive: true,
+        body: payload === null ? undefined : JSON.stringify(payload),
+        credentials: 'same-origin',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-XSRF-TOKEN': csrfToken(),
+        },
+    }).catch(() => null);
+}

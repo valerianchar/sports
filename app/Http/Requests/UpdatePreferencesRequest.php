@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\AudioMode;
 use App\Enums\CountdownSound;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,6 +20,7 @@ class UpdatePreferencesRequest extends FormRequest
             // Bips des dernières secondes d'un repos ou d'une série chronométrée.
             'countdown_seconds' => ['required', 'integer', Rule::in([0, 3, 5, 10])],
             'volume' => ['required', 'integer', 'min:0', 'max:100'],
+            'audio_mode' => ['sometimes', Rule::enum(AudioMode::class)],
             'countdown_sound' => ['required', Rule::enum(CountdownSound::class), function (string $attribute, mixed $value, \Closure $fail): void {
                 if ($value === CountdownSound::Perso->value && $this->user()->custom_sound_path === null) {
                     $fail('Envoie d’abord un fichier pour utiliser « Mon son ».');

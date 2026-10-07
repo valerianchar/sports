@@ -14,6 +14,10 @@
  * écrit sur la machine (Matrix, Hammer Strength, Technogym… en anglais) et les
  * surnoms de salle. La recherche de la bibliothèque les parcourt aussi.
  *
+ * « zones » : les parties du muscle que l'exercice accentue vraiment (clés de
+ * database/data/zones.php : haut / milieu / bas des pectoraux, largeur ou
+ * épaisseur du dos…). Vide pour le cardio et la mobilité.
+ *
  * Images (public/images/exercices/<slug>/) : photos de free-exercise-db
  * (https://github.com/yuhonas/free-exercise-db, domaine public) ; images de wger
  * (https://wger.de) sous licence Creative Commons, créditées dans « credit » ;
@@ -46,6 +50,7 @@ return [
             'Développé couché machine',
             'Presse pecs',
         ],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'presse-pectorale-convergente',
@@ -64,6 +69,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Converging Chest Press', 'Chest Press convergent'],
+        'zones' => ['pectoraux.milieu', 'pectoraux.interieur'],
     ],
     [
         'slug' => 'presse-pectorale-iso-laterale',
@@ -90,6 +96,7 @@ return [
             'Plate-Loaded Chest Press',
             'Hammer Strength',
         ],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'presse-pectorale-unilaterale',
@@ -108,6 +115,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Independent Chest Press', 'Single Arm Chest Press'],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'developpe-incline-machine',
@@ -126,6 +134,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Chest Press', 'Incline Press', 'Multi Press'],
+        'zones' => ['pectoraux.haut'],
     ],
     [
         'slug' => 'developpe-incline-iso-lateral',
@@ -144,6 +153,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'hans — CC BY-SA 4.0 (wger)',
         'aka' => ['Iso-Lateral Incline Press', 'Plate-Loaded Incline Press', 'Hammer Strength'],
+        'zones' => ['pectoraux.haut'],
     ],
     [
         'slug' => 'super-incline',
@@ -162,6 +172,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Iso-Lateral Super Incline Press', 'Super Incline Press', 'Hammer Strength'],
+        'zones' => ['pectoraux.haut', 'epaules.avant'],
     ],
     [
         'slug' => 'wide-chest',
@@ -180,6 +191,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Iso-Lateral Wide Chest', 'Wide Chest Press', 'Hammer Strength'],
+        'zones' => ['pectoraux.milieu', 'pectoraux.exterieur'],
     ],
     [
         'slug' => 'developpe-decline-machine',
@@ -198,6 +210,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Decline Chest Press', 'Decline Press'],
+        'zones' => ['pectoraux.bas'],
     ],
     [
         'slug' => 'developpe-decline-iso-lateral',
@@ -221,6 +234,7 @@ return [
             'Plate-Loaded Decline Press',
             'Hammer Strength',
         ],
+        'zones' => ['pectoraux.bas'],
     ],
     [
         'slug' => 'butterfly',
@@ -246,6 +260,7 @@ return [
             'Decline Pec Fly',
             'Super Fly',
         ],
+        'zones' => ['pectoraux.interieur'],
     ],
     [
         'slug' => 'ecarte-vis-a-vis',
@@ -264,6 +279,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Crossover', 'Cable Fly', 'High to Low Cable Fly', 'Functional Trainer'],
+        'zones' => ['pectoraux.bas', 'pectoraux.interieur'],
     ],
     [
         'slug' => 'ecarte-poulie-basse',
@@ -282,6 +298,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Low to High Cable Fly', 'Low Cable Fly', 'Functional Trainer'],
+        'zones' => ['pectoraux.haut', 'pectoraux.interieur'],
     ],
     [
         'slug' => 'ecarte-poulie-milieu',
@@ -300,6 +317,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'shushu — CC BY-SA 4.0 (wger)',
         'aka' => ['Standing Cable Fly', 'Mid Cable Fly', 'Functional Trainer'],
+        'zones' => ['pectoraux.milieu', 'pectoraux.interieur'],
     ],
     [
         'slug' => 'ecarte-poulie-unilateral',
@@ -318,6 +336,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Single Arm Cable Fly', 'Functional Trainer'],
+        'zones' => ['pectoraux.interieur'],
     ],
     [
         'slug' => 'ecarte-poulie-banc-plat',
@@ -336,6 +355,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Flat Bench Cable Fly', 'Lying Cable Fly'],
+        'zones' => ['pectoraux.milieu', 'pectoraux.interieur'],
     ],
     [
         'slug' => 'ecarte-poulie-incline',
@@ -354,6 +374,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Cable Fly'],
+        'zones' => ['pectoraux.haut', 'pectoraux.interieur'],
     ],
     [
         'slug' => 'developpe-poulie-debout',
@@ -372,6 +393,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Standing Cable Chest Press', 'Cable Chest Press', 'Functional Trainer'],
+        'zones' => ['pectoraux.milieu', 'pectoraux.interieur'],
     ],
     [
         'slug' => 'developpe-couche',
@@ -390,6 +412,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Bench Press', 'DC', 'Barbell Bench Press'],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'developpe-couche-prise-large',
@@ -408,6 +431,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Wide Grip Bench Press'],
+        'zones' => ['pectoraux.milieu', 'pectoraux.exterieur'],
     ],
     [
         'slug' => 'developpe-incline-barre',
@@ -426,6 +450,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Bench Press', 'Barbell Incline Press'],
+        'zones' => ['pectoraux.haut'],
     ],
     [
         'slug' => 'developpe-decline-barre',
@@ -444,6 +469,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Decline Bench Press'],
+        'zones' => ['pectoraux.bas'],
     ],
     [
         'slug' => 'developpe-couche-smith',
@@ -462,6 +488,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Bench Press', 'DC Smith'],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'developpe-incline-smith',
@@ -480,6 +507,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Incline Press'],
+        'zones' => ['pectoraux.haut'],
     ],
     [
         'slug' => 'developpe-decline-smith',
@@ -498,6 +526,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Decline Press'],
+        'zones' => ['pectoraux.bas'],
     ],
     [
         'slug' => 'developpe-couche-halteres',
@@ -516,6 +545,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Bench Press', 'DC haltères'],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'developpe-incline-halteres',
@@ -534,6 +564,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Dumbbell Press'],
+        'zones' => ['pectoraux.haut'],
     ],
     [
         'slug' => 'developpe-decline-halteres',
@@ -552,6 +583,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Decline Dumbbell Press'],
+        'zones' => ['pectoraux.bas'],
     ],
     [
         'slug' => 'ecarte-halteres',
@@ -570,6 +602,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Fly', 'Dumbbell Flyes'],
+        'zones' => ['pectoraux.milieu', 'pectoraux.exterieur'],
     ],
     [
         'slug' => 'ecarte-incline-halteres',
@@ -588,6 +621,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Dumbbell Fly'],
+        'zones' => ['pectoraux.haut', 'pectoraux.exterieur'],
     ],
     [
         'slug' => 'pullover-haltere',
@@ -606,6 +640,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Pullover'],
+        'zones' => ['pectoraux.exterieur', 'dos.largeur'],
     ],
     [
         'slug' => 'pompes',
@@ -624,6 +659,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Push-up', 'Push up'],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'pompes-inclinees',
@@ -642,6 +678,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Push-up'],
+        'zones' => ['pectoraux.bas'],
     ],
     [
         'slug' => 'pompes-declinees',
@@ -660,6 +697,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Decline Push-up'],
+        'zones' => ['pectoraux.haut', 'epaules.avant'],
     ],
     [
         'slug' => 'pompes-prise-large',
@@ -678,6 +716,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Wide Push-up'],
+        'zones' => ['pectoraux.milieu', 'pectoraux.exterieur'],
     ],
     [
         'slug' => 'pompes-explosives',
@@ -696,6 +735,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Plyo Push-up', 'Clap Push-up'],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'pompes-trx',
@@ -714,6 +754,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['TRX Push-up', 'TRX Chest Press'],
+        'zones' => ['pectoraux.milieu'],
     ],
     [
         'slug' => 'dips-pectoraux',
@@ -732,6 +773,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Chest Dips', 'Parallel Bar Dips'],
+        'zones' => ['pectoraux.bas', 'pectoraux.exterieur', 'triceps.lateral'],
     ],
     [
         'slug' => 'dips-anneaux',
@@ -750,6 +792,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Ring Dips'],
+        'zones' => ['pectoraux.bas', 'pectoraux.exterieur', 'triceps.lateral'],
     ],
     [
         'slug' => 'landmine-press',
@@ -768,6 +811,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['pectoraux.haut', 'pectoraux.interieur', 'epaules.avant'],
     ],
     [
         'slug' => 'developpe-epaules-machine',
@@ -792,6 +836,7 @@ return [
             'Multi Press',
             'Presse épaules',
         ],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'presse-epaules-iso-laterale',
@@ -814,6 +859,7 @@ return [
             'Plate-Loaded Shoulder Press',
             'Hammer Strength',
         ],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'developpe-militaire',
@@ -832,6 +878,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Overhead Press', 'Military Press', 'OHP'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'developpe-militaire-assis',
@@ -850,6 +897,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Seated Barbell Shoulder Press'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'developpe-halteres-assis',
@@ -868,6 +916,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Seated Dumbbell Shoulder Press', 'Dumbbell Shoulder Press'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'developpe-halteres-debout',
@@ -886,6 +935,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Standing Dumbbell Shoulder Press'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'developpe-arnold',
@@ -904,6 +954,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['epaules.avant', 'epaules.cote'],
     ],
     [
         'slug' => 'developpe-epaules-smith',
@@ -922,6 +973,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Shoulder Press'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'landmine-press-unilateral',
@@ -940,6 +992,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'handstand-push-up',
@@ -958,6 +1011,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'pike-push-up',
@@ -976,6 +1030,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'elevations-laterales',
@@ -994,6 +1049,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Lateral Raise', 'Dumbbell Lateral Raise'],
+        'zones' => ['epaules.cote'],
     ],
     [
         'slug' => 'elevations-laterales-poulie',
@@ -1012,6 +1068,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Lateral Raise'],
+        'zones' => ['epaules.cote'],
     ],
     [
         'slug' => 'elevations-laterales-machine',
@@ -1030,6 +1087,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
         'aka' => ['Lateral Raise', 'Seated Lateral Raise', 'Deltoid Raise'],
+        'zones' => ['epaules.cote'],
     ],
     [
         'slug' => 'elevations-frontales',
@@ -1048,6 +1106,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Front Raise', 'Dumbbell Front Raise'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'elevations-frontales-poulie',
@@ -1066,6 +1125,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Front Raise'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'elevations-frontales-disque',
@@ -1084,6 +1144,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Plate Front Raise'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'elevations-frontales-barre',
@@ -1102,6 +1163,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Barbell Front Raise'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'y-raise',
@@ -1120,6 +1182,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Y Raise'],
+        'zones' => ['epaules.cote', 'dos.haut'],
     ],
     [
         'slug' => 'oiseau-halteres',
@@ -1138,6 +1201,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Reverse Dumbbell Fly', 'Bent Over Lateral Raise'],
+        'zones' => ['epaules.arriere'],
     ],
     [
         'slug' => 'oiseau-banc-incline',
@@ -1156,6 +1220,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Chest Supported Reverse Fly'],
+        'zones' => ['epaules.arriere'],
     ],
     [
         'slug' => 'oiseau-inverse',
@@ -1180,6 +1245,7 @@ return [
             'Butterfly reverse',
             'Delts Machine',
         ],
+        'zones' => ['epaules.arriere'],
     ],
     [
         'slug' => 'oiseau-poulie',
@@ -1198,6 +1264,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Reverse Fly', 'Rear Delt Cable Fly'],
+        'zones' => ['epaules.arriere'],
     ],
     [
         'slug' => 'face-pull',
@@ -1216,6 +1283,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['epaules.arriere', 'dos.haut'],
     ],
     [
         'slug' => 'band-pull-apart',
@@ -1234,6 +1302,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['epaules.arriere', 'dos.haut'],
     ],
     [
         'slug' => 'rotation-externe-poulie',
@@ -1252,6 +1321,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable External Rotation'],
+        'zones' => ['epaules.arriere'],
     ],
     [
         'slug' => 'rotation-externe-elastique',
@@ -1270,6 +1340,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['epaules.arriere'],
     ],
     [
         'slug' => 'rowing-menton-barre',
@@ -1288,6 +1359,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Upright Row'],
+        'zones' => ['epaules.cote', 'dos.haut'],
     ],
     [
         'slug' => 'rowing-menton-poulie',
@@ -1306,6 +1378,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Upright Row'],
+        'zones' => ['epaules.cote', 'dos.haut'],
     ],
     [
         'slug' => 'shrugs',
@@ -1324,6 +1397,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Shrug', 'Haussements d\'épaules'],
+        'zones' => ['dos.haut'],
     ],
     [
         'slug' => 'shrugs-barre',
@@ -1342,6 +1416,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Barbell Shrug', 'Haussements d\'épaules'],
+        'zones' => ['dos.haut'],
     ],
     [
         'slug' => 'shrugs-smith',
@@ -1360,6 +1435,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Shrug'],
+        'zones' => ['dos.haut'],
     ],
     [
         'slug' => 'shrugs-machine',
@@ -1378,6 +1454,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Calf Machine Shrug'],
+        'zones' => ['dos.haut'],
     ],
     [
         'slug' => 'shrugs-machine-iso-laterale',
@@ -1403,6 +1480,7 @@ return [
             'Hammer Strength',
             'Haussements d\'épaules',
         ],
+        'zones' => ['dos.haut'],
     ],
     [
         'slug' => 'tirage-vertical-prise-large',
@@ -1427,6 +1505,7 @@ return [
             'Pulldown',
             'Tirage poitrine',
         ],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tirage-vertical-prise-serree',
@@ -1445,6 +1524,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Close Grip Lat Pulldown', 'Tirage poitrine prise serrée'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tirage-vertical-supination',
@@ -1463,6 +1543,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Reverse Grip Lat Pulldown', 'Underhand Pulldown'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tirage-vertical-triangle',
@@ -1481,6 +1562,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['V-Bar Pulldown', 'Neutral Grip Pulldown'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tirage-vertical-unilateral',
@@ -1499,6 +1581,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Single Arm Lat Pulldown', 'One Arm Pulldown'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tirage-vertical-divergent',
@@ -1517,6 +1600,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Diverging Lat Pulldown', 'Lat Pulldown', 'Lat Pulldown / Seated Row'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tirage-iso-lateral',
@@ -1542,6 +1626,7 @@ return [
             'Plate-Loaded Lat Pulldown',
             'Hammer Strength',
         ],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tractions-assistees',
@@ -1566,6 +1651,7 @@ return [
             'Vertical Traction',
             'Gravitron',
         ],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tractions-assistees-supination',
@@ -1584,6 +1670,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Dip/Chin Assist', 'Assisted Chin-up', 'Gravitron'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tractions-assistees-elastique',
@@ -1602,6 +1689,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tractions',
@@ -1620,6 +1708,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Pull-up', 'Pull up', 'Barre fixe'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'tractions-supination',
@@ -1638,6 +1727,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Chin up'],
+        'zones' => ['dos.largeur', 'biceps.courte'],
     ],
     [
         'slug' => 'tractions-prise-neutre',
@@ -1656,6 +1746,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Neutral Grip Pull-up'],
+        'zones' => ['dos.largeur', 'biceps.brachial'],
     ],
     [
         'slug' => 'tractions-lestees',
@@ -1674,6 +1765,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Weighted Pull-up'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'rowing-assis',
@@ -1692,6 +1784,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Seated Cable Row', 'Seated Row', 'Low Row', 'Tirage horizontal triangle'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-assis-prise-large',
@@ -1710,6 +1803,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Wide Grip Seated Row', 'Wide Grip Cable Row'],
+        'zones' => ['dos.epaisseur', 'dos.haut'],
     ],
     [
         'slug' => 'rowing-assis-unilateral',
@@ -1728,6 +1822,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Single Arm Seated Cable Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-machine',
@@ -1753,6 +1848,7 @@ return [
             'Upper Back',
             'Tirage horizontal machine',
         ],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'low-row-iso-lateral',
@@ -1777,6 +1873,7 @@ return [
             'DY Row',
             'Hammer Strength',
         ],
+        'zones' => ['dos.epaisseur', 'dos.largeur'],
     ],
     [
         'slug' => 'high-row-iso-lateral',
@@ -1795,6 +1892,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Iso-Lateral High Row', 'Hammer Strength'],
+        'zones' => ['dos.largeur', 'dos.haut'],
     ],
     [
         'slug' => 't-bar-row',
@@ -1813,6 +1911,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['T-Bar Row', 'Iso-Lateral T-Bar Row', 'Lever Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-t-bar-buste-appuye',
@@ -1831,6 +1930,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Chest Supported T-Bar Row', 'Incline Lever Row', 'Lever Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-t-bar-landmine',
@@ -1849,6 +1949,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Landmine T-Bar Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-landmine-un-bras',
@@ -1867,6 +1968,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Meadows Row', 'Single Arm Landmine Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-barre',
@@ -1885,6 +1987,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Barbell Row', 'Bent Over Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-barre-supination',
@@ -1903,6 +2006,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Reverse Grip Barbell Row', 'Yates Row'],
+        'zones' => ['dos.epaisseur', 'dos.largeur'],
     ],
     [
         'slug' => 'rowing-pendlay',
@@ -1921,6 +2025,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Pendlay Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-haltere-un-bras',
@@ -1939,6 +2044,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['One Arm Dumbbell Row', 'Single Arm Dumbbell Row'],
+        'zones' => ['dos.epaisseur', 'dos.largeur'],
     ],
     [
         'slug' => 'rowing-halteres-buste-penche',
@@ -1957,6 +2063,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Bent Over Dumbbell Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-halteres-banc-incline',
@@ -1975,6 +2082,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Dumbbell Row', 'Chest Supported Dumbbell Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-smith',
@@ -1993,6 +2101,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-inverse',
@@ -2011,6 +2120,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Inverted Row', 'Australian Pull-up'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-trx',
@@ -2029,6 +2139,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['TRX Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'rowing-anneaux',
@@ -2047,6 +2158,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Ring Row'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'pullover-machine',
@@ -2065,6 +2177,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Plate-Loaded Pullover'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'pull-over-poulie',
@@ -2083,6 +2196,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Straight Arm Pulldown', 'Cable Pullover'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'pull-over-poulie-corde',
@@ -2101,6 +2215,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Rope Straight Arm Pulldown', 'Rope Pullover'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'pull-over-poulie-allonge',
@@ -2119,6 +2234,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Lying Cable Pullover'],
+        'zones' => ['dos.largeur'],
     ],
     [
         'slug' => 'lombaires-machine',
@@ -2142,6 +2258,7 @@ return [
             'Abdominal / Back Extension',
             'Banc à lombaires',
         ],
+        'zones' => [],
     ],
     [
         'slug' => 'extensions-lombaires',
@@ -2166,6 +2283,7 @@ return [
             'Back Trainer',
             'Banc à lombaires',
         ],
+        'zones' => ['ischios.hanche', 'fessiers.grand'],
     ],
     [
         'slug' => 'extensions-lombaires-ghd',
@@ -2184,6 +2302,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['GHD Back Extension', 'Glute Ham Developer'],
+        'zones' => ['ischios.hanche', 'fessiers.grand'],
     ],
     [
         'slug' => 'good-morning',
@@ -2202,6 +2321,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['ischios.hanche'],
     ],
     [
         'slug' => 'souleve-de-terre',
@@ -2220,6 +2340,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Deadlift', 'SDT'],
+        'zones' => ['ischios.hanche', 'fessiers.grand'],
     ],
     [
         'slug' => 'souleve-de-terre-sumo',
@@ -2238,6 +2359,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Sumo Deadlift'],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'souleve-de-terre-barre-hexagonale',
@@ -2256,6 +2378,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Trap Bar Deadlift', 'Hex Bar Deadlift'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'rack-pull',
@@ -2274,6 +2397,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['fessiers.grand', 'dos.haut'],
     ],
     [
         'slug' => 'superman',
@@ -2292,6 +2416,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'curl-barre',
@@ -2310,6 +2435,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Barbell Curl'],
+        'zones' => ['biceps.longue', 'biceps.courte'],
     ],
     [
         'slug' => 'curl-barre-ez',
@@ -2328,6 +2454,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['EZ Bar Curl'],
+        'zones' => ['biceps.longue', 'biceps.courte'],
     ],
     [
         'slug' => 'curl-halteres',
@@ -2346,6 +2473,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Curl'],
+        'zones' => ['biceps.longue'],
     ],
     [
         'slug' => 'curl-halteres-alterne',
@@ -2364,6 +2492,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Alternating Dumbbell Curl'],
+        'zones' => ['biceps.longue'],
     ],
     [
         'slug' => 'curl-marteau',
@@ -2382,6 +2511,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Hammer Curl'],
+        'zones' => ['biceps.brachial'],
     ],
     [
         'slug' => 'curl-marteau-poulie-corde',
@@ -2400,6 +2530,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Rope Hammer Curl'],
+        'zones' => ['biceps.brachial'],
     ],
     [
         'slug' => 'curl-incline',
@@ -2418,6 +2549,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Dumbbell Curl'],
+        'zones' => ['biceps.longue'],
     ],
     [
         'slug' => 'curl-concentration',
@@ -2436,6 +2568,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Concentration Curl'],
+        'zones' => ['biceps.courte'],
     ],
     [
         'slug' => 'curl-pupitre',
@@ -2454,6 +2587,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Preacher Curl', 'Larry Scott', 'Standing Arm Curl'],
+        'zones' => ['biceps.courte'],
     ],
     [
         'slug' => 'curl-pupitre-haltere',
@@ -2472,6 +2606,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Preacher Curl', 'Larry Scott'],
+        'zones' => ['biceps.courte'],
     ],
     [
         'slug' => 'curl-biceps-machine',
@@ -2498,6 +2633,7 @@ return [
             'Bicep/Tricep',
             'Machine Preacher Curl',
         ],
+        'zones' => ['biceps.courte'],
     ],
     [
         'slug' => 'curl-poulie',
@@ -2516,6 +2652,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Curl'],
+        'zones' => ['biceps.longue', 'biceps.courte'],
     ],
     [
         'slug' => 'curl-poulie-unilateral',
@@ -2534,6 +2671,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Single Arm Cable Curl'],
+        'zones' => ['biceps.longue'],
     ],
     [
         'slug' => 'curl-poulie-haute',
@@ -2552,6 +2690,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['High Cable Curl', 'Functional Trainer'],
+        'zones' => ['biceps.courte'],
     ],
     [
         'slug' => 'spider-curl',
@@ -2570,6 +2709,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['biceps.courte'],
     ],
     [
         'slug' => 'curl-inverse',
@@ -2588,6 +2728,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Reverse Curl'],
+        'zones' => ['biceps.brachial'],
     ],
     [
         'slug' => 'curl-biceps-trx',
@@ -2606,6 +2747,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'cynomops — CC BY-SA 4.0 (wger)',
         'aka' => ['TRX Biceps Curl'],
+        'zones' => ['biceps.courte'],
     ],
     [
         'slug' => 'curl-poignets',
@@ -2624,6 +2766,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Wrist Curl'],
+        'zones' => [],
     ],
     [
         'slug' => 'extension-poignets',
@@ -2642,6 +2785,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Reverse Wrist Curl'],
+        'zones' => [],
     ],
     [
         'slug' => 'extension-triceps-poulie',
@@ -2660,6 +2804,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Triceps Pushdown', 'Triceps Pressdown', 'Pushdown'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'extension-triceps-poulie-corde',
@@ -2678,6 +2823,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Rope Pushdown', 'Triceps Pushdown'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'extension-triceps-poulie-barre-v',
@@ -2696,6 +2842,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['V-Bar Pushdown'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'extension-triceps-poulie-unilaterale',
@@ -2714,6 +2861,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Single Arm Pushdown'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'extension-nuque-poulie-corde',
@@ -2732,6 +2880,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Overhead Cable Triceps Extension'],
+        'zones' => ['triceps.longue'],
     ],
     [
         'slug' => 'extension-nuque-haltere',
@@ -2750,6 +2899,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Overhead Dumbbell Triceps Extension'],
+        'zones' => ['triceps.longue'],
     ],
     [
         'slug' => 'extension-triceps-halteres-allonge',
@@ -2768,6 +2918,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Skull Crusher'],
+        'zones' => ['triceps.longue'],
     ],
     [
         'slug' => 'barre-au-front',
@@ -2786,6 +2937,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Skull Crusher', 'Lying Triceps Extension'],
+        'zones' => ['triceps.longue'],
     ],
     [
         'slug' => 'developpe-couche-prise-serree',
@@ -2804,6 +2956,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Close Grip Bench Press'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'triceps-machine',
@@ -2827,6 +2980,7 @@ return [
             'Bicep/Tricep',
             'Seated Triceps Extension',
         ],
+        'zones' => ['triceps.longue'],
     ],
     [
         'slug' => 'dips-machine',
@@ -2845,6 +2999,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Triceps Press', 'Seated Dip', 'Seated Triceps Press', 'Dip machine'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'dips-assistes',
@@ -2863,6 +3018,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Dip/Chin Assist', 'Assisted Dip', 'Gravitron'],
+        'zones' => ['triceps.lateral', 'pectoraux.bas'],
     ],
     [
         'slug' => 'dips-triceps',
@@ -2881,6 +3037,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Triceps Dips'],
+        'zones' => ['triceps.lateral', 'pectoraux.bas'],
     ],
     [
         'slug' => 'dips-entre-bancs',
@@ -2899,6 +3056,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Bench Dips'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'kickback-triceps',
@@ -2917,6 +3075,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Triceps Kickback'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'kickback-triceps-poulie',
@@ -2935,6 +3094,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Cable Triceps Kickback'],
+        'zones' => ['triceps.lateral'],
     ],
     [
         'slug' => 'pompes-diamant',
@@ -2953,6 +3113,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Diamond Push-up'],
+        'zones' => ['triceps.lateral', 'pectoraux.interieur'],
     ],
     [
         'slug' => 'presse-a-cuisses',
@@ -2971,6 +3132,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Leg Press', '45° Leg Press', 'Linear Leg Press', 'Presse 45'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'presse-a-cuisses-assise',
@@ -2989,6 +3151,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
         'aka' => ['Leg Press', 'Seated Leg Press', 'Leg Press / Calf Press'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'presse-a-cuisses-pieds-serres',
@@ -3007,6 +3170,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Narrow Stance Leg Press'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'presse-a-cuisses-unilaterale',
@@ -3025,6 +3189,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Single Leg Press'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'presse-horizontale',
@@ -3043,6 +3208,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Horizontal Leg Press', 'Lying Leg Press'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'hack-squat',
@@ -3061,6 +3227,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Squat machine'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'reverse-hack-squat',
@@ -3079,6 +3246,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
         'aka' => ['Reverse V-Squat'],
+        'zones' => ['fessiers.grand', 'quadriceps.vastes'],
     ],
     [
         'slug' => 'pendulum-squat',
@@ -3097,6 +3265,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'polloperro — CC BY-SA 4.0 (wger)',
         'aka' => ['Pendulum X Squat'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'v-squat',
@@ -3115,6 +3284,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Perfect Squat', 'Super Squat Press', 'Leverage Squat'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'belt-squat',
@@ -3133,6 +3303,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Hip Belt Squat'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'squat',
@@ -3151,6 +3322,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Back Squat', 'Barbell Squat'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'squat-avant',
@@ -3169,6 +3341,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'box-squat',
@@ -3187,6 +3360,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'squat-smith',
@@ -3205,6 +3379,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Squat'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'goblet-squat',
@@ -3223,6 +3398,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'squat-halteres',
@@ -3241,6 +3417,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Squat'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'squat-sumo-haltere',
@@ -3259,6 +3436,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Sumo Squat'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'squat-sumo-kettlebell',
@@ -3277,6 +3455,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
         'aka' => ['Kettlebell Sumo Squat'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'squat-poids-du-corps',
@@ -3295,6 +3474,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Air Squat', 'Bodyweight Squat'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'jump-squats',
@@ -3313,6 +3493,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Squat Jump'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'pistol-squat',
@@ -3331,6 +3512,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'wakanda90 — CC BY-SA 4.0 (wger)',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'sissy-squat',
@@ -3349,6 +3531,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.droit'],
     ],
     [
         'slug' => 'squat-bulgare',
@@ -3367,6 +3550,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Bulgarian Split Squat', 'Fente bulgare'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand', 'fessiers.moyen'],
     ],
     [
         'slug' => 'squat-bulgare-smith',
@@ -3385,6 +3569,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Bulgarian Split Squat'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand', 'fessiers.moyen'],
     ],
     [
         'slug' => 'fentes-avant',
@@ -3403,6 +3588,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'Everkinetic — CC BY-SA 3.0 (wger)',
         'aka' => ['Forward Lunge'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'fentes-arriere',
@@ -3421,6 +3607,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Reverse Lunge'],
+        'zones' => ['fessiers.grand', 'quadriceps.vastes'],
     ],
     [
         'slug' => 'fentes-marchees',
@@ -3439,6 +3626,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Walking Lunge'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'fentes-barre',
@@ -3457,6 +3645,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Barbell Lunge'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'fentes-laterales',
@@ -3475,6 +3664,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'AlucardEvil40 — CC BY-SA 4.0 (wger)',
         'aka' => ['Side Lunge', 'Lateral Lunge'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'fentes-smith',
@@ -3493,6 +3683,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
         'aka' => ['Smith Machine Lunge'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'fentes-machine',
@@ -3511,6 +3702,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Lunge machine', 'Ground Base Squat Lunge'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'step-up',
@@ -3529,6 +3721,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'leg-extension',
@@ -3552,6 +3745,7 @@ return [
             'Leg Extension / Leg Curl',
             'Chaise à quadriceps',
         ],
+        'zones' => ['quadriceps.droit'],
     ],
     [
         'slug' => 'leg-extension-unilateral',
@@ -3570,6 +3764,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Single Leg Extension'],
+        'zones' => ['quadriceps.droit'],
     ],
     [
         'slug' => 'leg-curl',
@@ -3588,6 +3783,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Prone Leg Curl', 'Lying Leg Curl', 'Iso-Lateral Leg Curl', 'Leg curl couché'],
+        'zones' => ['ischios.flexion'],
     ],
     [
         'slug' => 'leg-curl-assis',
@@ -3606,6 +3802,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Seated Leg Curl', 'Leg Extension / Seated Leg Curl'],
+        'zones' => ['ischios.flexion'],
     ],
     [
         'slug' => 'leg-curl-debout',
@@ -3629,6 +3826,7 @@ return [
             'Iso-Lateral Kneeling Leg Curl',
             'Leg curl à genoux',
         ],
+        'zones' => ['ischios.flexion'],
     ],
     [
         'slug' => 'nordic-curl',
@@ -3647,6 +3845,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Nordic Hamstring Curl', 'Assisted Nordic Ham'],
+        'zones' => ['ischios.flexion'],
     ],
     [
         'slug' => 'glute-ham-raise',
@@ -3665,6 +3864,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['GHR', 'Glute Ham Bench', 'Glute Ham Developer'],
+        'zones' => ['ischios.flexion', 'ischios.hanche'],
     ],
     [
         'slug' => 'leg-curl-swiss-ball',
@@ -3683,6 +3883,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Swiss Ball Leg Curl'],
+        'zones' => ['ischios.flexion'],
     ],
     [
         'slug' => 'souleve-de-terre-roumain',
@@ -3701,6 +3902,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Romanian Deadlift', 'RDL'],
+        'zones' => ['ischios.hanche', 'fessiers.grand'],
     ],
     [
         'slug' => 'souleve-de-terre-roumain-halteres',
@@ -3719,6 +3921,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'AlucardEvil40 — CC BY-SA 4.0 (wger)',
         'aka' => ['Dumbbell Romanian Deadlift', 'Dumbbell RDL'],
+        'zones' => ['ischios.hanche', 'fessiers.grand'],
     ],
     [
         'slug' => 'souleve-de-terre-roumain-smith',
@@ -3737,6 +3940,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Romanian Deadlift', 'Smith RDL'],
+        'zones' => ['ischios.hanche', 'fessiers.grand'],
     ],
     [
         'slug' => 'souleve-de-terre-roumain-unilateral',
@@ -3755,6 +3959,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Single Leg RDL', 'Single Leg Romanian Deadlift'],
+        'zones' => ['ischios.hanche', 'fessiers.grand'],
     ],
     [
         'slug' => 'souleve-de-terre-jambes-tendues',
@@ -3773,6 +3978,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Stiff Leg Deadlift'],
+        'zones' => ['ischios.hanche'],
     ],
     [
         'slug' => 'mollets-debout',
@@ -3791,6 +3997,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Standing Calf Raise', 'Standing Calf'],
+        'zones' => ['mollets.gastrocnemiens'],
     ],
     [
         'slug' => 'mollets-assis',
@@ -3809,6 +4016,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Seated Calf Raise', 'Seated Calf'],
+        'zones' => ['mollets.soleaire'],
     ],
     [
         'slug' => 'mollets-presse',
@@ -3827,6 +4035,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Leg Press Calf Raise', 'Leg Press / Calf Press'],
+        'zones' => ['mollets.gastrocnemiens'],
     ],
     [
         'slug' => 'presse-a-mollets',
@@ -3845,6 +4054,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Calf Extension', 'Seated Calf Press', 'Mollets assis dos calé'],
+        'zones' => ['mollets.gastrocnemiens'],
     ],
     [
         'slug' => 'mollets-smith',
@@ -3863,6 +4073,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Smith Machine Calf Raise'],
+        'zones' => ['mollets.gastrocnemiens'],
     ],
     [
         'slug' => 'donkey-calf',
@@ -3881,6 +4092,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['mollets.gastrocnemiens'],
     ],
     [
         'slug' => 'mollets-halteres',
@@ -3899,6 +4111,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dumbbell Calf Raise'],
+        'zones' => ['mollets.gastrocnemiens'],
     ],
     [
         'slug' => 'elevations-des-orteils',
@@ -3917,6 +4130,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Tibialis Raise', 'Tib Raise', 'Tibia Dorsi Flexion'],
+        'zones' => [],
     ],
     [
         'slug' => 'adducteurs',
@@ -3941,6 +4155,7 @@ return [
             'Hip Adductor/Abductor',
             'Adduction machine',
         ],
+        'zones' => [],
     ],
     [
         'slug' => 'adduction-poulie',
@@ -3959,6 +4174,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Hip Adduction'],
+        'zones' => [],
     ],
     [
         'slug' => 'multi-hip-adduction',
@@ -3977,6 +4193,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Multi Hip', 'Rotary Hip', '4-Way Hip', 'Standing Hip Adduction'],
+        'zones' => [],
     ],
     [
         'slug' => 'multi-hip-flexion',
@@ -3995,6 +4212,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Multi Hip', 'Rotary Hip', '4-Way Hip', 'Standing Hip Flexion'],
+        'zones' => ['quadriceps.droit'],
     ],
     [
         'slug' => 'chaise',
@@ -4013,6 +4231,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Wall Sit'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'gainage-copenhague',
@@ -4031,6 +4250,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'hip-thrust',
@@ -4049,6 +4269,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Glute Drive', 'Hip & Glute', 'Glute Bridge machine'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'hip-thrust-debout-machine',
@@ -4067,6 +4288,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Standing Hip Thrust', 'Standing Glute Drive'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'hip-thrust-barre',
@@ -4085,6 +4307,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Barbell Hip Thrust'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'hip-thrust-smith',
@@ -4103,6 +4326,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Smith Machine Hip Thrust'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'hip-thrust-unilateral',
@@ -4121,6 +4345,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Single Leg Hip Thrust'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'pont-fessier',
@@ -4139,6 +4364,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Glute Bridge'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'pont-fessier-unilateral',
@@ -4157,6 +4383,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Single Leg Glute Bridge'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'pont-fessier-barre',
@@ -4175,6 +4402,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Barbell Glute Bridge'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'presse-a-cuisses-pieds-hauts',
@@ -4193,6 +4421,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['High Feet Leg Press'],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'kickback-machine',
@@ -4218,6 +4447,7 @@ return [
             'Glute Press',
             'Rear Kick',
         ],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'kickback-poulie',
@@ -4236,6 +4466,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Glute Kickback'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'donkey-kick',
@@ -4254,6 +4485,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'abducteurs',
@@ -4278,6 +4510,7 @@ return [
             'Hip Adductor/Abductor',
             'Abduction machine',
         ],
+        'zones' => ['fessiers.moyen'],
     ],
     [
         'slug' => 'multi-hip-abduction',
@@ -4302,6 +4535,7 @@ return [
             'Standing Hip Abduction',
             'Standing Hip Abductor',
         ],
+        'zones' => ['fessiers.moyen'],
     ],
     [
         'slug' => 'multi-hip-extension',
@@ -4320,6 +4554,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Multi Hip', 'Rotary Hip', '4-Way Hip', 'Standing Hip Extension'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'abduction-poulie',
@@ -4338,6 +4573,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Cable Hip Abduction'],
+        'zones' => ['fessiers.moyen'],
     ],
     [
         'slug' => 'marche-laterale-mini-band',
@@ -4356,6 +4592,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
         'aka' => ['Monster Walk', 'Lateral Band Walk'],
+        'zones' => ['fessiers.moyen'],
     ],
     [
         'slug' => 'clamshell',
@@ -4374,6 +4611,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['fessiers.moyen'],
     ],
     [
         'slug' => 'extension-hanche-chaise-romaine',
@@ -4392,6 +4630,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'Everkinetic — CC BY-SA 3.0 (wger)',
         'aka' => ['45° Hip Extension', 'Glute Hyperextension'],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'reverse-hyper',
@@ -4415,6 +4654,7 @@ return [
             'Extension inversée',
             'Glute Ham / Reverse Hyper',
         ],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'frog-pump',
@@ -4433,6 +4673,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['fessiers.grand'],
     ],
     [
         'slug' => 'pull-through-poulie',
@@ -4451,6 +4692,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Pull Through'],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'fentes-croisees',
@@ -4469,6 +4711,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Curtsy Lunge'],
+        'zones' => ['fessiers.moyen', 'fessiers.grand'],
     ],
     [
         'slug' => 'kettlebell-swing',
@@ -4487,6 +4730,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['KB Swing'],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'crunch',
@@ -4505,6 +4749,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'crunch-banc-decline',
@@ -4523,6 +4768,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Decline Crunch'],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'sit-up',
@@ -4541,6 +4787,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'sit-up-decline',
@@ -4559,6 +4806,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Decline Sit-up'],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'sit-up-ghd',
@@ -4577,6 +4825,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'crunch-machine',
@@ -4602,6 +4851,7 @@ return [
             'Ab Crunch Bench',
             'Abdominal Oblique Crunch',
         ],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'crunch-poulie-haute',
@@ -4620,6 +4870,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Crunch', 'Kneeling Cable Crunch'],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'crunch-poulie-debout',
@@ -4638,6 +4889,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Standing Cable Crunch'],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'crunch-swiss-ball',
@@ -4656,6 +4908,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.haut'],
     ],
     [
         'slug' => 'crunch-oblique',
@@ -4674,6 +4927,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'bicycle-crunch',
@@ -4692,6 +4946,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.obliques', 'abdos.haut'],
     ],
     [
         'slug' => 'crunch-inverse',
@@ -4710,6 +4965,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Reverse Crunch'],
+        'zones' => ['abdos.bas'],
     ],
     [
         'slug' => 'crunch-inverse-banc-decline',
@@ -4728,6 +4984,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.bas'],
     ],
     [
         'slug' => 'releves-de-genoux',
@@ -4746,6 +5003,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Captain\'s Chair', 'Vertical Knee Raise', 'Knee Raise', 'Power Tower'],
+        'zones' => ['abdos.bas'],
     ],
     [
         'slug' => 'releves-de-jambes-suspendu',
@@ -4764,6 +5022,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Hanging Leg Raise'],
+        'zones' => ['abdos.bas'],
     ],
     [
         'slug' => 'releves-de-jambes-allonge',
@@ -4782,6 +5041,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.bas'],
     ],
     [
         'slug' => 'ciseaux',
@@ -4800,6 +5060,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Flutter Kicks', 'Scissor Kicks'],
+        'zones' => ['abdos.bas'],
     ],
     [
         'slug' => 'v-up',
@@ -4818,6 +5079,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.haut', 'abdos.bas'],
     ],
     [
         'slug' => 'hollow-hold',
@@ -4836,6 +5098,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'gainage-planche',
@@ -4854,6 +5117,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Plank'],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'planche-shoulder-taps',
@@ -4872,6 +5136,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'clafal — CC BY-SA 4.0 (wger)',
         'aka' => [],
+        'zones' => ['abdos.gainage', 'abdos.obliques'],
     ],
     [
         'slug' => 'planche-commando',
@@ -4890,6 +5155,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'gainage-lateral',
@@ -4908,6 +5174,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Side Plank'],
+        'zones' => ['abdos.obliques', 'abdos.gainage'],
     ],
     [
         'slug' => 'dead-bug',
@@ -4926,6 +5193,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'bird-dog',
@@ -4944,6 +5212,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'mountain-climbers',
@@ -4962,6 +5231,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'roue-abdominale',
@@ -4980,6 +5250,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Ab Wheel', 'Ab Roller'],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'roll-out-trx',
@@ -4998,6 +5269,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'genoux-poitrine-trx',
@@ -5016,6 +5288,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.bas', 'abdos.gainage'],
     ],
     [
         'slug' => 'genoux-poitrine-swiss-ball',
@@ -5034,6 +5307,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.bas', 'abdos.gainage'],
     ],
     [
         'slug' => 'rotation-du-buste-machine',
@@ -5052,6 +5326,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Rotary Torso', 'Torso Rotation'],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'woodchopper-poulie-haut-bas',
@@ -5070,6 +5345,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Woodchop', 'Wood Chop'],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'woodchopper-poulie-bas-haut',
@@ -5088,6 +5364,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Cable Woodchop', 'Wood Chop'],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'pallof-press',
@@ -5106,6 +5383,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.gainage', 'abdos.obliques'],
     ],
     [
         'slug' => 'russian-twist',
@@ -5124,6 +5402,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'flexions-laterales-haltere',
@@ -5142,6 +5421,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'windmill-kettlebell',
@@ -5160,6 +5440,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'l-sit',
@@ -5178,6 +5459,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.gainage', 'abdos.bas'],
     ],
     [
         'slug' => 'dragon-flag',
@@ -5196,6 +5478,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.bas', 'abdos.gainage'],
     ],
     [
         'slug' => 'course',
@@ -5214,6 +5497,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Treadmill', 'Running'],
+        'zones' => [],
     ],
     [
         'slug' => 'marche-inclinee',
@@ -5232,6 +5516,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Incline Walk', '12-3-30'],
+        'zones' => [],
     ],
     [
         'slug' => 'sprints-fractionnes',
@@ -5250,6 +5535,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Treadmill Intervals', 'HIIT'],
+        'zones' => [],
     ],
     [
         'slug' => 'tapis-curve',
@@ -5268,6 +5554,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['S-Drive', 'Non-motorized Treadmill', 'Tapis non motorisé'],
+        'zones' => [],
     ],
     [
         'slug' => 'velo',
@@ -5286,6 +5573,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Upright Bike', 'Upright Cycle', 'Hybrid Cycle'],
+        'zones' => [],
     ],
     [
         'slug' => 'velo-semi-allonge',
@@ -5304,6 +5592,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Recumbent Bike', 'Recumbent Cycle', 'Hybrid Cycle'],
+        'zones' => [],
     ],
     [
         'slug' => 'velo-de-biking',
@@ -5322,6 +5611,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Indoor Cycle', 'Spinning', 'Vélo indoor', 'RPM'],
+        'zones' => [],
     ],
     [
         'slug' => 'air-bike',
@@ -5340,6 +5630,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Assault Bike', 'Echo Bike'],
+        'zones' => [],
     ],
     [
         'slug' => 'elliptique',
@@ -5358,6 +5649,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Elliptical', 'Cross Trainer', 'Ascent Trainer', 'Vélo elliptique'],
+        'zones' => [],
     ],
     [
         'slug' => 'stepper',
@@ -5376,6 +5668,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'escalier',
@@ -5394,6 +5687,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Climbmill', 'Stair Climber', 'StairMaster'],
+        'zones' => [],
     ],
     [
         'slug' => 'rameur',
@@ -5412,6 +5706,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Rower', 'Rowing machine', 'Concept2'],
+        'zones' => [],
     ],
     [
         'slug' => 'skierg',
@@ -5430,6 +5725,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Ski Erg'],
+        'zones' => [],
     ],
     [
         'slug' => 'ergometre-a-bras',
@@ -5448,6 +5744,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Krankcycle', 'Arm Bike', 'Upper Body Ergometer'],
+        'zones' => [],
     ],
     [
         'slug' => 'corde-a-sauter',
@@ -5466,6 +5763,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Jump Rope', 'Double unders'],
+        'zones' => ['mollets.gastrocnemiens', 'mollets.soleaire'],
     ],
     [
         'slug' => 'burpees',
@@ -5484,6 +5782,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'jumping-jacks',
@@ -5502,6 +5801,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'montees-de-genoux',
@@ -5520,6 +5820,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'talons-fesses',
@@ -5538,6 +5839,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'painDpice — CC BY-SA 4.0 (wger)',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'shadow-boxing',
@@ -5556,6 +5858,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'sled-push',
@@ -5574,6 +5877,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Prowler', 'S-Drive'],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand', 'mollets.soleaire'],
     ],
     [
         'slug' => 'sled-pull',
@@ -5592,6 +5896,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Sled Drag'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'sled-pull-corde',
@@ -5610,6 +5915,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Sled Rope Pull'],
+        'zones' => ['dos.epaisseur'],
     ],
     [
         'slug' => 'farmer-carry',
@@ -5628,6 +5934,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Farmer\'s Walk', 'Farmers Carry'],
+        'zones' => ['dos.haut', 'abdos.gainage'],
     ],
     [
         'slug' => 'sandbag-lunges',
@@ -5646,6 +5953,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'sandbag-carry',
@@ -5664,6 +5972,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'sandbag-clean',
@@ -5682,6 +5991,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'wall-balls',
@@ -5700,6 +6010,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'philip — CC BY-SA 4.0 (wger)',
         'aka' => ['Wall Ball Shots'],
+        'zones' => ['quadriceps.vastes', 'epaules.avant'],
     ],
     [
         'slug' => 'slam-ball',
@@ -5718,6 +6029,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Med Ball Slam'],
+        'zones' => ['abdos.haut', 'dos.largeur'],
     ],
     [
         'slug' => 'battle-rope-ondulations',
@@ -5736,6 +6048,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Battling Ropes'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'battle-rope-slams',
@@ -5754,6 +6067,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Battling Ropes'],
+        'zones' => ['epaules.avant'],
     ],
     [
         'slug' => 'kettlebell-clean',
@@ -5772,6 +6086,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'kettlebell-snatch',
@@ -5790,6 +6105,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'turkish-get-up',
@@ -5808,6 +6124,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['TGU'],
+        'zones' => ['abdos.gainage', 'epaules.avant'],
     ],
     [
         'slug' => 'thruster',
@@ -5826,6 +6143,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'epaules.avant'],
     ],
     [
         'slug' => 'thruster-kettlebell',
@@ -5844,6 +6162,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'epaules.avant'],
     ],
     [
         'slug' => 'devil-press',
@@ -5862,6 +6181,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['fessiers.grand', 'epaules.avant'],
     ],
     [
         'slug' => 'clean-haltere',
@@ -5880,6 +6200,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'snatch-haltere',
@@ -5898,6 +6219,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'wger.de — CC BY-SA 4.0 (wger)',
         'aka' => [],
+        'zones' => ['fessiers.grand', 'ischios.hanche'],
     ],
     [
         'slug' => 'man-maker',
@@ -5916,6 +6238,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'renegade-row',
@@ -5934,6 +6257,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['dos.epaisseur', 'abdos.gainage'],
     ],
     [
         'slug' => 'box-jump',
@@ -5952,6 +6276,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'step-up-box',
@@ -5970,6 +6295,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand'],
     ],
     [
         'slug' => 'burpee-broad-jump',
@@ -5988,6 +6314,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'bear-crawl',
@@ -6006,6 +6333,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => ['abdos.gainage'],
     ],
     [
         'slug' => 'sac-de-frappe-enchainements',
@@ -6024,6 +6352,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['Punching Bag', 'Boxing Bag'],
+        'zones' => [],
     ],
     [
         'slug' => 'squat-trx',
@@ -6042,6 +6371,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => ['TRX Squat'],
+        'zones' => ['quadriceps.vastes'],
     ],
     [
         'slug' => 'fente-bulgare-trx',
@@ -6060,6 +6390,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => ['quadriceps.vastes', 'fessiers.grand', 'fessiers.moyen'],
     ],
     [
         'slug' => 'landmine-rotation',
@@ -6078,6 +6409,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Landmine Twist'],
+        'zones' => ['abdos.obliques'],
     ],
     [
         'slug' => 'rotations-epaules',
@@ -6096,6 +6428,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'cercles-de-bras',
@@ -6114,6 +6447,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'rotations-de-hanches',
@@ -6133,6 +6467,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'rotations-de-chevilles',
@@ -6151,6 +6486,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'balanciers-de-jambe',
@@ -6169,6 +6505,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'worlds-greatest-stretch',
@@ -6187,6 +6524,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'cat-cow',
@@ -6205,6 +6543,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'mobilite-hanches-90-90',
@@ -6223,6 +6562,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'ouverture-thoracique',
@@ -6241,6 +6581,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'squat-profond-tenu',
@@ -6259,6 +6600,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'mobilite-inchworm',
@@ -6277,6 +6619,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'dislocations-epaules',
@@ -6295,6 +6638,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'mobilite-cheville-genou-avant',
@@ -6313,6 +6657,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'Davidgj32 — CC BY-SA 4.0 (wger)',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-pectoraux-mur',
@@ -6331,6 +6676,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-epaule-bras-croise',
@@ -6349,6 +6695,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-triceps',
@@ -6367,6 +6714,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-biceps',
@@ -6385,6 +6733,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-avant-bras',
@@ -6403,6 +6752,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'suspension-passive',
@@ -6421,6 +6771,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Dead Hang'],
+        'zones' => [],
     ],
     [
         'slug' => 'posture-de-l-enfant',
@@ -6439,6 +6790,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-trapezes-cou',
@@ -6457,6 +6809,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-genoux-poitrine',
@@ -6475,6 +6828,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'torsion-lombaire-allongee',
@@ -6493,6 +6847,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-figure-4',
@@ -6511,6 +6866,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-pigeon',
@@ -6529,6 +6885,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'Davidgj32 — CC BY-SA 4.0 (wger)',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-fente-basse',
@@ -6547,6 +6904,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-quadriceps-debout',
@@ -6565,6 +6923,7 @@ return [
         'images' => ['0.jpg'],
         'credit' => 'Davidgj32 — CC BY-SA 4.0 (wger)',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-quadriceps-allonge',
@@ -6583,6 +6942,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-ischios-assis',
@@ -6601,6 +6961,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-ischios-debout',
@@ -6619,6 +6980,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-ischios-elastique',
@@ -6637,6 +6999,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-papillon',
@@ -6655,6 +7018,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-grand-ecart-facial',
@@ -6673,6 +7037,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-mollets-mur',
@@ -6691,6 +7056,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-soleaire',
@@ -6709,6 +7075,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'etirement-tibias',
@@ -6727,6 +7094,7 @@ return [
         'images' => ['0.svg', '1.svg'],
         'credit' => 'illustration',
         'aka' => [],
+        'zones' => [],
     ],
     [
         'slug' => 'rouleau-quadriceps',
@@ -6745,6 +7113,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Foam Roller', 'Foam Rolling'],
+        'zones' => [],
     ],
     [
         'slug' => 'rouleau-ischios',
@@ -6763,6 +7132,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Foam Roller', 'Foam Rolling'],
+        'zones' => [],
     ],
     [
         'slug' => 'rouleau-mollets',
@@ -6781,6 +7151,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Foam Roller', 'Foam Rolling'],
+        'zones' => [],
     ],
     [
         'slug' => 'rouleau-dorsaux',
@@ -6799,6 +7170,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Foam Roller', 'Foam Rolling'],
+        'zones' => [],
     ],
     [
         'slug' => 'rouleau-fessiers',
@@ -6817,6 +7189,7 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Foam Roller', 'Foam Rolling'],
+        'zones' => [],
     ],
     [
         'slug' => 'rouleau-bandelette-it',
@@ -6835,5 +7208,6 @@ return [
         'images' => ['0.jpg', '1.jpg'],
         'credit' => 'free-exercise-db',
         'aka' => ['Foam Roller', 'Foam Rolling', 'IT Band'],
+        'zones' => [],
     ],
 ];

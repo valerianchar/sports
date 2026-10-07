@@ -6,6 +6,7 @@ import BottomSheet from '../../components/BottomSheet.vue';
 import ExerciseLibrary from '../../components/ExerciseLibrary.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
 import MuscleSummary from '../../components/MuscleSummary.vue';
+import ZoneCoverage from '../../components/ZoneCoverage.vue';
 import Stepper from '../../components/Stepper.vue';
 import LoadEditor from '../../components/LoadEditor.vue';
 import MachineSettingsEditor from '../../components/MachineSettingsEditor.vue';
@@ -86,6 +87,23 @@ function closeDetail() {
 
 // La ligne dont la feuille de variantes revient après la lecture d'une fiche.
 let reopenIndex = null;
+
+/** Un exercice proposé pour une zone oubliée : il se glisse avant les étirements de fin. */
+function addForZone(exercise) {
+    if (items.value.length >= props.maxItems) {
+        return;
+    }
+
+    let at = items.value.length;
+
+    while (at > 0 && catalog.value[items.value[at - 1].exercise]?.group === 'mobilite') {
+        at--;
+    }
+
+    const list = [...items.value];
+    list.splice(at, 0, newItem(catalog.value[exercise.slug] ?? exercise, machine.value));
+    items.value = list;
+}
 
 function update(index, changes) {
     const next = { ...items.value[index], ...changes };
@@ -351,6 +369,7 @@ function destroy() {
             <p class="mb-1.5 text-[13px] font-semibold text-text-muted">{{ draftSummary }}</p>
 
             <MuscleSummary v-if="items.length" :items="items" :catalog="catalog" :height="200" />
+            <ZoneCoverage :items="items" :catalog="catalog" @add="addForZone" @info="(exercise, back) => explain(exercise.slug, null, back)" />
 
             <article v-for="(item, index) in items" :key="item.key" class="flex flex-col gap-3.5 rounded-[22px] bg-surface p-4">
                 <div class="flex items-start gap-3">

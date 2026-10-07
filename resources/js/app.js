@@ -1,5 +1,6 @@
 import { createApp, h } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createInertiaApp, router } from '@inertiajs/vue3';
+import { setAudioMode } from './audio';
 import AppLayout from './layouts/AppLayout.vue';
 import { registerServiceWorker } from './pwa';
 
@@ -18,6 +19,10 @@ createInertiaApp({
         return page;
     },
     setup({ el, App, props, plugin }) {
+        // Le mode du son (avec la musique ou prioritaire) suit le compte connecté.
+        setAudioMode(props.initialPage.props.auth?.user?.audio_mode);
+        router.on('navigate', (event) => setAudioMode(event.detail.page.props.auth?.user?.audio_mode));
+
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .mount(el);

@@ -15,8 +15,10 @@
 #   SPORTS_IMAGE=localhost:5000/sports:<sha> \
 #     docker compose -f compose.deploy.yaml up -d
 #
-# Deux conteneurs seulement : l'application et sa base. Les minuteurs vivent
-# dans le navigateur ; ni file d'attente, ni planificateur, ni temps réel.
+# Trois conteneurs : l'application, sa base, et l'envoi des alertes de séance.
+# Les minuteurs vivent dans le navigateur ; quand l'appli passe en arrière-plan,
+# elle confie au serveur les fins de repos à annoncer par notification.
+# « alertes » tourne sur la même image, sans migration ni port exposé.
 
 # Nom de projet figé : les volumes ne dépendent pas du nom du dossier, qui pourrait
 # être renommé sans qu'on veuille perdre la base.
@@ -42,6 +44,19 @@ services:
         networks:
             - default
             - proxy
+        depends_on:
+            mysql:
+                condition: service_healthy
+
+    alertes:
+        image: '${SPORTS_IMAGE:-localhost:5000/sports:latest}'
+        restart: unless-stopped
+        env_file: .env
+        environment:
+            # Journaux sur la sortie standard, et pas de volume de stockage : celui-ci
+            # appartient à l'application, qui doit rester seule à y écrire.
+            LOG_CHANNEL: stderr
+        command: ['php', 'artisan', 'alertes:envoyer']
         depends_on:
             mysql:
                 condition: service_healthy

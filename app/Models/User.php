@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AudioMode;
 use App\Enums\CountdownSound;
 use App\Notifications\ResetPassword;
 use Database\Factories\UserFactory;
@@ -14,7 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password', 'sound', 'prep_seconds', 'countdown_seconds', 'volume', 'countdown_sound', 'custom_sound_path', 'custom_sound_name', 'target_weight'])]
+#[Fillable(['name', 'email', 'password', 'sound', 'prep_seconds', 'countdown_seconds', 'volume', 'countdown_sound', 'audio_mode', 'custom_sound_path', 'custom_sound_name', 'target_weight'])]
 #[Hidden(['password', 'remember_token', 'custom_sound_path'])]
 class User extends Authenticatable
 {
@@ -33,6 +34,7 @@ class User extends Authenticatable
         'countdown_seconds' => 5,
         'volume' => 80,
         'countdown_sound' => 'bip',
+        'audio_mode' => 'melange',
     ];
 
     /**
@@ -48,8 +50,21 @@ class User extends Authenticatable
             'countdown_seconds' => 'integer',
             'volume' => 'integer',
             'countdown_sound' => CountdownSound::class,
+            'audio_mode' => AudioMode::class,
             'target_weight' => 'float',
         ];
+    }
+
+    /** @return HasMany<PushSubscription, $this> */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    /** @return HasMany<PushAlert, $this> */
+    public function pushAlerts(): HasMany
+    {
+        return $this->hasMany(PushAlert::class);
     }
 
     /** @return HasMany<Workout, $this> */

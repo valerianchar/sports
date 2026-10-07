@@ -9,6 +9,7 @@ use App\Enums\MuscleGroup;
 use App\Enums\WorkoutGoal;
 use App\Support\ExerciseCatalog;
 use App\Support\MachineSettings;
+use App\Support\MuscleZones;
 use App\Support\Stretches;
 use App\Support\WorkoutEstimate;
 use Illuminate\Support\Collection;
@@ -79,6 +80,9 @@ final class SuggestWorkout
 
     private Randomizer $random;
 
+    /** @var list<string> les zones des muscles visés (pectoraux haut, bas…) que la séance devrait toucher */
+    private array $targetZones = [];
+
     private WorkoutGoal $goal = WorkoutGoal::Hypertrophy;
 
     public function __construct(private readonly SuggestCardio $cardio) {}
@@ -124,6 +128,18 @@ final class SuggestWorkout
             'items' => array_map(fn (array $item): array => array_diff_key($item, ['_score' => true]), $items),
             'seconds' => WorkoutEstimate::seconds($items),
         ];
+    }
+
+    /** Un classique de salle, que l'assistant propose en premier. */
+    public static function isStaple(string $slug): bool
+    {
+        return in_array($slug, self::STAPLES, true);
+    }
+
+    /** Avancé ou très technique : en dernier recours. */
+    public static function isAdvanced(string $slug): bool
+    {
+        return in_array($slug, self::ADVANCED, true);
     }
 
     /**
@@ -278,6 +294,7 @@ final class SuggestWorkout
     private function pick(array $targets, int $budget, WorkoutGoal $goal, ?EquipmentKind $equipment, array $existing = []): array
     {
         $pool = $this->pool($targets, $equipment)->except(array_column($existing, 'exercise'));
+        $this->targetZones = MuscleZones::zonesOfMuscles($targets);
         $coverage = array_fill_keys($targets, 0.0);
         // Muscles visés qui ont déjà un exercice où ils sont principaux.
         $served = [];
@@ -461,6 +478,12 @@ final class SuggestWorkout
         if ($equipment !== EquipmentKind::Bodyweight && in_array($exercise['equipment'], self::ACCESSORY_EQUIPMENT, true)) {
             $gain -= 0.5;
         }
+
+        // Une zone du muscle encore jamais touchée (le haut des pectoraux après un
+        // développé couché) : un angle de plus vaut mieux qu'une variante du même.
+        $covered = array_merge(...array_map(fn (array $item): array => ExerciseCatalog::find($item['exercise'])['zones'] ?? [], $chosen));
+        $fresh = array_diff(array_intersect($exercise['zones'] ?? [], $this->targetZones), $covered);
+        $gain += 0.3 * min(2, count($fresh));
 
         $twin = 0.0;
         $twins = 0;

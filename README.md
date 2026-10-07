@@ -56,7 +56,18 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   pause. Le programme (touche le compteur « Exercice n / N » ou « Changer ») réordonne la suite
   en pleine séance — machine prise : « Plus tard » (avant les étirements), « Maintenant », ↑ ↓ — ou
   prend une variante pour le jour, sans réseau ; l'exercice en cours garde son chrono. En fin de séance, le journal part au serveur ; sans réseau, il est gardé sur le
-  téléphone et renvoyé plus tard, sans jamais être compté deux fois.
+  téléphone et renvoyé plus tard, sans jamais être compté deux fois. Charge et répétitions se
+  tapent au clavier (toucher la valeur) ; pendant le repos, on règle la charge de la série qui
+  vient et on corrige la série faite. Les bips se mêlent à la musique sans la couper (Audio
+  Session « transient ») ; le mode « Prioritaire » les fait sonner en silencieux, au prix de la
+  musique. Appli en arrière-plan : iOS endort la page, le lecteur confie alors au serveur les fins
+  de repos, envoyées en notifications web par le conteneur `alertes` (`php artisan
+  alertes:envoyer`, clés VAPID du .env via `php artisan alertes:cles` ; sur iPhone, appli ajoutée
+  à l'écran d'accueil).
+- **Zones** — chaque grand muscle a ses zones (`database/data/zones.php` : haut, milieu, bas,
+  intérieur, extérieur des pectoraux…), et chaque exercice celles qu'il travaille (`zones`).
+  L'éditeur et l'assistant montrent la couverture d'une séance ; toucher une zone oubliée
+  propose de quoi la travailler, et l'assistant varie lui-même les angles.
 - **Progrès** — seules les séances menées au bout (toutes les séries prévues faites) comptent ;
   une séance interrompue est gardée mais n'entre dans aucune statistique. Chaque série réellement faite est enregistrée (charge, répétitions faites,
   ajustables au « − / + » du lecteur, objectif, paliers de drop), avec la difficulté ressentie

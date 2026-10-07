@@ -11,6 +11,31 @@
 let context = null;
 let customBuffer = null;
 let customUrl = null;
+let mode = 'melange';
+
+/*
+ * La place du son de l'appli face à la musique (API Audio Session, Safari
+ * 16.4+). « transient » : des sons brefs qui se mêlent à la musique sans
+ * l'arrêter — l'iPhone les tait en mode silencieux. « playback » : ils sonnent
+ * même en silencieux, mais l'iPhone met la musique en pause. Une page web ne
+ * peut pas demander mieux : baisser la musique sous le bip reste l'affaire
+ * d'iOS.
+ */
+function applySession() {
+    try {
+        if (navigator.audioSession) {
+            navigator.audioSession.type = mode === 'prioritaire' ? 'playback' : 'transient';
+        }
+    } catch {
+        // Navigateur sans Audio Session : il décide seul.
+    }
+}
+
+/** « melange » (par défaut) ou « prioritaire » — le réglage du compte. */
+export function setAudioMode(value) {
+    mode = value === 'prioritaire' ? 'prioritaire' : 'melange';
+    applySession();
+}
 
 function ensureContext() {
     context ??= new (window.AudioContext || window.webkitAudioContext)();
@@ -20,11 +45,8 @@ function ensureContext() {
 
 export function unlockAudio() {
     try {
-        // iPhone en mode silencieux : sans cette déclaration (Safari 17+), Safari
-        // coupe les sons de la page — le minuteur resterait muet en pleine séance.
-        if (navigator.audioSession) {
-            navigator.audioSession.type = 'playback';
-        }
+        // Déclarée à chaque réveil : c'est elle qui décide si la musique continue.
+        applySession();
 
         ensureContext();
 

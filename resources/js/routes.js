@@ -14,6 +14,7 @@ export const routes = {
     assistantSuggest: '/seances/assistant/proposition',
     assistantComplete: '/seances/assistant/completer',
     exerciseEquivalents: (slug) => `/exercices/${slug}/equivalents`,
+    zoneExercises: (zone) => `/exercices/zones/${zone}`,
     workouts: '/seances',
     workout: (id) => `/seances/${id}`,
     preferences: '/reglages',

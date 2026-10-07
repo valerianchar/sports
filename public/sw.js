@@ -8,7 +8,7 @@
  * au sous-sol sans réseau n'affiche pas de trous.
  */
 
-const CACHE_VERSION = 'seance-v1';
+const CACHE_VERSION = 'seance-v2';
 const IMAGE_CACHE = 'seance-exercices-v2';
 const OFFLINE_PAGE = '/offline.html';
 
@@ -100,3 +100,45 @@ async function networkThenOfflinePage(request) {
         );
     }
 }
+
+/*
+ * Alertes de séance envoyées par le serveur quand l'appli dort en
+ * arrière-plan : fin d'un repos, reprise de l'effort. Le son est celui des
+ * notifications du téléphone ; une alerte remplace la précédente de la même
+ * séance (même étiquette) au lieu de s'empiler.
+ */
+self.addEventListener('push', (event) => {
+    let data = {};
+
+    try {
+        data = event.data ? event.data.json() : {};
+    } catch {
+        data = { title: 'Séance', body: event.data?.text() };
+    }
+
+    event.waitUntil(
+        self.registration.showNotification(data.title || 'Séance', {
+            body: data.body || '',
+            tag: data.tag || 'seance',
+            renotify: true,
+            silent: false,
+            vibrate: [200, 80, 200],
+            icon: '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
+            data: { url: data.url || '/' },
+        }),
+    );
+});
+
+// Toucher l'alerte ramène dans l'appli — dans la fenêtre déjà ouverte si possible.
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windows) => {
+            const open = windows.find((client) => 'focus' in client);
+
+            return open ? open.focus() : self.clients.openWindow(event.notification.data?.url || '/');
+        }),
+    );
+});

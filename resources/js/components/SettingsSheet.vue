@@ -1,10 +1,11 @@
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { SwitchRoot, SwitchThumb } from 'reka-ui';
 import BottomSheet from './BottomSheet.vue';
 import Stepper from './Stepper.vue';
-import { loadCustomSound, previewCountdown } from '../audio';
+import { currentSubscription, disableAlerts, enableAlerts, pushSupport, testAlert } from '../alerts';
+import { loadCustomSound, previewCountdown, setAudioMode } from '../audio';
 import { routes } from '../routes';
 
 const props = defineProps({
@@ -22,7 +23,62 @@ const form = useForm({
     countdown_seconds: user.value.countdown_seconds ?? 5,
     volume: user.value.volume ?? 80,
     countdown_sound: user.value.countdown_sound ?? 'bip',
+    audio_mode: user.value.audio_mode ?? 'melange',
 });
+
+// Le mode s'entend tout de suite au « Tester », avant même d'enregistrer.
+watch(() => form.audio_mode, (value) => setAudioMode(value));
+
+/*
+ * Alertes hors de l'appli : l'état de ce téléphone (abonné ou non), relu à
+ * chaque ouverture des réglages.
+ */
+const alerts = ref({ support: 'unsupported', on: false, busy: false, message: null });
+
+watch(
+    () => props.open,
+    async (open) => {
+        if (!open || !page.props.push_public_key) {
+            return;
+        }
+
+        alerts.value = { ...alerts.value, support: pushSupport(), on: Boolean(await currentSubscription()), message: null };
+    },
+    { immediate: true },
+);
+
+async function toggleAlerts() {
+    alerts.value.busy = true;
+    alerts.value.message = null;
+
+    try {
+        if (alerts.value.on) {
+            await disableAlerts();
+            alerts.value.on = false;
+        } else {
+            await enableAlerts(page.props.push_public_key);
+            alerts.value.on = true;
+            await testAlert();
+            alerts.value.message = 'Activées : une notification d’essai vient de partir.';
+        }
+    } catch (error) {
+        alerts.value.support = pushSupport();
+        alerts.value.message = error.message === 'denied' ? null : 'Impossible d’activer les alertes pour le moment. Réessaie.';
+    } finally {
+        alerts.value.busy = false;
+    }
+}
+
+async function sendTest() {
+    alerts.value.message = null;
+
+    try {
+        const { sent } = await testAlert();
+        alerts.value.message = sent ? 'Notification envoyée : elle arrive dans quelques secondes.' : 'Aucun téléphone abonné : réactive les alertes.';
+    } catch {
+        alerts.value.message = 'Envoi impossible pour le moment.';
+    }
+}
 
 /* Entendre le réglage tout de suite : trois secondes de décompte et la reprise. */
 async function test() {
@@ -184,6 +240,28 @@ function logout() {
                 <p class="text-[12px] font-medium text-text-faint">Le volume du téléphone s'applique aussi : monte-le pendant la séance.</p>
             </div>
 
+            <div v-if="form.sound" class="flex flex-col gap-2">
+                <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Bips et musique</span>
+                <div class="grid grid-cols-2 gap-1.5" role="radiogroup" aria-label="Bips et musique">
+                    <button
+                        v-for="choice in page.props.audio_modes"
+                        :key="choice.value"
+                        type="button"
+                        role="radio"
+                        :aria-checked="form.audio_mode === choice.value"
+                        class="h-11 rounded-xl px-2 text-[13px] font-bold"
+                        :class="form.audio_mode === choice.value ? 'bg-accent text-on-accent' : 'bg-surface-2 text-text-soft'"
+                        @click="form.audio_mode = choice.value"
+                    >
+                        {{ choice.label }}
+                    </button>
+                </div>
+                <p class="text-[12px] font-medium text-text-faint">
+                    {{ page.props.audio_modes.find((m) => m.value === form.audio_mode)?.description }}
+                    <template v-if="form.countdown_sound === 'voix'"> La voix de l'iPhone coupe la musique dans tous les cas : préfère un bip.</template>
+                </p>
+            </div>
+
             <Stepper
                 label="Compte à rebours avant la séance"
                 :display="form.prep_seconds === 0 ? 'Aucun' : `${form.prep_seconds} s`"
@@ -192,6 +270,35 @@ function logout() {
                 @decrease="form.prep_seconds--"
                 @increase="form.prep_seconds++"
             />
+        </div>
+
+        <div v-if="page.props.push_public_key" class="flex flex-col gap-2.5 rounded-[22px] bg-surface p-4">
+            <span class="flex flex-col gap-0.5">
+                <span class="text-[15px] font-bold">Alertes hors de l'appli</span>
+                <span class="text-[12.5px] font-medium text-text-muted">
+                    Écran verrouillé ou autre appli ouverte : une notification sonne à la fin de chaque repos, par-dessus ta musique.
+                </span>
+            </span>
+            <p v-if="alerts.support === 'install'" class="rounded-xl bg-bg px-3 py-2.5 text-[12.5px] font-semibold text-text-soft">
+                Sur iPhone, ajoute d'abord Séance à l'écran d'accueil (bouton Partager, puis « Sur l'écran d'accueil »), puis ouvre-la depuis son icône.
+            </p>
+            <p v-else-if="alerts.support === 'denied'" class="rounded-xl bg-bg px-3 py-2.5 text-[12.5px] font-semibold text-prep">
+                Notifications refusées : autorise-les dans les Réglages du téléphone, rubrique Notifications, puis Séance.
+            </p>
+            <p v-else-if="alerts.support === 'unsupported'" class="text-[12.5px] font-semibold text-text-muted">Ce navigateur ne reçoit pas de notifications.</p>
+            <div v-else class="flex gap-2">
+                <button
+                    type="button"
+                    class="h-11 flex-1 rounded-full text-[14px] font-extrabold"
+                    :class="alerts.on ? 'bg-surface-2 text-text-soft' : 'bg-accent text-on-accent'"
+                    :disabled="alerts.busy"
+                    @click="toggleAlerts"
+                >
+                    {{ alerts.busy ? '…' : alerts.on ? 'Désactiver' : 'Activer les alertes' }}
+                </button>
+                <button v-if="alerts.on" type="button" class="h-11 rounded-full bg-surface-2 px-4 text-[14px] font-extrabold text-accent" @click="sendTest">Tester</button>
+            </div>
+            <p v-if="alerts.message" class="text-[12.5px] font-semibold text-text-soft" aria-live="polite">{{ alerts.message }}</p>
         </div>
 
         <button type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="form.processing" @click="save">Enregistrer</button>

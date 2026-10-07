@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\AudioMode;
 use App\Enums\CountdownSound;
 use App\Support\ExerciseCatalog;
 use App\Support\MachineSettings;
+use App\Support\MuscleZones;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -37,6 +39,7 @@ class HandleInertiaRequests extends Middleware
                     'countdown_seconds' => $user->countdown_seconds,
                     'volume' => $user->volume,
                     'countdown_sound' => $user->countdown_sound->value,
+                    'audio_mode' => $user->audio_mode->value,
                     'custom_sound_url' => $user->custom_sound_url,
                     'custom_sound_name' => $user->custom_sound_name,
                 ],
@@ -47,8 +50,16 @@ class HandleInertiaRequests extends Middleware
             ],
             'registration_open' => config('sport.registration_open'),
             'seconds_per_rep' => config('sport.seconds_per_rep'),
+            // Clé publique des notifications web ; absente, l'appli ne propose pas les alertes.
+            'push_public_key' => fn (): ?string => $request->user() === null ? null : config('services.webpush.public_key'),
+            'audio_modes' => fn (): array => array_map(
+                fn (AudioMode $mode): array => ['value' => $mode->value, 'label' => $mode->label(), 'description' => $mode->description()],
+                AudioMode::cases(),
+            ),
             // Vitesse, inclinaison, niveau : ce que règle chaque machine de cardio.
             'machine_settings' => fn (): ?array => $request->user() === null ? null : MachineSettings::forClient(),
+            // Les zones de chaque grand muscle (pectoraux haut, bas…), pour la couverture d'une séance.
+            'muscle_zones' => fn (): ?array => $request->user() === null ? null : MuscleZones::forClient(),
             // Les sons du compte à rebours, pour les réglages.
             'countdown_sounds' => fn (): array => array_map(
                 fn (CountdownSound $sound): array => ['value' => $sound->value, 'label' => $sound->label()],

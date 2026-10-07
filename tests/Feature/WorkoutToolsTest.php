@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Actions\SuggestWorkout;
 use App\Enums\EquipmentKind;
+use App\Enums\Muscle;
+use App\Enums\WorkoutGoal;
 use App\Models\User;
 use App\Models\Workout;
 use App\Support\ExerciseCatalog;
@@ -163,6 +166,41 @@ class WorkoutToolsTest extends TestCase
             foreach ($fields as $field) {
                 $this->assertArrayHasKey($field, $item, "{$item['exercise']} sans {$field}");
             }
+        }
+    }
+
+    public function test_a_missing_zone_gets_exercises_proposed(): void
+    {
+        $exercises = $this->actingAs(User::factory()->create())
+            ->getJson('/exercices/zones/pectoraux.bas?'.http_build_query(['exclude' => ['dips-pectoraux'], 'equipment' => 'machine']))
+            ->assertOk()
+            ->json('exercises');
+
+        $this->assertNotEmpty($exercises);
+        $this->assertNotContains('dips-pectoraux', array_column($exercises, 'slug'));
+
+        foreach ($exercises as $exercise) {
+            $this->assertContains('pectoraux.bas', $exercise['zones'], $exercise['slug']);
+        }
+
+        $this->actingAs(User::factory()->create())->getJson('/exercices/zones/nez.bout')->assertNotFound();
+    }
+
+    public function test_the_zones_travel_with_every_page(): void
+    {
+        $this->actingAs(User::factory()->create())->get('/')
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('muscle_zones.0.key', 'pectoraux')
+                ->where('muscle_zones.0.zones.0.key', 'pectoraux.haut'));
+    }
+
+    public function test_the_assistant_works_several_zones_of_a_muscle(): void
+    {
+        foreach ([0, 1, 2] as $variant) {
+            $items = app(SuggestWorkout::class)->handle([Muscle::Chest], 45, WorkoutGoal::Hypertrophy, variant: $variant)['items'];
+            $zones = array_unique(array_merge(...array_map(fn (array $item): array => ExerciseCatalog::find($item['exercise'])['zones'], $items)));
+
+            $this->assertGreaterThanOrEqual(4, count(array_filter($zones, fn (string $zone): bool => str_starts_with($zone, 'pectoraux.'))), "Variante {$variant}");
         }
     }
 }

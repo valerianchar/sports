@@ -8,6 +8,7 @@ import FlashToast from '../../components/FlashToast.vue';
 import { useWakeLock } from '../../composables/useWakeLock';
 import { beep, countdownSound, goSound, loadCustomSound, restSound, unlockAudio, vibrate } from '../../audio';
 import { sendLog } from '../../pendingLogs';
+import { alertsAllowed, cancelAlerts, scheduleAlerts } from '../../alerts';
 import { routes } from '../../routes';
 import { patchJson } from '../../http';
 import { formatKg, formatSet, formatTonnage } from '../../format';
@@ -232,8 +233,16 @@ function buzz(pattern) {
     }
 }
 
-function goTo(target, countSet = false) {
+/*
+ * `startAt` : l'instant où l'étape aurait dû commencer. Une étape chronométrée
+ * finie pendant que l'appli dormait en arrière-plan enchaîne sur la suivante à
+ * l'heure prévue — celle des alertes envoyées —, pas à l'heure du retour ; les
+ * sons de ce rattrapage se taisent.
+ */
+function goTo(target, countSet = false, startAt = null) {
     const at = Date.now();
+    const begin = startAt ?? at;
+    const late = at - begin > 1500;
     const current = state.steps[state.index];
     lastBeep = null;
 
@@ -251,7 +260,7 @@ function goTo(target, countSet = false) {
     now.value = at;
 
     if (target >= state.steps.length) {
-        finish(at);
+        finish(begin);
 
         return;
     }
@@ -261,10 +270,16 @@ function goTo(target, countSet = false) {
     Object.assign(state, {
         index: target,
         currentDuration: step.duration,
-        endAt: step.duration != null ? at + step.duration * 1000 : null,
-        startAt: at,
+        endAt: step.duration != null ? begin + step.duration * 1000 : null,
+        startAt: begin,
         elapsedBase: 0,
     });
+
+    if (late) {
+        persist(true);
+
+        return;
+    }
 
     if (step.kind === 'work') {
         if (props.preferences.sound) {
@@ -408,7 +423,7 @@ function tick() {
                 perform(step, step.duration);
             }
 
-            goTo(state.index + 1, step.kind === 'work');
+            goTo(state.index + 1, step.kind === 'work', state.endAt);
 
             return;
         }
@@ -503,7 +518,11 @@ function changeWeight(direction) {
  * dégressif, ou celle du palier de drop — et l'envoie au serveur.
  */
 function setWeightTo(weight) {
-    const current = step.value;
+    setWeightFor(step.value, weight);
+}
+
+/** Fixe la charge d'une série donnée (`{ item, set, drop }`), en cours ou à venir. */
+function setWeightFor(current, weight) {
     const position = current.item;
     const it = items[position];
     let payload;
@@ -532,6 +551,85 @@ function setWeightTo(weight) {
         });
     }, 700);
 }
+
+// ---------------------------------------------------------------- saisie directe
+
+/*
+ * Taper une valeur plutôt que d'enchaîner les − / + : la charge (vide = poids
+ * du corps) ou les répétitions, à l'effort comme pendant le repos — pour la
+ * série qui vient, ou pour corriger celle qu'on vient de faire.
+ */
+const quick = reactive({ open: false, kind: 'weight', title: '', value: '', apply: null, error: null });
+
+function openQuick(kind, title, value, apply) {
+    Object.assign(quick, {
+        open: true,
+        kind,
+        title,
+        value: value === null || value === undefined ? '' : String(value).replace('.', ','),
+        apply,
+        error: null,
+    });
+}
+
+function applyQuick() {
+    const raw = String(quick.value).trim().replace(',', '.');
+
+    if (quick.kind === 'weight') {
+        const weight = raw === '' ? null : Number(raw);
+
+        if (weight !== null && (!Number.isFinite(weight) || weight < 0 || weight > 999)) {
+            quick.error = 'Une charge entre 0 et 999 kg — vide pour le poids du corps.';
+
+            return;
+        }
+
+        quick.apply(weight === 0 ? null : weight === null ? null : Math.round(weight * 100) / 100);
+    } else {
+        const reps = Number(raw);
+
+        if (!Number.isInteger(reps) || reps < 0 || reps > 100) {
+            quick.error = 'Un nombre de répétitions entre 0 et 100.';
+
+            return;
+        }
+
+        quick.apply(reps);
+    }
+
+    quick.open = false;
+}
+
+/** La dernière série principale faite, si elle précède le repos en cours : on peut la corriger. */
+const lastSet = computed(() => {
+    if (step.value?.kind !== 'rest') {
+        return null;
+    }
+
+    for (let i = state.performed.length - 1; i >= 0; i--) {
+        if (state.performed[i].drop === null) {
+            return { index: i, ...state.performed[i] };
+        }
+    }
+
+    return null;
+});
+
+function correctLastReps(reps) {
+    state.performed[lastSet.value.index].reps = reps;
+    persist(true);
+}
+
+function correctLastWeight(weight) {
+    const entry = lastSet.value;
+    state.performed[entry.index].weight = weight;
+    // La charge corrigée devient aussi celle de cette série pour la prochaine fois.
+    setWeightFor({ item: entry.position, set: entry.set }, weight);
+    persist(true);
+}
+
+/** La série qui suit le repos en cours, pour régler sa charge pendant qu'on charge la barre. */
+const upcomingSet = computed(() => (step.value?.kind === 'rest' ? { item: step.value.item, set: step.value.set } : null));
 
 const completeSet = () => {
     perform(step.value);
@@ -892,6 +990,86 @@ function onKey(event) {
     }
 }
 
+// ---------------------------------------------------------------- alertes en arrière-plan
+
+/*
+ * L'appli passe en arrière-plan en plein repos : iOS va endormir la page et ses
+ * bips. On confie au serveur les fins d'étapes chronométrées à venir — jusqu'à
+ * la prochaine série en répétitions, qui attend qu'on revienne —, avec un
+ * avertissement avant la fin des repos d'au moins 20 s. Au retour, on les
+ * reprend : le lecteur sonne de nouveau lui-même.
+ */
+let alertsOut = false;
+
+function announce(s) {
+    if (!s) {
+        return { title: 'Séance terminée', body: 'Reviens dans l’appli pour l’enregistrer.' };
+    }
+
+    const it = items[s.item];
+    const name = catalog[it.exercise].name;
+
+    if (s.kind === 'rest') {
+        return { title: 'Repos', body: `${formatClock(s.duration)} de repos, puis ${name}` };
+    }
+
+    const label = s.drop !== undefined ? `drop ${s.drop + 1}` : `série ${s.set}/${it.sets}`;
+
+    return { title: 'C’est reparti !', body: [name, label, target(s), itemSettings(s.item)].filter(Boolean).join(' · ') };
+}
+
+function upcomingAlerts() {
+    const current = state.steps[state.index];
+
+    if (!current || current.duration == null || state.paused || state.done) {
+        return [];
+    }
+
+    const lead = Math.max(5, props.preferences.countdown_seconds || 5);
+    const alerts = [];
+    let index = state.index;
+    let s = current;
+    let end = (state.endAt - Date.now()) / 1000;
+
+    while (s && s.duration != null && alerts.length < 38 && end <= 7200) {
+        const following = state.steps[index + 1];
+
+        if (s.kind === 'rest' && s.duration >= 20 && end - lead > 1) {
+            alerts.push({ in: end - lead, title: `Plus que ${lead} s de repos`, body: announce(following).body });
+        }
+
+        alerts.push({ in: Math.max(0, end), ...announce(following) });
+
+        if (!following || following.duration == null) {
+            break;
+        }
+
+        index++;
+        s = following;
+        end += s.duration;
+    }
+
+    return alerts;
+}
+
+function onVisibility() {
+    if (!props.preferences.sound || !alertsAllowed()) {
+        return;
+    }
+
+    if (document.visibilityState === 'hidden') {
+        const alerts = upcomingAlerts();
+
+        if (alerts.length) {
+            scheduleAlerts(state.clientId, alerts);
+            alertsOut = true;
+        }
+    } else if (alertsOut) {
+        cancelAlerts(state.clientId);
+        alertsOut = false;
+    }
+}
+
 onMounted(() => {
     // Le son personnel se charge pendant le compte à rebours de départ.
     if (props.preferences.sound && cue() === 'perso') {
@@ -904,11 +1082,17 @@ onMounted(() => {
 
     timer = setInterval(tick, 200);
     window.addEventListener('keydown', onKey);
+    document.addEventListener('visibilitychange', onVisibility);
 });
 
 onUnmounted(() => {
     clearInterval(timer);
     window.removeEventListener('keydown', onKey);
+    document.removeEventListener('visibilitychange', onVisibility);
+
+    if (alertsOut) {
+        cancelAlerts(state.clientId);
+    }
 });
 </script>
 
@@ -1017,6 +1201,38 @@ onUnmounted(() => {
                         </span>
                         <button type="button" class="iconbtn size-[38px] bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" aria-label="Comment faire" @click="openDetail">i</button>
                     </div>
+                    <!-- Pendant le repos : la charge de la série qui vient, et la série faite à corriger. -->
+                    <div v-if="upcomingSet && usesWeight(exercise)" class="mt-2.5 flex w-full items-center justify-between gap-2 rounded-[18px] bg-surface p-1.5 pl-4">
+                        <span class="text-[11px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Charge à venir</span>
+                        <span class="flex items-center gap-1.5">
+                            <button type="button" class="iconbtn size-10 bg-surface-2! text-[20px] font-semibold disabled:opacity-35" aria-label="Charge à venir : moins" :disabled="load(upcomingSet).weight === null" @click="setWeightFor(upcomingSet, stepWeight(load(upcomingSet).weight, -1))">−</button>
+                            <button
+                                type="button"
+                                class="min-w-[96px] text-center font-display text-[24px] leading-none font-extrabold tabular-nums underline decoration-line-strong decoration-2 underline-offset-[5px]"
+                                :class="load(upcomingSet).weight === null ? 'text-[15px]! text-text-muted' : ''"
+                                :aria-label="`Charge à venir ${formatWeight(load(upcomingSet).weight) ?? 'poids du corps'} : toucher pour la taper`"
+                                @click="openQuick('weight', 'Charge de la prochaine série', load(upcomingSet).weight, (weight) => setWeightFor(upcomingSet, weight))"
+                            >
+                                {{ formatWeight(load(upcomingSet).weight) ?? 'Poids du corps' }}
+                            </button>
+                            <button type="button" class="iconbtn size-10 bg-surface-2! text-[20px] font-semibold" aria-label="Charge à venir : plus" @click="setWeightFor(upcomingSet, stepWeight(load(upcomingSet).weight, 1))">+</button>
+                        </span>
+                    </div>
+                    <p v-if="lastSet && lastSet.reps !== null" class="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] font-semibold text-text-muted">
+                        <span>Série faite :</span>
+                        <button type="button" class="rounded-lg bg-surface px-2.5 py-1 font-bold text-text" :aria-label="`${lastSet.reps} répétitions faites : corriger`" @click="openQuick('reps', 'Répétitions faites (série précédente)', lastSet.reps, correctLastReps)">
+                            {{ lastSet.reps }} reps ✎
+                        </button>
+                        <button
+                            v-if="usesWeight(catalog[lastSet.exercise])"
+                            type="button"
+                            class="rounded-lg bg-surface px-2.5 py-1 font-bold text-text"
+                            :aria-label="`Charge ${formatWeight(lastSet.weight) ?? 'poids du corps'} : corriger`"
+                            @click="openQuick('weight', 'Charge utilisée (série précédente)', lastSet.weight, correctLastWeight)"
+                        >
+                            {{ formatWeight(lastSet.weight) ?? 'poids du corps' }} ✎
+                        </button>
+                    </p>
                     <button v-if="step.between" type="button" class="mt-2 h-10 rounded-full bg-surface px-4 text-[13px] font-extrabold text-accent" @click="programOpen = true">
                         Machine prise ? Changer d'exercice
                     </button>
@@ -1065,7 +1281,14 @@ onUnmounted(() => {
                         <div class="mt-2.5 flex items-center gap-4">
                             <button type="button" class="iconbtn size-11 bg-surface! text-[22px] font-semibold disabled:opacity-35" aria-label="Une répétition de moins" :disabled="shownReps === 0" @click="adjustReps(-1)">−</button>
                             <div class="flex items-baseline gap-2" :class="state.repsDone !== null && state.repsDone < load(step).reps ? 'text-prep' : 'text-accent'">
-                                <span class="font-display leading-[0.85] font-extrabold tabular-nums" :class="usesWeight(exercise) ? 'text-[100px]' : 'text-[120px]'" aria-live="polite">{{ shownReps }}</span>
+                                <button
+                                    type="button"
+                                    class="font-display leading-[0.85] font-extrabold tabular-nums"
+                                    :class="usesWeight(exercise) ? 'text-[100px]' : 'text-[120px]'"
+                                    aria-live="polite"
+                                    :aria-label="`${shownReps} répétitions : toucher pour taper le nombre fait`"
+                                    @click="openQuick('reps', 'Répétitions faites', shownReps, (reps) => (state.repsDone = reps))"
+                                >{{ shownReps }}</button>
                                 <span class="font-display text-[28px] font-bold">REPS</span>
                             </div>
                             <button type="button" class="iconbtn size-11 bg-surface! text-[22px] font-semibold" aria-label="Une répétition de plus" @click="adjustReps(1)">+</button>
@@ -1075,9 +1298,16 @@ onUnmounted(() => {
                         </span>
                     <div v-if="usesWeight(exercise)" class="mt-2.5 flex items-center gap-3 rounded-full bg-surface p-1.5">
                         <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold disabled:opacity-35" aria-label="Charge : moins" :disabled="load(step).weight === null" @click="changeWeight(-1)">−</button>
-                        <span class="min-w-[130px] text-center font-display text-[34px] leading-none font-extrabold tabular-nums" :class="load(step).weight === null ? 'text-[18px]! text-text-muted' : 'text-text'" aria-live="polite">
+                        <button
+                            type="button"
+                            class="min-w-[130px] rounded-xl text-center font-display text-[34px] leading-none font-extrabold tabular-nums underline decoration-line-strong decoration-2 underline-offset-[6px]"
+                            :class="load(step).weight === null ? 'text-[18px]! text-text-muted' : 'text-text'"
+                            aria-live="polite"
+                            :aria-label="`Charge ${formatWeight(load(step).weight) ?? 'poids du corps'} : toucher pour la taper`"
+                            @click="openQuick('weight', 'Charge de la série', load(step).weight, setWeightTo)"
+                        >
                             {{ formatWeight(load(step).weight) ?? 'Poids du corps' }}
-                        </span>
+                        </button>
                         <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold" aria-label="Charge : plus" @click="changeWeight(1)">+</button>
                     </div>
                     <button
@@ -1321,6 +1551,25 @@ onUnmounted(() => {
                     <button type="button" class="iconbtn size-10 shrink-0 bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" :aria-label="`Comment faire : ${choice.name}`" @click="explain(choice.slug, () => (reopenIndex = swapping, swapping = null), () => (swapping = reopenIndex))">i</button>
                 </li>
             </ul>
+        </BottomSheet>
+
+        <BottomSheet v-model:open="quick.open" :title="quick.title" :description="quick.kind === 'weight' ? 'En kilos ; laisse vide pour le poids du corps.' : null">
+            <form class="flex flex-col gap-3" @submit.prevent="applyQuick">
+                <label class="flex items-baseline gap-2 rounded-2xl bg-surface px-4 py-3">
+                    <input
+                        v-model="quick.value"
+                        type="text"
+                        :inputmode="quick.kind === 'weight' ? 'decimal' : 'numeric'"
+                        :placeholder="quick.kind === 'weight' ? '62,5' : '8'"
+                        :aria-label="quick.title"
+                        autofocus
+                        class="w-full min-w-0 border-0 bg-transparent p-0 font-display text-[44px] font-bold text-text outline-none placeholder:text-text-faint"
+                    />
+                    <span class="font-display text-[22px] font-bold text-text-muted">{{ quick.kind === 'weight' ? 'kg' : 'reps' }}</span>
+                </label>
+                <p v-if="quick.error" class="text-[13px] text-danger">{{ quick.error }}</p>
+                <button type="submit" class="btn-accent h-14 w-full text-[22px]">Valider</button>
+            </form>
         </BottomSheet>
 
         <!-- Le lecteur n'a pas de mise en page : il porte lui-même les messages. -->

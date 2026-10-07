@@ -7,6 +7,7 @@ import BottomSheet from '../../components/BottomSheet.vue';
 import ExerciseLibrary from '../../components/ExerciseLibrary.vue';
 import ExerciseSheet from '../../components/ExerciseSheet.vue';
 import MuscleSummary from '../../components/MuscleSummary.vue';
+import ZoneCoverage from '../../components/ZoneCoverage.vue';
 import Stepper from '../../components/Stepper.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
@@ -25,7 +26,9 @@ const props = defineProps({
 
 const page = usePage();
 const labels = computed(() => page.props.muscles);
-const catalog = computed(() => bySlug([...props.exercises, ...(props.library ?? [])]));
+// Les exercices ajoutés pour une zone oubliée viennent compléter ceux de la proposition.
+const added = ref([]);
+const catalog = computed(() => bySlug([...props.exercises, ...(props.library ?? []), ...added.value]));
 
 // Les muscles proposés au choix, par région.
 const regions = MUSCLE_REGIONS;
@@ -308,6 +311,32 @@ function browse() {
  * quand on ferme la fiche.
  */
 let reopen = null;
+
+/** Un exercice pour une zone oubliée : aux réglages de la proposition, avant les étirements. */
+function addForZone(exercise) {
+    added.value = [...added.value, exercise];
+    const prescription = props.proposal.prescriptions[exercise.mode];
+    const item = {
+        exercise: exercise.slug,
+        mode: exercise.mode,
+        value: exercise.group === 'cardio' ? 300 : prescription.value,
+        sets: prescription.sets,
+        rest_sets: prescription.rest_sets,
+        rest_after: prescription.rest_after,
+        origin: exercise.slug,
+    };
+
+    let at = items.value.length;
+
+    while (at > 0 && catalog.value[items.value[at - 1].exercise]?.group === 'mobilite') {
+        at--;
+    }
+
+    const list = [...items.value];
+    list.splice(at, 0, item);
+    items.value = list;
+    toast(`Ajouté : ${exercise.name}`);
+}
 
 function explain(slug, close = null, back = null) {
     close?.();
@@ -596,6 +625,7 @@ const prescription = (item) => {
             <p class="mb-1 text-[13px] font-semibold text-text-muted">{{ proposalSummary }}</p>
 
             <MuscleSummary :items="items" :catalog="catalog" :height="200" />
+            <ZoneCoverage :items="items" :catalog="catalog" :equipment="props.input.equipment" @add="addForZone" @info="(exercise, back) => explain(exercise.slug, null, back)" />
             <p class="px-1 text-[12.5px] font-medium text-text-faint">
                 <span class="font-serif font-extrabold text-accent italic">i</span> montre comment faire l'exercice et régler la machine. Un exercice ne te plaît pas ? ⟳ le remplace par un équivalent, ou touche-le pour choisir toi-même.
             </p>

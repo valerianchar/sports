@@ -101,6 +101,8 @@ final class ExerciseCatalog
             'credit' => $exercise['credit'],
             // Les noms écrits sur les machines (souvent en anglais) et les surnoms de salle, pour la recherche.
             'aka' => $exercise['aka'] ?? [],
+            // Les parties du muscle que l'exercice accentue (clés de database/data/zones.php).
+            'zones' => $exercise['zones'] ?? [],
         ])->values()->all();
     }
 

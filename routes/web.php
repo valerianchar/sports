@@ -8,8 +8,11 @@ use App\Http\Controllers\BodyWeightController;
 use App\Http\Controllers\CustomSoundController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\ExerciseEquivalentController;
+use App\Http\Controllers\MuscleZoneController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\PushAlertController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\WorkoutAssistantController;
 use App\Http\Controllers\WorkoutController;
 use App\Http\Controllers\WorkoutItemSettingsController;
@@ -40,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [WorkoutController::class, 'index'])->name('workouts.index');
     Route::get('/exercices', [ExerciseController::class, 'index'])->name('exercises.index');
     // Variantes d'un exercice, pour le changer dans l'éditeur — JSON.
+    // Avant la route paramétrée : « zones » n'est pas un exercice.
+    Route::get('/exercices/zones/{zone}', [MuscleZoneController::class, 'show'])->name('exercises.zones');
     Route::get('/exercices/{exercise}/equivalents', [ExerciseEquivalentController::class, 'index'])->name('exercises.equivalents');
 
     // Avant la route paramétrée : « nouvelle » et « assistant » ne sont pas des identifiants de séance.
@@ -68,6 +73,17 @@ Route::middleware('auth')->group(function () {
 
     Route::patch('/journal/{clientId}/ressenti', [WorkoutLogController::class, 'feeling'])
         ->whereUuid('clientId')->middleware('throttle:30,1')->name('workouts.logs.feeling');
+
+    // Notifications : abonnement du téléphone, alertes d'une séance en arrière-plan — JSON.
+    Route::post('/notifications/abonnement', [PushSubscriptionController::class, 'store'])
+        ->middleware('throttle:20,1')->name('push.subscribe');
+    Route::delete('/notifications/abonnement', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+    Route::post('/notifications/essai', [PushSubscriptionController::class, 'test'])
+        ->middleware('throttle:5,1')->name('push.test');
+    Route::put('/seances/alertes/{session}', [PushAlertController::class, 'store'])
+        ->whereUuid('session')->middleware('throttle:120,1')->name('push.alerts.store');
+    Route::delete('/seances/alertes/{session}', [PushAlertController::class, 'destroy'])
+        ->whereUuid('session')->middleware('throttle:120,1')->name('push.alerts.destroy');
 
     // Progrès : statistiques de performance, pesées.
     Route::get('/progres', [ProgressController::class, 'index'])->name('progress.index');

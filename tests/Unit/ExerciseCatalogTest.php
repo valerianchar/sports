@@ -161,4 +161,67 @@ class ExerciseCatalogTest extends TestCase
         $this->assertSame(10, WorkoutDefaults::for('squat')['value']);
         $this->assertSame(30, WorkoutDefaults::for('gainage-planche')['value']);
     }
+
+    /**
+     * Les clés de zones (pectoraux.haut, dos.largeur…) définies dans database/data/zones.php.
+     *
+     * @return list<string>
+     */
+    private static function zoneKeys(): array
+    {
+        $groups = require __DIR__.'/../../database/data/zones.php';
+
+        return array_merge(...array_map(fn (array $group): array => array_keys($group['zones']), array_values($groups)));
+    }
+
+    public function test_every_exercise_lists_known_zones(): void
+    {
+        $keys = self::zoneKeys();
+
+        foreach (ExerciseCatalog::all() as $slug => $exercise) {
+            $this->assertArrayHasKey('zones', $exercise, $slug);
+            $this->assertIsList($exercise['zones'], $slug);
+            $this->assertSame(array_values(array_unique($exercise['zones'])), $exercise['zones'], "Zone en double : {$slug}");
+
+            foreach ($exercise['zones'] as $zone) {
+                $this->assertContains($zone, $keys, "Zone inconnue pour {$slug} : {$zone}");
+            }
+        }
+    }
+
+    /**
+     * L'assistant propose de quoi compléter une zone oubliée : chacune doit
+     * avoir plusieurs exercices.
+     */
+    public function test_every_zone_is_trained_by_several_exercises(): void
+    {
+        $used = ExerciseCatalog::all()->pluck('zones')->flatten()->countBy();
+
+        foreach (self::zoneKeys() as $zone) {
+            $this->assertGreaterThanOrEqual(3, $used->get($zone, 0), $zone);
+        }
+    }
+
+    public function test_the_zones_match_the_classic_exercises(): void
+    {
+        $expected = [
+            'developpe-incline-halteres' => 'pectoraux.haut',
+            'developpe-couche' => 'pectoraux.milieu',
+            'butterfly' => 'pectoraux.interieur',
+            'dips-pectoraux' => 'pectoraux.bas',
+            'tractions' => 'dos.largeur',
+            'curl-marteau' => 'biceps.brachial',
+            'extension-nuque-haltere' => 'triceps.longue',
+            'leg-extension' => 'quadriceps.droit',
+            'mollets-assis' => 'mollets.soleaire',
+        ];
+
+        foreach ($expected as $slug => $zone) {
+            $this->assertContains($zone, ExerciseCatalog::find($slug)['zones'], $slug);
+        }
+
+        // Un étirement ne travaille pas de zone.
+        $this->assertSame([], ExerciseCatalog::find('etirement-pectoraux-mur')['zones']);
+        $this->assertSame(ExerciseCatalog::find('butterfly')['zones'], collect(ExerciseCatalog::forClient(['butterfly']))->first()['zones']);
+    }
 }

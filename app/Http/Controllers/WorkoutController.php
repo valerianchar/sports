@@ -106,6 +106,7 @@ class WorkoutController extends Controller
                 'volume' => $request->user()->volume,
                 'countdown_sound' => $request->user()->countdown_sound->value,
                 'custom_sound_url' => $request->user()->custom_sound_url,
+                'audio_mode' => $request->user()->audio_mode->value,
             ],
         ]);
     }

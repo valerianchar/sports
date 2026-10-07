@@ -57,6 +57,9 @@ services:
             # appartient à l'application, qui doit rester seule à y écrire.
             LOG_CHANNEL: stderr
         command: ['php', 'artisan', 'alertes:envoyer']
+        # Le contrôle de santé de l'image interroge le serveur web, absent ici.
+        healthcheck:
+            disable: true
         depends_on:
             mysql:
                 condition: service_healthy

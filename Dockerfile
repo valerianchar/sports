@@ -22,7 +22,8 @@ RUN composer dump-autoload --classmap-authoritative --no-dev
 # un seul conteneur en façade, donc une seule chose à surveiller sur le serveur.
 FROM dunglas/frankenphp:php8.4-alpine AS runtime
 
-RUN install-php-extensions pdo_mysql intl opcache
+# gmp : les calculs de chiffrement des notifications web (minishlink/web-push).
+RUN install-php-extensions pdo_mysql intl opcache gmp
 
 WORKDIR /app
 

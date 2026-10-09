@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\PushSubscription;
+use Illuminate\Support\Facades\Log;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\WebPush;
 
@@ -35,6 +36,15 @@ class PushSender
             // Urgence haute et courte durée de vie : une alerte de repos en retard ne sert plus à rien.
             ['TTL' => 60, 'urgency' => 'high', 'topic' => 'seance'],
         );
+
+        // Un refus du service de notifications (Apple, Google…) se note : sans lui, on ne saurait pas pourquoi rien n'arrive.
+        if (! $report->isSuccess()) {
+            Log::warning('Notification refusée', [
+                'service' => parse_url($subscription->endpoint, PHP_URL_HOST),
+                'status' => $report->getResponse()?->getStatusCode(),
+                'reason' => $report->getReason(),
+            ]);
+        }
 
         return ! $report->isSubscriptionExpired();
     }

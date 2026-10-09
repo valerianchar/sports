@@ -8,7 +8,7 @@ import FlashToast from '../../components/FlashToast.vue';
 import { useWakeLock } from '../../composables/useWakeLock';
 import { beep, countdownSound, goSound, loadCustomSound, restSound, unlockAudio, vibrate } from '../../audio';
 import { sendLog } from '../../pendingLogs';
-import { alertsAllowed, cancelAlerts, clearStatus, scheduleAlerts, showStatus } from '../../alerts';
+import { alertsAllowed, cancelAlerts, clearStatus, resyncAlerts, scheduleAlerts, showStatus } from '../../alerts';
 import { describe, nowPlayingSupported, pauseNowPlaying, playTimeline, progress as mediaProgress, startNowPlaying, stopNowPlaying } from '../../nowPlaying';
 import { routes } from '../../routes';
 import { patchJson } from '../../http';
@@ -1224,13 +1224,10 @@ function upcomingAlerts() {
 }
 
 function onVisibility() {
-    // Comme une vidéo : la piste et l'écran verrouillé suffisent ; au retour, on resynchronise.
-    if (videoMode) {
-        if (document.visibilityState === 'visible') {
-            syncMedia(true);
-        }
-
-        return;
+    // Comme une vidéo : au retour, la piste se resynchronise. Les notifications
+    // partent quand même — iOS peut couper le son d'une appli d'écran d'accueil.
+    if (videoMode && document.visibilityState === 'visible') {
+        syncMedia(true);
     }
 
     if (!alertsAllowed()) {
@@ -1275,8 +1272,11 @@ onMounted(() => {
         syncMedia(false);
     }
 
+    // Le téléphone redonne son abonnement au serveur : un abonnement perdu se répare seul.
+    resyncAlerts();
+
     // La séance lancée apparaît dans le centre de notifications.
-    if (!videoMode && alertsAllowed()) {
+    if (alertsAllowed()) {
         showStatus(`Séance lancée · ${props.workout.name}`, `${items.length} exercice${items.length > 1 ? 's' : ''} · ${statusLine() ?? ''}`);
     }
 

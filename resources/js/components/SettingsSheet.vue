@@ -4,7 +4,7 @@ import { router, useForm, usePage } from '@inertiajs/vue3';
 import { SwitchRoot, SwitchThumb } from 'reka-ui';
 import BottomSheet from './BottomSheet.vue';
 import Stepper from './Stepper.vue';
-import { currentSubscription, disableAlerts, enableAlerts, pushSupport, testAlert } from '../alerts';
+import { diagnoseAlerts, disableAlerts, enableAlerts, pushSupport, testAlert } from '../alerts';
 import { loadCustomSound, previewCountdown, setAudioMode } from '../audio';
 import { routes } from '../routes';
 
@@ -33,7 +33,12 @@ watch(() => form.audio_mode, (value) => setAudioMode(value));
  * Alertes hors de l'appli : l'état de ce téléphone (abonné ou non), relu à
  * chaque ouverture des réglages.
  */
-const alerts = ref({ support: 'unsupported', on: false, busy: false, message: null });
+const alerts = ref({ support: 'unsupported', on: false, busy: false, message: null, diagnosis: null });
+
+async function diagnose() {
+    const diagnosis = await diagnoseAlerts();
+    alerts.value = { ...alerts.value, support: diagnosis.support, on: diagnosis.local && diagnosis.server !== false, diagnosis };
+}
 
 watch(
     () => props.open,
@@ -42,10 +47,19 @@ watch(
             return;
         }
 
-        alerts.value = { ...alerts.value, support: pushSupport(), on: Boolean(await currentSubscription()), message: null };
+        alerts.value.message = null;
+        await diagnose();
     },
     { immediate: true },
 );
+
+// Ce qui a échoué, dit simplement.
+const failures = {
+    denied: 'Notifications refusées : autorise-les dans les Réglages de l’iPhone, rubrique Notifications, puis Séance.',
+    worker: 'L’appli n’a pas pu préparer les notifications. Ferme-la complètement, rouvre-la depuis son icône, puis réessaie.',
+    subscribe: 'Le téléphone a refusé l’abonnement. Vérifie que Séance est bien ouverte depuis son icône sur l’écran d’accueil.',
+    server: 'Le serveur n’a pas enregistré ce téléphone. Réessaie dans un instant.',
+};
 
 async function toggleAlerts() {
     alerts.value.busy = true;
@@ -63,9 +77,10 @@ async function toggleAlerts() {
         }
     } catch (error) {
         alerts.value.support = pushSupport();
-        alerts.value.message = error.message === 'denied' ? null : 'Impossible d’activer les alertes pour le moment. Réessaie.';
+        alerts.value.message = `${failures[error.step] ?? 'Impossible d’activer les alertes pour le moment. Réessaie.'}${error.detail ? ` (${error.detail})` : ''}`;
     } finally {
         alerts.value.busy = false;
+        await diagnose();
     }
 }
 
@@ -299,6 +314,15 @@ function logout() {
                 <button v-if="alerts.on" type="button" class="h-11 rounded-full bg-surface-2 px-4 text-[14px] font-extrabold text-accent" @click="sendTest">Tester</button>
             </div>
             <p v-if="alerts.message" class="text-[12.5px] font-semibold text-text-soft" aria-live="polite">{{ alerts.message }}</p>
+            <!-- L'état réel, pour comprendre ce qui coince sans deviner. -->
+            <ul v-if="alerts.diagnosis" class="flex flex-col gap-1 rounded-xl bg-bg px-3 py-2.5 text-[12px] font-semibold text-text-muted" aria-label="État des alertes">
+                <li :class="alerts.diagnosis.standalone ? 'text-accent' : 'text-prep'">{{ alerts.diagnosis.standalone ? '✓' : '✗' }} Ouverte depuis l'icône de l'écran d'accueil</li>
+                <li :class="alerts.diagnosis.permission === 'granted' ? 'text-accent' : 'text-prep'">
+                    {{ alerts.diagnosis.permission === 'granted' ? '✓ Notifications autorisées' : alerts.diagnosis.permission === 'denied' ? '✗ Notifications refusées' : '… Notifications pas encore autorisées' }}
+                </li>
+                <li :class="alerts.diagnosis.local ? 'text-accent' : 'text-prep'">{{ alerts.diagnosis.local ? '✓' : '✗' }} Téléphone abonné</li>
+                <li v-if="alerts.diagnosis.local" :class="alerts.diagnosis.server ? 'text-accent' : 'text-prep'">{{ alerts.diagnosis.server ? '✓' : '✗' }} Abonnement reçu par le serveur</li>
+            </ul>
         </div>
 
         <button type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="form.processing" @click="save">Enregistrer</button>

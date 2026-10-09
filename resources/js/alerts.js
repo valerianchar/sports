@@ -47,16 +47,80 @@ export async function currentSubscription() {
     }
 }
 
+/** Une erreur qui dit à quelle étape l'activation a échoué, pour le diagnostic. */
+class AlertError extends Error {
+    constructor(step, detail = '') {
+        super(step);
+        this.step = step;
+        this.detail = detail;
+    }
+}
+
 /** Demande la permission (à appeler depuis un toucher), abonne ce téléphone. */
 export async function enableAlerts(publicKey) {
     if ((await Notification.requestPermission()) !== 'granted') {
-        throw new Error('denied');
+        throw new AlertError('denied');
     }
 
-    const worker = await registration();
-    const subscription = (await worker.pushManager.getSubscription()) ?? (await worker.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(publicKey) }));
+    let worker;
+    let subscription;
 
-    await postJson('/notifications/abonnement', subscription.toJSON());
+    try {
+        worker = await registration();
+    } catch (error) {
+        throw new AlertError('worker', error.message);
+    }
+
+    try {
+        subscription = (await worker.pushManager.getSubscription()) ?? (await worker.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(publicKey) }));
+    } catch (error) {
+        throw new AlertError('subscribe', error.message);
+    }
+
+    try {
+        await postJson('/notifications/abonnement', subscription.toJSON());
+    } catch (error) {
+        throw new AlertError('server', error.status ?? error.message);
+    }
+}
+
+/**
+ * L'état réel des alertes, pour les réglages : ce que permet le téléphone,
+ * son abonnement, et si le serveur le connaît.
+ */
+export async function diagnoseAlerts() {
+    const support = pushSupport();
+    const result = { support, permission: 'Notification' in window ? Notification.permission : 'absente', standalone: isStandalone(), local: false, server: null };
+
+    if (support !== 'ok') {
+        return result;
+    }
+
+    const subscription = await currentSubscription();
+    result.local = Boolean(subscription);
+
+    if (subscription) {
+        try {
+            result.server = (await postJson('/notifications/abonnement', subscription.toJSON())).subscribed === true;
+        } catch {
+            result.server = false;
+        }
+    }
+
+    return result;
+}
+
+/** Redonne au serveur l'abonnement de ce téléphone, s'il en a un (sans bruit en cas d'échec). */
+export async function resyncAlerts() {
+    if (!alertsAllowed()) {
+        return;
+    }
+
+    const subscription = await currentSubscription();
+
+    if (subscription) {
+        await postJson('/notifications/abonnement', subscription.toJSON()).catch(() => null);
+    }
 }
 
 export async function disableAlerts() {

@@ -123,8 +123,37 @@ function chooseKind(value) {
 }
 
 const isCardio = computed(() => kind.value === 'cardio');
+
+/*
+ * Le formulaire se déroule en étapes : le type de séance (et son objectif ou
+ * son format), les muscles — sauf pour le cardio —, puis le temps, le
+ * matériel et les options. Les réglages fins restent repliés.
+ */
+const stepMeta = {
+    type: { short: 'Séance', title: 'Quelle séance ?', hint: 'Muscu, perte de poids ou cardio : l’assistant adapte exercices, répétitions et repos.' },
+    muscles: { short: 'Muscles', title: 'Quels muscles ?', hint: 'Touche la silhouette, choisis dans la liste ou prends un raccourci.' },
+    duree: { short: 'Temps', title: 'Combien de temps ?', hint: 'Et avec quoi : l’assistant remplit le temps que tu as.' },
+};
+const stepKeys = computed(() => (isCardio.value ? ['type', 'duree'] : ['type', 'muscles', 'duree']));
+const stepIndex = ref(props.proposal ? 0 : 0);
+const currentStep = computed(() => stepKeys.value[Math.min(stepIndex.value, stepKeys.value.length - 1)]);
+const advanced = ref(false);
+
+function goStep(position) {
+    stepIndex.value = Math.max(0, Math.min(position, stepKeys.value.length - 1));
+    document.querySelector('[data-scroll]')?.scrollTo({ top: 0 });
+}
+
+function nextStep() {
+    if (currentStep.value === 'duree') {
+        suggest();
+    } else {
+        goStep(stepIndex.value + 1);
+    }
+}
 const needsMuscles = computed(() => kind.value === 'muscu');
 const canSuggest = computed(() => !needsMuscles.value || form.muscles.length > 0);
+const canNext = computed(() => currentStep.value !== 'muscles' || canSuggest.value);
 
 const equipmentChoices = computed(() =>
     isCardio.value
@@ -378,11 +407,25 @@ const prescription = (item) => {
 
         <!-- CRITÈRES -->
         <div v-if="editing" data-scroll class="no-scrollbar flex flex-1 flex-col gap-3 overflow-y-auto px-5 pt-1 pb-[110px]">
-            <h1 class="display text-[44px] leading-[0.9] font-extrabold">Compose ta<br />séance</h1>
-            <p class="mb-2 text-[14px] font-medium text-text-muted">
-                Dis ce que tu veux travailler et le temps que tu as : je propose une séance que tu pourras retoucher.
-            </p>
+            <!-- Trois étapes (deux pour le cardio) : quoi, quels muscles, combien de temps. -->
+            <ol class="flex gap-1.5" aria-label="Étapes">
+                <li v-for="(key, position) in stepKeys" :key="key" class="flex flex-1 flex-col gap-1.5">
+                    <button
+                        type="button"
+                        class="h-1.5 rounded-full"
+                        :class="position <= stepIndex ? 'bg-accent' : 'bg-surface-3'"
+                        :aria-label="`Étape ${position + 1} : ${stepMeta[key].short}`"
+                        :aria-current="position === stepIndex ? 'step' : undefined"
+                        :disabled="position > stepIndex"
+                        @click="goStep(position)"
+                    />
+                    <span class="text-[10.5px] font-extrabold tracking-[0.08em] uppercase" :class="position === stepIndex ? 'text-text' : 'text-text-faint'">{{ stepMeta[key].short }}</span>
+                </li>
+            </ol>
+            <h1 class="display mt-2 text-[40px] leading-[0.92] font-extrabold">{{ stepMeta[currentStep].title }}</h1>
+            <p class="mb-1 text-[14px] font-medium text-text-muted">{{ stepMeta[currentStep].hint }}</p>
 
+            <template v-if="currentStep === 'type'">
             <section class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
                 <h2 class="display text-[22px] font-bold">Type de séance</h2>
                 <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Type de séance">
@@ -400,73 +443,6 @@ const prescription = (item) => {
                         <span class="text-[11.5px] leading-tight font-semibold" :class="kind === choice.value ? 'text-on-accent/75' : 'text-text-muted'">
                             {{ choice.description }}
                         </span>
-                    </button>
-                </div>
-            </section>
-
-            <section v-if="!isCardio" class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
-                <div class="flex items-baseline justify-between">
-                    <h2 class="display text-[22px] font-bold">Muscles<span v-if="!needsMuscles" class="ml-2 font-sans text-[13px] font-bold text-text-muted normal-case">facultatif</span></h2>
-                    <button v-if="form.muscles.length" type="button" class="text-[13px] font-bold text-text-muted" @click="form.muscles = []">
-                        Effacer
-                    </button>
-                </div>
-
-                <div class="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
-                    <button
-                        v-for="preset in presets"
-                        :key="preset.label"
-                        type="button"
-                        class="h-[34px] shrink-0 rounded-full px-3.5 text-[13px] font-bold whitespace-nowrap"
-                        :class="presetActive(preset) ? 'bg-accent text-on-accent' : 'border-[1.5px] border-line text-text-soft'"
-                        :aria-pressed="presetActive(preset)"
-                        @click="applyPreset(preset)"
-                    >
-                        {{ preset.label }}
-                    </button>
-                </div>
-
-                <BodyMap :intensity="intensity" :height="240" interactive label="" @toggle="toggle" />
-                <p class="-mt-2 text-center text-[12px] font-semibold text-text-faint">
-                    {{ needsMuscles || form.muscles.length ? 'Touche un muscle pour le choisir' : 'Sans choix, la séance fait travailler tout le corps' }}
-                </p>
-
-                <div v-for="region in regions" :key="region.label" class="flex flex-col gap-2">
-                    <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">{{ region.label }}</span>
-                    <div class="flex flex-wrap gap-2">
-                        <button
-                            v-for="muscle in region.muscles"
-                            :key="muscle"
-                            type="button"
-                            class="h-[34px] rounded-full px-3.5 text-[13px] font-bold"
-                            :class="form.muscles.includes(muscle) ? 'bg-accent text-on-accent' : 'bg-surface-2 text-text-soft'"
-                            :aria-pressed="form.muscles.includes(muscle)"
-                            @click="toggle(muscle)"
-                        >
-                            {{ labels[muscle] }}
-                        </button>
-                    </div>
-                </div>
-                <p v-if="page.props.errors.muscles" class="text-[13px] text-danger">{{ page.props.errors.muscles }}</p>
-            </section>
-
-            <section class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
-                <h2 class="display text-[22px] font-bold">Durée</h2>
-                <div class="flex items-center justify-between">
-                    <button type="button" class="iconbtn size-11 bg-surface-2! text-[22px] font-semibold" aria-label="5 minutes de moins" @click="setMinutes(form.minutes - 5)">−</button>
-                    <span class="font-display text-[44px] leading-none font-extrabold tabular-nums" aria-live="polite">{{ form.minutes }} min</span>
-                    <button type="button" class="iconbtn size-11 bg-surface-2! text-[22px] font-semibold" aria-label="5 minutes de plus" @click="setMinutes(form.minutes + 5)">+</button>
-                </div>
-                <div class="grid grid-cols-4 gap-2">
-                    <button
-                        v-for="minutes in [30, 45, 60, 90]"
-                        :key="minutes"
-                        type="button"
-                        class="h-9 rounded-xl text-[13px] font-bold"
-                        :class="form.minutes === minutes ? 'bg-text text-bg' : 'bg-surface-2 text-text-soft'"
-                        @click="form.minutes = minutes"
-                    >
-                        {{ minutes }} min
                     </button>
                 </div>
             </section>
@@ -515,8 +491,124 @@ const prescription = (item) => {
                     Échauffement et retour au calme compris. Le fractionné alterne efforts et récupération : 30 s / 30 s, 40 s / 20 s, Tabata…
                 </p>
             </section>
+            </template>
 
-            <section v-else class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
+            <template v-else-if="currentStep === 'muscles'">
+            <section v-if="!isCardio" class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
+                <div class="flex items-baseline justify-between">
+                    <h2 class="display text-[22px] font-bold">Muscles<span v-if="!needsMuscles" class="ml-2 font-sans text-[13px] font-bold text-text-muted normal-case">facultatif</span></h2>
+                    <button v-if="form.muscles.length" type="button" class="text-[13px] font-bold text-text-muted" @click="form.muscles = []">
+                        Effacer
+                    </button>
+                </div>
+
+                <div class="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+                    <button
+                        v-for="preset in presets"
+                        :key="preset.label"
+                        type="button"
+                        class="h-[34px] shrink-0 rounded-full px-3.5 text-[13px] font-bold whitespace-nowrap"
+                        :class="presetActive(preset) ? 'bg-accent text-on-accent' : 'border-[1.5px] border-line text-text-soft'"
+                        :aria-pressed="presetActive(preset)"
+                        @click="applyPreset(preset)"
+                    >
+                        {{ preset.label }}
+                    </button>
+                </div>
+
+                <BodyMap :intensity="intensity" :height="240" interactive label="" @toggle="toggle" />
+                <p class="-mt-2 text-center text-[12px] font-semibold text-text-faint">
+                    {{ needsMuscles || form.muscles.length ? 'Touche un muscle pour le choisir' : 'Sans choix, la séance fait travailler tout le corps' }}
+                </p>
+
+                <div v-for="region in regions" :key="region.label" class="flex flex-col gap-2">
+                    <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">{{ region.label }}</span>
+                    <div class="flex flex-wrap gap-2">
+                        <button
+                            v-for="muscle in region.muscles"
+                            :key="muscle"
+                            type="button"
+                            class="h-[34px] rounded-full px-3.5 text-[13px] font-bold"
+                            :class="form.muscles.includes(muscle) ? 'bg-accent text-on-accent' : 'bg-surface-2 text-text-soft'"
+                            :aria-pressed="form.muscles.includes(muscle)"
+                            @click="toggle(muscle)"
+                        >
+                            {{ labels[muscle] }}
+                        </button>
+                    </div>
+                </div>
+                <p v-if="page.props.errors.muscles" class="text-[13px] text-danger">{{ page.props.errors.muscles }}</p>
+            </section>
+            </template>
+
+            <template v-else>
+            <section class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
+                <h2 class="display text-[22px] font-bold">Durée</h2>
+                <div class="flex items-center justify-between">
+                    <button type="button" class="iconbtn size-11 bg-surface-2! text-[22px] font-semibold" aria-label="5 minutes de moins" @click="setMinutes(form.minutes - 5)">−</button>
+                    <span class="font-display text-[44px] leading-none font-extrabold tabular-nums" aria-live="polite">{{ form.minutes }} min</span>
+                    <button type="button" class="iconbtn size-11 bg-surface-2! text-[22px] font-semibold" aria-label="5 minutes de plus" @click="setMinutes(form.minutes + 5)">+</button>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <button
+                        v-for="minutes in [30, 45, 60, 90]"
+                        :key="minutes"
+                        type="button"
+                        class="h-9 rounded-xl text-[13px] font-bold"
+                        :class="form.minutes === minutes ? 'bg-text text-bg' : 'bg-surface-2 text-text-soft'"
+                        @click="form.minutes = minutes"
+                    >
+                        {{ minutes }} min
+                    </button>
+                </div>
+            </section>
+
+            <section class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
+                <h2 class="display text-[22px] font-bold">Matériel</h2>
+                <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Matériel">
+                    <button
+                        v-for="choice in equipmentChoices"
+                        :key="choice.value"
+                        type="button"
+                        role="radio"
+                        :aria-checked="form.equipment === choice.value"
+                        class="h-11 rounded-xl px-3 text-[13px] font-bold"
+                        :class="form.equipment === choice.value ? 'bg-text text-bg' : 'bg-surface-2 text-text-soft'"
+                        @click="form.equipment = choice.value"
+                    >
+                        {{ choice.label }}
+                    </button>
+                </div>
+            </section>
+
+            <section class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
+                <label v-for="option in [
+                    { key: 'warmup', title: 'Échauffement', text: '5 minutes de cardio pour commencer' },
+                    { key: 'stretch', title: 'Étirements', text: 'Deux étirements des muscles travaillés à la fin' },
+                ].filter((o) => !isCardio || o.key !== 'warmup')" :key="option.key" class="flex cursor-pointer items-center justify-between gap-4">
+                    <span class="flex flex-col gap-0.5">
+                        <span class="text-[15px] font-bold">{{ option.title }}</span>
+                        <span class="text-[12.5px] font-medium text-text-muted">{{ option.text }}</span>
+                    </span>
+                    <SwitchRoot
+                        v-model="form[option.key]"
+                        class="relative h-7 w-12 shrink-0 rounded-full transition-colors"
+                        :class="form[option.key] ? 'bg-accent' : 'bg-surface-3'"
+                        :aria-label="option.title"
+                    >
+                        <SwitchThumb
+                            class="absolute top-1 block size-5 rounded-full transition-[left]"
+                            :class="form[option.key] ? 'left-6 bg-on-accent' : 'left-1 bg-text-muted'"
+                        />
+                    </SwitchRoot>
+                </label>
+            </section>
+
+                <button v-if="!isCardio" type="button" class="flex h-12 items-center justify-between rounded-2xl bg-surface px-4 text-[14px] font-bold text-text-soft" :aria-expanded="advanced" @click="advanced = !advanced">
+                    <span class="text-left">Séries, répétitions et repos <span class="font-medium text-text-muted">· {{ form.sets ?? 'Auto' }} × {{ form.reps }}</span></span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" :class="advanced ? 'rotate-180' : ''" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+            <section v-if="!isCardio && advanced" class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
                 <div class="flex items-baseline justify-between gap-3">
                     <h2 class="display text-[22px] font-bold">Séries et repos</h2>
                     <span class="text-[12px] font-bold text-accent" aria-live="polite">jusqu’à {{ expected }} exercices</span>
@@ -576,47 +668,7 @@ const prescription = (item) => {
                     <template v-if="kind === 'perte-de-poids'"> La séance finit par un bloc de fractionné.</template>
                 </p>
             </section>
-
-            <section class="flex flex-col gap-3 rounded-[22px] bg-surface p-4">
-                <h2 class="display text-[22px] font-bold">Matériel</h2>
-                <div class="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Matériel">
-                    <button
-                        v-for="choice in equipmentChoices"
-                        :key="choice.value"
-                        type="button"
-                        role="radio"
-                        :aria-checked="form.equipment === choice.value"
-                        class="h-11 rounded-xl px-3 text-[13px] font-bold"
-                        :class="form.equipment === choice.value ? 'bg-text text-bg' : 'bg-surface-2 text-text-soft'"
-                        @click="form.equipment = choice.value"
-                    >
-                        {{ choice.label }}
-                    </button>
-                </div>
-            </section>
-
-            <section class="flex flex-col gap-4 rounded-[22px] bg-surface p-4">
-                <label v-for="option in [
-                    { key: 'warmup', title: 'Échauffement', text: '5 minutes de cardio pour commencer' },
-                    { key: 'stretch', title: 'Étirements', text: 'Deux étirements des muscles travaillés à la fin' },
-                ].filter((o) => !isCardio || o.key !== 'warmup')" :key="option.key" class="flex cursor-pointer items-center justify-between gap-4">
-                    <span class="flex flex-col gap-0.5">
-                        <span class="text-[15px] font-bold">{{ option.title }}</span>
-                        <span class="text-[12.5px] font-medium text-text-muted">{{ option.text }}</span>
-                    </span>
-                    <SwitchRoot
-                        v-model="form[option.key]"
-                        class="relative h-7 w-12 shrink-0 rounded-full transition-colors"
-                        :class="form[option.key] ? 'bg-accent' : 'bg-surface-3'"
-                        :aria-label="option.title"
-                    >
-                        <SwitchThumb
-                            class="absolute top-1 block size-5 rounded-full transition-[left]"
-                            :class="form[option.key] ? 'left-6 bg-on-accent' : 'left-1 bg-text-muted'"
-                        />
-                    </SwitchRoot>
-                </label>
-            </section>
+            </template>
         </div>
 
         <!-- PROPOSITION -->
@@ -665,15 +717,18 @@ const prescription = (item) => {
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7" /></svg>
                     Autre proposition
                 </button>
-                <button type="button" class="btn-soft h-12 text-[14px]" @click="editing = true">Modifier les critères</button>
+                <button type="button" class="btn-soft h-12 text-[14px]" @click="editing = true; stepIndex = stepKeys.length - 1">Modifier les critères</button>
             </div>
         </div>
 
         <div class="bottom-bar flex flex-col gap-2">
             <template v-if="editing">
-                <button type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="!canSuggest || loading" @click="suggest()">
-                    {{ canSuggest ? 'Proposer une séance' : 'Choisis des muscles' }}
-                </button>
+                <div class="flex gap-2">
+                    <button v-if="stepIndex > 0" type="button" class="btn-soft h-14 w-[30%] text-[15px]" @click="goStep(stepIndex - 1)">Retour</button>
+                    <button type="button" class="btn-accent h-14 flex-1 text-[22px]" :disabled="!canNext || loading" @click="nextStep">
+                        {{ currentStep === 'duree' ? 'Proposer une séance' : canNext ? 'Suivant' : 'Choisis des muscles' }}
+                    </button>
+                </div>
             </template>
             <template v-else>
                 <button type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="loading" @click="save({ start: true })">

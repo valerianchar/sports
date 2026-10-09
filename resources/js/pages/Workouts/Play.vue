@@ -11,6 +11,7 @@ import { sendLog } from '../../pendingLogs';
 import { alertsAllowed, cancelAlerts, clearStatus, resyncAlerts, scheduleAlerts, showStatus } from '../../alerts';
 import { describe, nowPlayingSupported, pauseNowPlaying, playTimeline, progress as mediaProgress, startNowPlaying, stopNowPlaying } from '../../nowPlaying';
 import { routes } from '../../routes';
+import { PLAYER_STORAGE_KEY, RESUME_WINDOW } from '../../session';
 import { patchJson } from '../../http';
 import { formatKg, formatSet, formatTonnage } from '../../format';
 import {
@@ -168,8 +169,7 @@ let timer = null;
  * séance en cours est gardée sur le téléphone et reprend en pause, là où elle
  * s'était arrêtée. Au-delà de quatre heures, on repart de zéro.
  */
-const STORAGE_KEY = 'seance.player.v2';
-const RESUME_WINDOW = 4 * 60 * 60 * 1000;
+const STORAGE_KEY = PLAYER_STORAGE_KEY;
 let lastSaved = 0;
 
 function persist(force = false) {

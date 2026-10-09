@@ -1,53 +1,34 @@
 <script setup>
 import { computed, ref } from 'vue';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import BodyMap from '../../components/BodyMap.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import BottomSheet from '../../components/BottomSheet.vue';
-import HomeKpis from '../../components/HomeKpis.vue';
-import SettingsSheet from '../../components/SettingsSheet.vue';
 import TabBar from '../../components/TabBar.vue';
+import WorkoutActions from '../../components/WorkoutActions.vue';
+import WorkoutCard from '../../components/WorkoutCard.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
-import { bySlug, groupsOf, loadIntensity, muscleLoad, summary } from '../../workout';
+import { bySlug, normalize } from '../../workout';
 
+/**
+ * Toutes les séances enregistrées : les lancer, les modifier, en créer.
+ */
 const props = defineProps({
     workouts: { type: Array, required: true },
     exercises: { type: Array, required: true },
-    kpis: { type: Object, required: true },
 });
 
-const page = usePage();
 const catalog = computed(() => bySlug(props.exercises));
-const settingsOpen = ref(false);
-const deleting = ref(null);
-const deleteOpen = computed({
-    get: () => deleting.value !== null,
-    set: (open) => {
-        if (!open) {
-            deleting.value = null;
-        }
-    },
+const more = ref(null);
+const creating = ref(false);
+const query = ref('');
+
+const shown = computed(() => {
+    const q = normalize(query.value.trim());
+
+    return q ? props.workouts.filter((workout) => normalize(workout.name).includes(q)) : props.workouts;
 });
 
-function destroy() {
-    router.delete(deleting.value.urls.destroy, { preserveScroll: true, onFinish: () => (deleting.value = null) });
-}
-
-const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-
-const cards = computed(() =>
-    props.workouts.map((workout) => ({
-        ...workout,
-        meta: summary(workout.items, page.props.seconds_per_rep),
-        groups: groupsOf(workout.items, catalog.value),
-        intensity: loadIntensity(muscleLoad(workout.items, catalog.value)),
-    })),
-);
-
-/*
- * Le son n'est permis qu'à partir d'un geste : on réveille le contexte audio
- * au toucher, avant la navigation vers le lecteur.
- */
+/* Le son n'est permis qu'à partir d'un geste : on le réveille au toucher, avant le lecteur. */
 function play(workout) {
     unlockAudio();
     router.visit(workout.items.length ? workout.urls.play : workout.urls.edit);
@@ -57,84 +38,53 @@ function play(workout) {
 <template>
     <Head title="Mes séances" />
 
-    <div class="no-scrollbar flex-1 overflow-y-auto px-5 pt-3 pb-6">
-        <div class="flex items-start justify-between gap-3">
-            <p class="pt-1 text-[12px] font-bold tracking-[0.12em] text-text-muted uppercase">{{ today }}</p>
-            <button
-                type="button"
-                class="iconbtn size-10 text-[13px] font-extrabold"
-                aria-label="Réglages et compte"
-                @click="settingsOpen = true"
-            >
-                {{ page.props.auth.user.initials }}
+    <div class="no-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto px-5 pt-3 pb-8">
+        <header class="flex items-end justify-between gap-3">
+            <h1 class="display text-[46px] leading-[0.9] font-extrabold">Séances</h1>
+            <button type="button" class="btn-accent h-11 shrink-0 px-4 text-[18px]" @click="creating = true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                Nouvelle
             </button>
-        </div>
-        <h1 class="display mt-1 mb-6 text-[56px] leading-[0.88] font-extrabold tracking-[-0.01em]">Salut<br />{{ page.props.auth.user.first_name }}</h1>
+        </header>
 
-        <HomeKpis :kpis="props.kpis" />
+        <label v-if="props.workouts.length > 5" class="flex h-12 items-center gap-2.5 rounded-2xl bg-surface px-4">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" class="text-text-muted" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+            <input v-model="query" type="search" placeholder="Chercher une séance" aria-label="Chercher une séance" class="min-w-0 flex-1 border-none bg-transparent text-[16px] font-medium text-text outline-none" />
+        </label>
 
-        <h2 class="display mb-3 text-[22px] font-bold">Mes séances</h2>
+        <WorkoutCard v-for="workout in shown" :key="workout.id" :workout="workout" :catalog="catalog" @play="play" @more="more = $event" />
 
-        <div class="flex flex-col gap-3">
-            <article v-for="workout in cards" :key="workout.id" class="flex flex-col gap-3.5 rounded-3xl bg-surface p-[18px]">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="flex min-w-0 flex-col gap-1">
-                        <h2 class="display text-[28px] font-bold text-pretty">{{ workout.name }}</h2>
-                        <p class="text-[13px] font-medium text-text-muted">{{ workout.meta }}</p>
-                    </div>
-                    <div class="flex shrink-0 gap-2">
-                        <button type="button" class="iconbtn size-10 bg-surface-2! text-text-muted hover:text-danger" :aria-label="`Supprimer ${workout.name}`" @click="deleting = workout">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></svg>
-                        </button>
-                        <Link :href="workout.urls.edit" class="iconbtn size-10 bg-surface-2!" :aria-label="`Modifier ${workout.name}`">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z" /></svg>
-                        </Link>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between gap-3">
-                    <p class="text-[12px] font-semibold tracking-[0.02em] text-text-soft">
-                        {{ workout.groups }}
-                        <span v-if="workout.last_done" class="block pt-1 text-text-faint">Faite {{ workout.last_done }}</span>
-                    </p>
-                    <BodyMap v-if="workout.items.length" :intensity="workout.intensity" :height="84" :label="`Muscles de ${workout.name}`" />
-                </div>
-                <button type="button" class="btn-accent h-[52px] text-[22px]" @click="play(workout)">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" /></svg>
-                    Lancer
-                </button>
-            </article>
+        <p v-if="props.workouts.length && !shown.length" class="px-2 py-6 text-center text-[14px] font-semibold text-text-muted">Aucune séance ne s'appelle ainsi.</p>
 
-            <p v-if="!cards.length" class="px-2 pt-2 pb-1 text-[14px] leading-normal text-text-muted">
-                Aucune séance pour l'instant : dis à l'assistant ce que tu veux travailler, il compose la première.
-            </p>
-
-            <Link :href="routes.assistant" class="flex items-center gap-4 rounded-3xl border-[1.5px] border-accent bg-accent/8 p-[18px] text-text hover:bg-accent/12">
-                <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></svg>
-                </span>
-                <span class="flex min-w-0 flex-col gap-0.5">
-                    <span class="font-display text-[22px] leading-none font-extrabold uppercase">Assistant</span>
-                    <span class="text-[13px] font-medium text-text-muted">Choisis tes muscles et ton temps, je compose la séance.</span>
-                </span>
-            </Link>
-
-            <Link :href="routes.newWorkout" class="dashed h-[60px] rounded-3xl">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
-                Nouvelle séance vide
-            </Link>
+        <div v-if="!props.workouts.length" class="flex flex-col items-center gap-4 rounded-3xl bg-surface px-6 py-10 text-center">
+            <p class="display text-[30px] font-extrabold">Pas encore de séance</p>
+            <p class="text-[14px] font-medium text-text-muted">L'assistant en compose une à partir de tes muscles et de ton temps.</p>
+            <Link :href="routes.assistant" class="btn-accent h-12 px-5 text-[20px] text-on-accent!">Composer une séance</Link>
         </div>
     </div>
 
-    <TabBar active="home" />
+    <TabBar active="workouts" />
 
-    <SettingsSheet v-model:open="settingsOpen" />
+    <WorkoutActions :workout="more" @close="more = null" />
 
-    <BottomSheet
-        v-model:open="deleteOpen"
-        title="Supprimer ?"
-        :description="deleting ? `« ${deleting.name} » disparaîtra. Les séances déjà faites restent dans ton historique.` : ''"
-    >
-        <button type="button" class="btn-accent h-14 w-full bg-danger! text-[22px]" @click="destroy">Supprimer la séance</button>
-        <button type="button" class="btn-soft h-[54px] text-[15px]" @click="deleting = null">Garder</button>
+    <BottomSheet v-model:open="creating" title="Nouvelle séance" description="L'assistant compose pour toi, ou tu pars de zéro.">
+        <Link :href="routes.assistant" class="flex items-center gap-4 rounded-2xl border-[1.5px] border-accent bg-accent/8 p-4 text-text!">
+            <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></svg>
+            </span>
+            <span class="flex flex-col gap-0.5">
+                <span class="font-display text-[22px] leading-none font-extrabold uppercase">Avec l'assistant</span>
+                <span class="text-[13px] font-medium text-text-muted">Muscles, temps, objectif : il compose.</span>
+            </span>
+        </Link>
+        <Link :href="routes.newWorkout" class="flex items-center gap-4 rounded-2xl bg-surface p-4 text-text!">
+            <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-2" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+            </span>
+            <span class="flex flex-col gap-0.5">
+                <span class="font-display text-[22px] leading-none font-extrabold uppercase">Séance vide</span>
+                <span class="text-[13px] font-medium text-text-muted">Tu choisis chaque exercice toi-même.</span>
+            </span>
+        </Link>
     </BottomSheet>
 </template>

@@ -1,18 +1,19 @@
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { router, useForm, usePage } from '@inertiajs/vue3';
 import { SwitchRoot, SwitchThumb } from 'reka-ui';
-import BottomSheet from './BottomSheet.vue';
-import Stepper from './Stepper.vue';
-import { diagnoseAlerts, disableAlerts, enableAlerts, pushSupport, testAlert } from '../alerts';
-import { loadCustomSound, previewCountdown, setAudioMode } from '../audio';
-import { routes } from '../routes';
+import { Head, Link } from '@inertiajs/vue3';
+import Stepper from '../../components/Stepper.vue';
+import TabBar from '../../components/TabBar.vue';
+import { diagnoseAlerts, disableAlerts, enableAlerts, pushSupport, testAlert } from '../../alerts';
+import { loadCustomSound, previewCountdown, setAudioMode } from '../../audio';
+import { routes } from '../../routes';
 
-const props = defineProps({
-    open: { type: Boolean, required: true },
-});
-
-const emit = defineEmits(['update:open']);
+/*
+ * Les réglages : le son du lecteur, les alertes hors de l'appli, le départ
+ * des séances, le compte. Une vraie page plutôt qu'une feuille : il y a de
+ * quoi faire défiler.
+ */
 
 const page = usePage();
 const user = computed(() => page.props.auth.user);
@@ -40,18 +41,11 @@ async function diagnose() {
     alerts.value = { ...alerts.value, support: diagnosis.support, on: diagnosis.local && diagnosis.server !== false, diagnosis };
 }
 
-watch(
-    () => props.open,
-    async (open) => {
-        if (!open || !page.props.push_public_key) {
-            return;
-        }
-
-        alerts.value.message = null;
+onMounted(async () => {
+    if (page.props.push_public_key) {
         await diagnose();
-    },
-    { immediate: true },
-);
+    }
+});
 
 // Ce qui a échoué, dit simplement.
 const failures = {
@@ -150,7 +144,7 @@ function removeSound() {
 }
 
 function save() {
-    form.put(routes.preferences, { preserveScroll: true, onSuccess: () => emit('update:open', false) });
+    form.put(routes.preferences, { preserveScroll: true });
 }
 
 function logout() {
@@ -159,7 +153,17 @@ function logout() {
 </script>
 
 <template>
-    <BottomSheet :open="props.open" title="Réglages" :description="`${user.name} · ${user.email}`" @update:open="emit('update:open', $event)">
+    <Head title="Réglages" />
+
+    <div class="no-scrollbar flex flex-1 flex-col gap-4 overflow-y-auto px-5 pt-3 pb-[120px]">
+        <header class="flex items-center gap-3">
+            <Link :href="routes.home" class="iconbtn size-11" aria-label="Retour">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
+            </Link>
+            <h1 class="display text-[40px] leading-none font-extrabold">Réglages</h1>
+        </header>
+
+        <h2 class="mt-2 px-1 text-[11px] font-extrabold tracking-[0.12em] text-text-muted uppercase">Lecteur</h2>
         <div class="flex flex-col gap-5 rounded-[22px] bg-surface p-4">
             <label class="flex cursor-pointer items-center justify-between gap-4">
                 <span class="flex flex-col gap-0.5">
@@ -287,6 +291,7 @@ function logout() {
             />
         </div>
 
+        <h2 v-if="page.props.push_public_key" class="mt-2 px-1 text-[11px] font-extrabold tracking-[0.12em] text-text-muted uppercase">Hors de l'appli</h2>
         <div v-if="page.props.push_public_key" class="flex flex-col gap-2.5 rounded-[22px] bg-surface p-4">
             <span class="flex flex-col gap-0.5">
                 <span class="text-[15px] font-bold">Alertes hors de l'appli</span>
@@ -325,7 +330,22 @@ function logout() {
             </ul>
         </div>
 
-        <button type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="form.processing" @click="save">Enregistrer</button>
-        <button type="button" class="h-11 text-[14px] font-bold text-danger" @click="logout">Se déconnecter</button>
-    </BottomSheet>
+        <h2 class="mt-2 px-1 text-[11px] font-extrabold tracking-[0.12em] text-text-muted uppercase">Compte</h2>
+        <div class="flex items-center justify-between gap-3 rounded-[22px] bg-surface p-4">
+            <span class="flex min-w-0 flex-col">
+                <span class="truncate text-[15px] font-bold">{{ user.name }}</span>
+                <span class="truncate text-[12.5px] font-medium text-text-muted">{{ user.email }}</span>
+            </span>
+            <button type="button" class="h-10 shrink-0 rounded-full bg-surface-2 px-4 text-[13px] font-extrabold text-danger" @click="logout">Se déconnecter</button>
+        </div>
+    </div>
+
+    <!-- Enregistrer reste à portée, au-dessus de la barre d'onglets. -->
+    <div v-if="form.isDirty" class="pointer-events-none absolute inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+74px)] px-5">
+        <button type="button" class="btn-accent pointer-events-auto h-14 w-full text-[22px] shadow-[0_8px_24px_rgb(0_0_0/0.5)]" :disabled="form.processing" @click="save">
+            Enregistrer
+        </button>
+    </div>
+
+    <TabBar active="home" />
 </template>

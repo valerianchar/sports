@@ -10,9 +10,13 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
 
 ## Ce que fait l'application
 
-- **Mes séances** — l'accueil. Un compte neuf part sans séance : l'assistant compose la
-  première. Chaque carte se modifie ou se supprime d'un geste ; elle donne le nombre d'exercices, de séries, une durée
-  estimée (3 s par répétition) et la date de la dernière fois.
+- **Aujourd'hui** — l'accueil : reprendre la séance laissée en cours sur ce téléphone, composer
+  une séance (l'assistant, déjà orienté muscu, perte de poids ou cardio) ou partir d'une séance
+  vide, refaire une des trois séances les plus récentes, et la semaine en chiffres. Un compte neuf
+  part sans séance.
+- **Séances** — toutes les séances enregistrées, cherchables : les lancer, les modifier, les
+  supprimer ; chaque carte donne le nombre d'exercices, de séries, une durée estimée (3 s par
+  répétition), les muscles et la dernière fois. Les réglages ont leur page (`/reglages`).
 - **Exercices** — la bibliothèque, par muscle ou par machine (87 machines et équipements :
   guidées Matrix et EGYM, machines assistées, iso-latérales Hammer Strength et Panatta,
   squats machines, poulies, zone cross-training / Hyrox, cardio), filtrable et cherchable —
@@ -24,7 +28,7 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   pour la séance entière dans l'éditeur (charge comptée en séries, une demie pour un muscle
   secondaire) et sur chaque carte de l'accueil, pour chaque exercice dans l'éditeur et sa
   fiche. Tracé repris de react-muscle-highlighter (MIT).
-- **Assistant** — on choisit les muscles à travailler (sur la silhouette ou par raccourcis :
+- **Assistant** — en trois étapes (la séance, les muscles, le temps ; deux pour le cardio) : on choisit les muscles à travailler (sur la silhouette ou par raccourcis :
   Push, Pull, Jambes, Full body…), la durée, l'objectif (force, volume, endurance) et le
   matériel (machines, charges libres, poids du corps), avec en option un échauffement et des
   étirements. Les séries par exercice (Auto ou 2 à 6), les répétitions par série, le repos
@@ -41,7 +45,8 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   en finisher) et **cardio** (ni muscles ni séries : échauffement, blocs continus ou fractionnés
   — 30/30, 40/20, Tabata, 1 min/1 min… — sur les machines ou au poids du corps, retour au calme ;
   `app/Actions/SuggestCardio.php`).
-- **Éditeur** — nom, exercices dans l'ordre, et pour chacun : charge en kilos (pas de 1 kg
+- **Éditeur** — nom, puis une ligne par exercice (« 3 × 10 reps · 60 kg · repos 1:30 ») ; un
+  toucher ouvre ses réglages dans une feuille : charge en kilos (pas de 1 kg
   sous 10 kg puis de 2,5 kg, ou saisie libre) — fixe ou une par série (dégressif, pyramide ;
   « Dégressif auto » baisse de 10 % par série) —, drop set (jusqu'à quatre paliers enchaînés
   sans repos, sur la dernière série ou sur chacune), répétitions ou durée, séries, repos entre séries,

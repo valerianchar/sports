@@ -54,6 +54,7 @@ Route::middleware('auth')->group(function () {
     // Compléter une séance en cours d'édition — JSON.
     Route::post('/seances/assistant/completer', [WorkoutAssistantController::class, 'complete'])
         ->middleware('throttle:60,1')->name('workouts.assistant.complete');
+    Route::get('/seances', [WorkoutController::class, 'list'])->name('workouts.list');
     Route::post('/seances', [WorkoutController::class, 'store'])->name('workouts.store');
     Route::get('/seances/{workout}/modifier', [WorkoutController::class, 'edit'])->name('workouts.edit');
     Route::put('/seances/{workout}', [WorkoutController::class, 'update'])->name('workouts.update');
@@ -92,6 +93,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/progres/objectif-poids', [BodyWeightController::class, 'target'])->name('body-weights.target');
     Route::delete('/progres/poids/{bodyWeight}', [BodyWeightController::class, 'destroy'])->name('body-weights.destroy');
 
+    Route::get('/reglages', [PreferencesController::class, 'edit'])->name('preferences.edit');
     Route::put('/reglages', [PreferencesController::class, 'update'])->name('preferences.update');
     Route::post('/reglages/son', [CustomSoundController::class, 'store'])->middleware('throttle:10,1')->name('preferences.sound.store');
     Route::get('/reglages/son', [CustomSoundController::class, 'show'])->name('preferences.sound.show');

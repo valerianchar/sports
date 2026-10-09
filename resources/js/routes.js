@@ -16,6 +16,7 @@ export const routes = {
     exerciseEquivalents: (slug) => `/exercices/${slug}/equivalents`,
     zoneExercises: (zone) => `/exercices/zones/${zone}`,
     workouts: '/seances',
+    settings: '/reglages',
     workout: (id) => `/seances/${id}`,
     preferences: '/reglages',
     login: '/connexion',

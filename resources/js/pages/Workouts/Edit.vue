@@ -26,7 +26,9 @@ import {
     stepRest,
     stepValue,
     summary,
+    targetLabel,
     usesWeight,
+    formatWeight,
 } from '../../workout';
 
 const props = defineProps({
@@ -103,6 +105,37 @@ function addForZone(exercise) {
     const list = [...items.value];
     list.splice(at, 0, newItem(catalog.value[exercise.slug] ?? exercise, machine.value));
     items.value = list;
+}
+
+// L'exercice dont on règle les détails dans la feuille (son indice), ou rien.
+const editing = ref(null);
+let reopenEdit = null;
+const editOpen = computed({
+    get: () => editing.value !== null,
+    set: (open) => {
+        if (!open) {
+            editing.value = null;
+        }
+    },
+});
+
+function removeItem(index) {
+    items.value.splice(index, 1);
+    editing.value = null;
+}
+
+/** « 3 × 10 reps · 60 kg · repos 1:30 » : un exercice en une ligne. */
+function rowLine(item) {
+    const exercise = catalog.value[item.exercise];
+    const load = item.set_weights?.length
+        ? 'charge par série'
+        : formatWeight(item.weight);
+    const drops = item.drops?.length ? `drop ×${item.drops.length}` : null;
+    const rest = item.sets > 1 && item.rest_sets ? `repos ${formatShort(item.rest_sets)}` : null;
+
+    return [`${item.sets} × ${targetLabel(item)}`, usesWeight(exercise) ? load : null, drops, rest, settingsLabel(item, machineFields(exercise, machine.value))]
+        .filter(Boolean)
+        .join(' · ');
 }
 
 function update(index, changes) {
@@ -330,7 +363,7 @@ function leave() {
     if (dirty.value) {
         confirmLeave.value = true;
     } else {
-        router.visit(routes.home);
+        router.visit(routes.workouts);
     }
 }
 
@@ -368,39 +401,119 @@ function destroy() {
             />
             <p class="mb-1.5 text-[13px] font-semibold text-text-muted">{{ draftSummary }}</p>
 
-            <MuscleSummary v-if="items.length" :items="items" :catalog="catalog" :height="200" />
-            <ZoneCoverage :items="items" :catalog="catalog" @add="addForZone" @info="(exercise, back) => explain(exercise.slug, null, back)" />
 
-            <article v-for="(item, index) in items" :key="item.key" class="flex flex-col gap-3.5 rounded-[22px] bg-surface p-4">
-                <div class="flex items-start gap-3">
-                    <span class="w-[30px] font-display text-[26px] leading-none font-extrabold text-accent">{{ String(index + 1).padStart(2, '0') }}</span>
-                    <button type="button" class="flex min-w-0 flex-1 flex-col gap-0.5 text-left" @click="detail = item.exercise">
-                        <span class="text-[16px] leading-tight font-extrabold">{{ catalog[item.exercise].name }}</span>
-                        <span class="text-[12.5px] font-medium text-text-muted">
-                            {{ catalog[item.exercise].equipment_label }} · <span class="font-bold text-accent">Comment faire</span>
+            <!-- La séance d'un coup d'œil : une ligne par exercice ; ses réglages s'ouvrent au toucher. -->
+            <ol v-if="items.length" class="flex flex-col gap-2" aria-label="Exercices de la séance">
+                <li v-for="(item, index) in items" :key="item.key" class="flex items-center gap-2.5 rounded-2xl bg-surface p-2.5">
+                    <span class="w-6 shrink-0 text-center font-display text-[20px] font-extrabold text-accent">{{ index + 1 }}</span>
+                    <button type="button" class="flex min-w-0 flex-1 items-center gap-3 text-left" :aria-label="`Régler ${catalog[item.exercise].name}`" @click="editing = index">
+                        <span class="size-14 shrink-0 overflow-hidden rounded-xl bg-surface-2">
+                            <img :src="catalog[item.exercise].images[0]" alt="" class="size-full object-cover" />
                         </span>
+                        <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span class="text-[15px] leading-tight font-bold">{{ catalog[item.exercise].name }}</span>
+                            <span class="text-[12.5px] leading-snug font-medium text-text-muted">{{ rowLine(item) }}</span>
+                        </span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-text-faint" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
                     </button>
-                    <div class="flex gap-1">
-                        <button type="button" class="iconbtn size-[30px] bg-surface-2! text-accent" :aria-label="`Changer ${catalog[item.exercise].name} pour une variante`" @click="openSwap(index)">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14.3-3.3M20 4v5h-5M20 15a8 8 0 0 1-14.3 3.3M4 20v-5h5" /></svg>
-                        </button>
-                        <button type="button" class="iconbtn size-[30px] bg-surface-2! text-text-soft disabled:opacity-35" aria-label="Monter" :disabled="index === 0" @click="move(index, -1)">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6" /></svg>
-                        </button>
-                        <button type="button" class="iconbtn size-[30px] bg-surface-2! text-text-soft disabled:opacity-35" aria-label="Descendre" :disabled="index === items.length - 1" @click="move(index, 1)">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-                        </button>
-                        <button type="button" class="iconbtn size-[30px] bg-surface-2! text-danger" :aria-label="`Retirer ${catalog[item.exercise].name}`" @click="items.splice(index, 1)">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                        </button>
-                    </div>
+                </li>
+            </ol>
+
+            <div v-if="items.length < props.maxItems" class="grid gap-2" :class="items.length ? 'grid-cols-2' : 'grid-cols-1'">
+                <button type="button" class="dashed h-[60px] shrink-0 rounded-[18px] text-[14px]" @click="openPicker">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+                    Ajouter
+                </button>
+                <button
+                    v-if="items.length"
+                    type="button"
+                    class="flex h-[60px] shrink-0 items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-accent bg-accent/8 text-[14px] font-bold text-text"
+                    @click="openCompletion"
+                >
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-accent" aria-hidden="true"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></svg>
+                    Compléter
+                </button>
+            </div>
+
+            <template v-if="items.length">
+                <h2 class="mt-3 px-1 text-[11px] font-extrabold tracking-[0.12em] text-text-muted uppercase">Muscles et zones</h2>
+                <MuscleSummary :items="items" :catalog="catalog" :height="200" />
+                <ZoneCoverage :items="items" :catalog="catalog" @add="addForZone" @info="(exercise, back) => explain(exercise.slug, null, back)" />
+            </template>
+
+            <button v-if="props.workout" type="button" class="h-11 shrink-0 text-[14px] font-bold text-danger" @click="confirmDelete = true">
+                Supprimer la séance
+            </button>
+        </div>
+
+        <div class="bottom-bar">
+            <button v-if="items.length" type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="saving" @click="save({ start: true })">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" /></svg>
+                Lancer la séance
+            </button>
+            <button v-else type="button" class="btn-accent h-14 w-full bg-surface-2! text-[22px] text-text-muted!" @click="openPicker">
+                Ajoute un exercice
+            </button>
+        </div>
+    </div>
+
+    <!-- SÉLECTION D'EXERCICES -->
+    <div v-if="picking" class="relative flex min-h-0 flex-1 flex-col">
+        <ExerciseLibrary
+            :exercises="props.exercises"
+            :groups="props.groups"
+            :picked="picked"
+            picking
+            @toggle="togglePick"
+            @info="detail = $event"
+        >
+            <template #header>
+                <div class="flex items-center gap-3">
+                    <button type="button" class="iconbtn size-10" aria-label="Retour à la séance" @click="picking = false; replacing = null">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
+                    </button>
+                    <h1 class="display text-[30px] font-extrabold">{{ replacing !== null ? 'Choisir une variante' : 'Ajouter des exos' }}</h1>
+                </div>
+            </template>
+        </ExerciseLibrary>
+
+        <div class="bottom-bar">
+            <button type="button" class="btn-accent h-14 w-full text-[22px]" @click="picked.length ? confirmPick() : ((picking = false), (replacing = null))">
+                {{ picked.length ? `Ajouter (${picked.length})` : 'Retour' }}
+            </button>
+        </div>
+    </div>
+
+    <ExerciseSheet v-if="detailExercise" :exercise="detailExercise" @close="closeDetail" />
+
+    <!-- Les réglages d'un exercice, dans une feuille : la liste reste lisible. -->
+    <BottomSheet v-model:open="editOpen" :title="editing !== null && items[editing] ? catalog[items[editing].exercise].name : ''" :description="editing !== null && items[editing] ? catalog[items[editing].exercise].equipment_label : null">
+        <template v-for="(item, index) in items" :key="item.key">
+            <div v-if="index === editing" class="flex flex-col gap-3.5">
+                <!-- Les actions de l'exercice : comment faire, le remplacer, le déplacer, le retirer. -->
+                <div class="grid grid-cols-5 gap-1.5">
+                    <button type="button" class="flex flex-col items-center gap-1 rounded-xl bg-surface p-2 text-[11px] font-bold text-text-soft" @click="explain(item.exercise, () => (reopenEdit = editing, editing = null), () => (editing = reopenEdit))">
+                        <span class="font-serif text-[17px] leading-none font-extrabold text-accent italic" aria-hidden="true">i</span>Comment
+                    </button>
+                    <button type="button" class="flex flex-col items-center gap-1 rounded-xl bg-surface p-2 text-[11px] font-bold text-text-soft" @click="editing = null; openSwap(index)">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="text-accent" aria-hidden="true"><path d="M4 9a8 8 0 0 1 14.3-3.3M20 4v5h-5M20 15a8 8 0 0 1-14.3 3.3M4 20v-5h5" /></svg>Remplacer
+                    </button>
+                    <button type="button" class="flex flex-col items-center gap-1 rounded-xl bg-surface p-2 text-[11px] font-bold text-text-soft disabled:opacity-35" :disabled="index === 0" @click="move(index, -1); editing = index - 1">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>Monter
+                    </button>
+                    <button type="button" class="flex flex-col items-center gap-1 rounded-xl bg-surface p-2 text-[11px] font-bold text-text-soft disabled:opacity-35" :disabled="index === items.length - 1" @click="move(index, 1); editing = index + 1">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>Descendre
+                    </button>
+                    <button type="button" class="flex flex-col items-center gap-1 rounded-xl bg-surface p-2 text-[11px] font-bold text-danger" @click="removeItem(index)">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>Retirer
+                    </button>
                 </div>
 
                 <button
                     type="button"
                     class="-mt-1 flex items-center gap-3 rounded-2xl bg-bg px-3 py-2 text-left"
                     :aria-label="`Muscles : ${muscleNames(catalog[item.exercise].primary)}`"
-                    @click="detail = item.exercise"
+                    @click="explain(item.exercise, () => (reopenEdit = editing, editing = null), () => (editing = reopenEdit))"
                 >
                     <BodyMap :intensity="exerciseIntensity(catalog[item.exercise])" :height="64" label="" />
                     <span class="flex min-w-0 flex-col gap-0.5 text-[12.5px]">
@@ -481,72 +594,10 @@ function destroy() {
                         @increase="update(index, { rest_after: stepRest(item.rest_after, 1) })"
                     />
                 </div>
-            </article>
-
-            <button
-                v-if="items.length < props.maxItems"
-                type="button"
-                class="dashed h-[60px] shrink-0 rounded-[22px]"
-                @click="openPicker"
-            >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
-                Ajouter des exercices
-            </button>
-
-            <button
-                v-if="items.length && items.length < props.maxItems"
-                type="button"
-                class="flex h-[60px] shrink-0 items-center justify-center gap-2.5 rounded-[22px] border-[1.5px] border-accent bg-accent/8 text-[15px] font-bold text-text"
-                @click="openCompletion"
-            >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="text-accent" aria-hidden="true"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z" /></svg>
-                Compléter avec l'assistant
-            </button>
-
-            <button v-if="props.workout" type="button" class="h-11 shrink-0 text-[14px] font-bold text-danger" @click="confirmDelete = true">
-                Supprimer la séance
-            </button>
-        </div>
-
-        <div class="bottom-bar">
-            <button v-if="items.length" type="button" class="btn-accent h-14 w-full text-[22px]" :disabled="saving" @click="save({ start: true })">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z" /></svg>
-                Lancer la séance
-            </button>
-            <button v-else type="button" class="btn-accent h-14 w-full bg-surface-2! text-[22px] text-text-muted!" @click="openPicker">
-                Ajoute un exercice
-            </button>
-        </div>
-    </div>
-
-    <!-- SÉLECTION D'EXERCICES -->
-    <div v-if="picking" class="relative flex min-h-0 flex-1 flex-col">
-        <ExerciseLibrary
-            :exercises="props.exercises"
-            :groups="props.groups"
-            :picked="picked"
-            picking
-            @toggle="togglePick"
-            @info="detail = $event"
-        >
-            <template #header>
-                <div class="flex items-center gap-3">
-                    <button type="button" class="iconbtn size-10" aria-label="Retour à la séance" @click="picking = false; replacing = null">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7" /></svg>
-                    </button>
-                    <h1 class="display text-[30px] font-extrabold">{{ replacing !== null ? 'Choisir une variante' : 'Ajouter des exos' }}</h1>
-                </div>
-            </template>
-        </ExerciseLibrary>
-
-        <div class="bottom-bar">
-            <button type="button" class="btn-accent h-14 w-full text-[22px]" @click="picked.length ? confirmPick() : ((picking = false), (replacing = null))">
-                {{ picked.length ? `Ajouter (${picked.length})` : 'Retour' }}
-            </button>
-        </div>
-    </div>
-
-    <ExerciseSheet v-if="detailExercise" :exercise="detailExercise" @close="closeDetail" />
+                        </div>
+        </template>
+        <button type="button" class="btn-accent h-14 w-full text-[22px]" @click="editing = null">OK</button>
+    </BottomSheet>
 
     <BottomSheet
         v-model:open="swapOpen"
@@ -677,7 +728,7 @@ function destroy() {
 
     <BottomSheet v-model:open="confirmLeave" title="Quitter ?" description="Tes modifications ne sont pas enregistrées.">
         <button type="button" class="btn-accent h-14 w-full text-[22px]" @click="confirmLeave = false; save()">Enregistrer</button>
-        <button type="button" class="btn-soft h-[54px] text-[15px]" @click="router.visit(routes.home)">Quitter sans enregistrer</button>
+        <button type="button" class="btn-soft h-[54px] text-[15px]" @click="router.visit(routes.workouts)">Quitter sans enregistrer</button>
     </BottomSheet>
 
     <BottomSheet

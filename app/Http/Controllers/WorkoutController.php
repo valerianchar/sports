@@ -10,6 +10,7 @@ use App\Http\Resources\WorkoutResource;
 use App\Models\Workout;
 use App\Queries\PerformanceStats;
 use App\Support\ExerciseCatalog;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -21,19 +22,45 @@ class WorkoutController extends Controller
     /**
      * « Mes séances » : l'écran d'accueil.
      */
+    /**
+     * « Aujourd'hui » : reprendre une séance, en composer une, refaire une
+     * séance récente, et la semaine en un coup d'œil.
+     */
     public function index(Request $request): Response
     {
-        $workouts = $request->user()->workouts()
-            ->with(['items', 'latestLog'])
-            ->oldest()
-            ->get();
+        $workouts = $this->workouts($request)
+            // Les plus récemment faites d'abord ; les jamais faites, les plus récentes.
+            ->sortByDesc(fn (Workout $workout): string => $workout->latestLog?->finished_at?->toIso8601String() ?? '0'.$workout->created_at->toIso8601String())
+            ->values();
+
+        return Inertia::render('Home', [
+            'workouts' => WorkoutResource::collection($workouts->take(3)),
+            'workoutsCount' => $workouts->count(),
+            // Une séance laissée en cours sur ce téléphone retrouve son nom.
+            'workoutNames' => $workouts->mapWithKeys(fn (Workout $workout): array => [$workout->id => $workout->name]),
+            'exercises' => ExerciseCatalog::forClient($workouts->take(3)->flatMap->items->pluck('exercise')),
+            'kpis' => (new PerformanceStats($request->user()))->home(),
+        ]);
+    }
+
+    /**
+     * Toutes les séances, pour les lancer, les modifier ou les supprimer.
+     */
+    public function list(Request $request): Response
+    {
+        $workouts = $this->workouts($request);
 
         return Inertia::render('Workouts/Index', [
             'workouts' => WorkoutResource::collection($workouts),
             // Les séances ne portent que des slugs : groupes et durées se déduisent du catalogue.
             'exercises' => ExerciseCatalog::forClient($workouts->flatMap->items->pluck('exercise')),
-            'kpis' => (new PerformanceStats($request->user()))->home(),
         ]);
+    }
+
+    /** @return Collection<int, Workout> */
+    private function workouts(Request $request): Collection
+    {
+        return $request->user()->workouts()->with(['items', 'latestLog'])->oldest()->get();
     }
 
     public function create(): Response
@@ -70,7 +97,7 @@ class WorkoutController extends Controller
 
         $workout->delete();
 
-        return redirect()->route('workouts.index')->with('success', "« {$workout->name} » supprimée.");
+        return redirect()->route('workouts.list')->with('success', "« {$workout->name} » supprimée.");
     }
 
     /**
@@ -136,6 +163,6 @@ class WorkoutController extends Controller
             return redirect()->route('workouts.edit', $workout)->with('success', $message.' Ajuste-la à ton goût.');
         }
 
-        return redirect()->route('workouts.index')->with('success', $message);
+        return redirect()->route('workouts.list')->with('success', $message);
     }
 }

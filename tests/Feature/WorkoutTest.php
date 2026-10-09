@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Workout;
 use App\Support\ExerciseCatalog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
 use Tests\TestCase;
 
@@ -29,13 +30,32 @@ class WorkoutTest extends TestCase
         ];
     }
 
-    public function test_the_home_screen_lists_only_my_workouts(): void
+    public function test_today_puts_the_most_recently_done_workouts_first(): void
+    {
+        $user = User::factory()->create();
+        $old = Workout::factory()->for($user)->withItems()->create(['name' => 'Ancienne']);
+        $recent = Workout::factory()->for($user)->withItems()->create(['name' => 'Récente']);
+        Workout::factory()->for($user)->withItems()->create(['name' => 'Jamais faite']);
+        $old->logs()->forceCreate(['name' => 'Ancienne', 'client_id' => (string) Str::uuid(), 'user_id' => $user->id, 'duration_seconds' => 600, 'sets_done' => 1, 'exercises_done' => 1, 'finished_at' => now()->subDays(5), 'completed' => true]);
+        $recent->logs()->forceCreate(['name' => 'Récente', 'client_id' => (string) Str::uuid(), 'user_id' => $user->id, 'duration_seconds' => 600, 'sets_done' => 1, 'exercises_done' => 1, 'finished_at' => now()->subDay(), 'completed' => true]);
+
+        $this->actingAs($user)->get('/')
+            ->assertOk()
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->component('Home')
+                ->where('workouts.0.name', 'Récente')
+                ->where('workouts.1.name', 'Ancienne')
+                ->where('workoutsCount', 3)
+                ->has('kpis'));
+    }
+
+    public function test_the_workouts_page_lists_only_my_workouts(): void
     {
         $user = User::factory()->create();
         Workout::factory()->for($user)->withItems()->create(['name' => 'Pecs']);
         Workout::factory()->withItems()->create(['name' => 'Celle d’un autre']);
 
-        $this->actingAs($user)->get('/')
+        $this->actingAs($user)->get('/seances')
             ->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page
                 ->component('Workouts/Index')
@@ -56,7 +76,7 @@ class WorkoutTest extends TestCase
                 $this->item('tractions'),
                 $this->item('gainage-planche', ['mode' => 'time', 'value' => 45]),
             ],
-        ])->assertRedirect('/');
+        ])->assertRedirect('/seances');
 
         $workout = $user->workouts()->sole();
         $this->assertSame('Dos', $workout->name);
@@ -90,7 +110,7 @@ class WorkoutTest extends TestCase
         $this->actingAs($user)->put("/seances/{$workout->id}", [
             'name' => 'Réordonnée',
             'items' => [$this->item('pompes'), $this->item('developpe-couche', ['sets' => 5])],
-        ])->assertRedirect('/');
+        ])->assertRedirect('/seances');
 
         $workout->refresh();
         $this->assertSame('Réordonnée', $workout->name);
@@ -157,7 +177,7 @@ class WorkoutTest extends TestCase
         $user = User::factory()->create();
         $workout = Workout::factory()->for($user)->withItems()->create();
 
-        $this->actingAs($user)->delete("/seances/{$workout->id}")->assertRedirect('/');
+        $this->actingAs($user)->delete("/seances/{$workout->id}")->assertRedirect('/seances');
 
         $this->assertModelMissing($workout);
         $this->assertDatabaseCount('workout_items', 0);

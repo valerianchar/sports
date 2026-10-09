@@ -23,6 +23,7 @@ class WorkoutResource extends JsonResource
             'items' => $this->items->map(fn (WorkoutItem $item): array => [
                 'exercise' => $item->exercise,
                 'mode' => $item->mode->value,
+                'per_side' => $item->per_side,
                 'value' => $item->value,
                 'weight' => $item->weight,
                 'set_weights' => $item->set_weights,

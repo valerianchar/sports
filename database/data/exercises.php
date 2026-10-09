@@ -18,6 +18,16 @@
  * database/data/zones.php : haut / milieu / bas des pectoraux, largeur ou
  * épaisseur du dos…). Vide pour le cardio et la mobilité.
  *
+ * « sides » : comment la série se répartit entre les côtés du corps.
+ *   'both'      les deux côtés travaillent ensemble (squat, développé couché,
+ *               rameur…) — cas général, machines et cardio compris ;
+ *   'each'      un côté puis l'autre : la série entière (répétitions, ou durée
+ *               tenue) d'un côté, puis de l'autre (rowing haltère un bras,
+ *               squat bulgare, gainage latéral, étirements…) ;
+ *   'alternate' on change de côté à chaque répétition (curl alterné, fentes
+ *               marchées, russian twist…). Un exercice chronométré à
+ *               mouvement alterné continu (mountain climbers) reste 'both'.
+ *
  * Images (public/images/exercices/<slug>/) : photos de free-exercise-db
  * (https://github.com/yuhonas/free-exercise-db, domaine public) ; images de wger
  * (https://wger.de) sous licence Creative Commons, créditées dans « credit » ;
@@ -33,6 +43,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'chest-press',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -58,6 +69,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'chest-press',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -77,6 +89,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'iso-chest',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -104,6 +117,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'chest-press',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps', 'obliques'],
         'steps' => [
@@ -123,6 +137,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'incline-press',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -142,6 +157,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'iso-chest',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -161,6 +177,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'iso-chest',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest', 'front-deltoids'],
         'secondary' => ['triceps'],
         'steps' => [
@@ -180,6 +197,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'iso-chest',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -199,6 +217,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'decline-press',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -218,6 +237,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'iso-chest',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['triceps', 'front-deltoids'],
         'steps' => [
@@ -242,6 +262,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'pec-deck',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -268,6 +289,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -287,6 +309,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -306,6 +329,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -325,6 +349,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'obliques'],
         'steps' => [
@@ -344,6 +369,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -363,6 +389,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -382,6 +409,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps', 'abs'],
         'steps' => [
@@ -401,6 +429,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -420,6 +449,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -439,6 +469,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -458,6 +489,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['triceps', 'front-deltoids'],
         'steps' => [
@@ -477,6 +509,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -496,6 +529,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -515,6 +549,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['triceps', 'front-deltoids'],
         'steps' => [
@@ -534,6 +569,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -553,6 +589,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -572,6 +609,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['triceps', 'front-deltoids'],
         'steps' => [
@@ -591,6 +629,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -610,6 +649,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -629,6 +669,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest', 'upper-back'],
         'secondary' => ['triceps', 'front-deltoids'],
         'steps' => [
@@ -648,6 +689,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['triceps', 'front-deltoids', 'abs'],
         'steps' => [
@@ -667,6 +709,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['triceps', 'front-deltoids', 'abs'],
         'steps' => [
@@ -686,6 +729,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest', 'front-deltoids'],
         'secondary' => ['triceps', 'abs'],
         'steps' => [
@@ -705,6 +749,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps', 'abs'],
         'steps' => [
@@ -724,6 +769,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['triceps', 'front-deltoids', 'abs'],
         'steps' => [
@@ -743,6 +789,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'trx',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'triceps', 'abs'],
         'steps' => [
@@ -762,6 +809,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'parallel-bars',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest', 'triceps'],
         'secondary' => ['front-deltoids'],
         'steps' => [
@@ -781,6 +829,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'rings',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest', 'triceps'],
         'secondary' => ['front-deltoids', 'abs'],
         'steps' => [
@@ -800,6 +849,7 @@ return [
         'group' => 'pectoraux',
         'equipment' => 'landmine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest', 'front-deltoids'],
         'secondary' => ['triceps', 'abs'],
         'steps' => [
@@ -819,6 +869,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'shoulder-press',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'trapezius'],
         'steps' => [
@@ -844,6 +895,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'iso-shoulder',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'trapezius'],
         'steps' => [
@@ -867,6 +919,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'trapezius', 'abs'],
         'steps' => [
@@ -886,6 +939,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'trapezius'],
         'steps' => [
@@ -905,6 +959,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'trapezius'],
         'steps' => [
@@ -924,6 +979,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'trapezius', 'abs'],
         'steps' => [
@@ -943,6 +999,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'rear-deltoids'],
         'steps' => [
@@ -962,6 +1019,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'trapezius'],
         'steps' => [
@@ -981,6 +1039,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'landmine',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['front-deltoids'],
         'secondary' => ['chest', 'triceps', 'obliques'],
         'steps' => [
@@ -1000,6 +1059,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'triceps'],
         'secondary' => ['trapezius', 'abs'],
         'steps' => [
@@ -1019,6 +1079,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['triceps', 'trapezius', 'chest'],
         'steps' => [
@@ -1038,6 +1099,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'rear-deltoids'],
         'secondary' => ['trapezius'],
         'steps' => [
@@ -1057,6 +1119,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['front-deltoids', 'rear-deltoids'],
         'secondary' => ['trapezius'],
         'steps' => [
@@ -1076,6 +1139,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'lateral-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'rear-deltoids'],
         'secondary' => ['trapezius'],
         'steps' => [
@@ -1095,6 +1159,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['chest'],
         'steps' => [
@@ -1114,6 +1179,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['chest'],
         'steps' => [
@@ -1133,6 +1199,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'plate',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['chest', 'trapezius'],
         'steps' => [
@@ -1152,6 +1219,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['chest', 'trapezius'],
         'steps' => [
@@ -1171,6 +1239,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'trapezius'],
         'secondary' => ['rear-deltoids'],
         'steps' => [
@@ -1190,6 +1259,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['rear-deltoids'],
         'secondary' => ['trapezius', 'upper-back'],
         'steps' => [
@@ -1209,6 +1279,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['rear-deltoids'],
         'secondary' => ['trapezius', 'upper-back'],
         'steps' => [
@@ -1228,6 +1299,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'pec-deck',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['rear-deltoids'],
         'secondary' => ['trapezius', 'upper-back'],
         'steps' => [
@@ -1253,6 +1325,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['rear-deltoids'],
         'secondary' => ['trapezius', 'upper-back'],
         'steps' => [
@@ -1272,6 +1345,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['rear-deltoids'],
         'secondary' => ['trapezius', 'upper-back'],
         'steps' => [
@@ -1291,6 +1365,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'bands',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['rear-deltoids'],
         'secondary' => ['trapezius', 'upper-back'],
         'steps' => [
@@ -1310,6 +1385,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['rear-deltoids'],
         'secondary' => ['upper-back'],
         'steps' => [
@@ -1329,6 +1405,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'bands',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['rear-deltoids'],
         'secondary' => ['upper-back'],
         'steps' => [
@@ -1348,6 +1425,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['trapezius', 'front-deltoids'],
         'secondary' => ['rear-deltoids', 'biceps'],
         'steps' => [
@@ -1367,6 +1445,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['trapezius', 'front-deltoids'],
         'secondary' => ['rear-deltoids', 'biceps'],
         'steps' => [
@@ -1386,6 +1465,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['trapezius'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -1405,6 +1485,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['trapezius'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -1424,6 +1505,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['trapezius'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -1443,6 +1525,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'calf-standing',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['trapezius'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -1462,6 +1545,7 @@ return [
         'group' => 'epaules',
         'equipment' => 'shrug-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['trapezius'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -1488,6 +1572,7 @@ return [
         'group' => 'dos',
         'equipment' => 'lat-pulldown',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1513,6 +1598,7 @@ return [
         'group' => 'dos',
         'equipment' => 'lat-pulldown',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1532,6 +1618,7 @@ return [
         'group' => 'dos',
         'equipment' => 'lat-pulldown',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1551,6 +1638,7 @@ return [
         'group' => 'dos',
         'equipment' => 'lat-pulldown',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1570,6 +1658,7 @@ return [
         'group' => 'dos',
         'equipment' => 'lat-pulldown',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1589,6 +1678,7 @@ return [
         'group' => 'dos',
         'equipment' => 'lat-pulldown',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1608,6 +1698,7 @@ return [
         'group' => 'dos',
         'equipment' => 'iso-pulldown',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1634,6 +1725,7 @@ return [
         'group' => 'dos',
         'equipment' => 'assisted',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1659,6 +1751,7 @@ return [
         'group' => 'dos',
         'equipment' => 'assisted',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1678,6 +1771,7 @@ return [
         'group' => 'dos',
         'equipment' => 'bands',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1697,6 +1791,7 @@ return [
         'group' => 'dos',
         'equipment' => 'pull-up-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -1716,6 +1811,7 @@ return [
         'group' => 'dos',
         'equipment' => 'pull-up-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back', 'biceps'],
         'secondary' => ['rear-deltoids', 'forearm'],
         'steps' => [
@@ -1735,6 +1831,7 @@ return [
         'group' => 'dos',
         'equipment' => 'pull-up-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'forearm'],
         'steps' => [
@@ -1754,6 +1851,7 @@ return [
         'group' => 'dos',
         'equipment' => 'pull-up-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'forearm'],
         'steps' => [
@@ -1773,6 +1871,7 @@ return [
         'group' => 'dos',
         'equipment' => 'seated-row',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius'],
         'steps' => [
@@ -1792,6 +1891,7 @@ return [
         'group' => 'dos',
         'equipment' => 'seated-row',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['rear-deltoids', 'trapezius', 'biceps'],
         'steps' => [
@@ -1811,6 +1911,7 @@ return [
         'group' => 'dos',
         'equipment' => 'seated-row',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius'],
         'steps' => [
@@ -1830,6 +1931,7 @@ return [
         'group' => 'dos',
         'equipment' => 'seated-row',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius'],
         'steps' => [
@@ -1856,6 +1958,7 @@ return [
         'group' => 'dos',
         'equipment' => 'iso-row',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius'],
         'steps' => [
@@ -1881,6 +1984,7 @@ return [
         'group' => 'dos',
         'equipment' => 'iso-row',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['rear-deltoids', 'biceps', 'trapezius'],
         'steps' => [
@@ -1900,6 +2004,7 @@ return [
         'group' => 'dos',
         'equipment' => 't-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['trapezius', 'biceps', 'rear-deltoids', 'lower-back'],
         'steps' => [
@@ -1919,6 +2024,7 @@ return [
         'group' => 'dos',
         'equipment' => 't-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['trapezius', 'biceps', 'rear-deltoids'],
         'steps' => [
@@ -1938,6 +2044,7 @@ return [
         'group' => 'dos',
         'equipment' => 'landmine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['trapezius', 'biceps', 'rear-deltoids', 'lower-back'],
         'steps' => [
@@ -1957,6 +2064,7 @@ return [
         'group' => 'dos',
         'equipment' => 'landmine',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius'],
         'steps' => [
@@ -1976,6 +2084,7 @@ return [
         'group' => 'dos',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'trapezius', 'rear-deltoids', 'lower-back'],
         'steps' => [
@@ -1995,6 +2104,7 @@ return [
         'group' => 'dos',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'trapezius', 'rear-deltoids', 'lower-back'],
         'steps' => [
@@ -2014,6 +2124,7 @@ return [
         'group' => 'dos',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['trapezius', 'rear-deltoids', 'biceps', 'lower-back'],
         'steps' => [
@@ -2033,6 +2144,7 @@ return [
         'group' => 'dos',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius'],
         'steps' => [
@@ -2052,6 +2164,7 @@ return [
         'group' => 'dos',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius', 'lower-back'],
         'steps' => [
@@ -2071,6 +2184,7 @@ return [
         'group' => 'dos',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius'],
         'steps' => [
@@ -2090,6 +2204,7 @@ return [
         'group' => 'dos',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'trapezius', 'lower-back'],
         'steps' => [
@@ -2109,6 +2224,7 @@ return [
         'group' => 'dos',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'abs'],
         'steps' => [
@@ -2128,6 +2244,7 @@ return [
         'group' => 'dos',
         'equipment' => 'trx',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids'],
         'steps' => [
@@ -2147,6 +2264,7 @@ return [
         'group' => 'dos',
         'equipment' => 'rings',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['biceps', 'rear-deltoids', 'abs'],
         'steps' => [
@@ -2166,6 +2284,7 @@ return [
         'group' => 'dos',
         'equipment' => 'pullover-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['chest', 'triceps'],
         'steps' => [
@@ -2185,6 +2304,7 @@ return [
         'group' => 'dos',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['triceps'],
         'steps' => [
@@ -2204,6 +2324,7 @@ return [
         'group' => 'dos',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['triceps'],
         'steps' => [
@@ -2223,6 +2344,7 @@ return [
         'group' => 'dos',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['triceps', 'chest'],
         'steps' => [
@@ -2242,6 +2364,7 @@ return [
         'group' => 'dos',
         'equipment' => 'back-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['lower-back'],
         'secondary' => ['gluteal', 'hamstring'],
         'steps' => [
@@ -2266,6 +2389,7 @@ return [
         'group' => 'dos',
         'equipment' => 'roman-chair',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['lower-back'],
         'secondary' => ['gluteal', 'hamstring'],
         'steps' => [
@@ -2291,6 +2415,7 @@ return [
         'group' => 'dos',
         'equipment' => 'ghd',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['lower-back'],
         'secondary' => ['gluteal', 'hamstring'],
         'steps' => [
@@ -2310,6 +2435,7 @@ return [
         'group' => 'dos',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring', 'lower-back'],
         'secondary' => ['gluteal'],
         'steps' => [
@@ -2329,6 +2455,7 @@ return [
         'group' => 'dos',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring', 'gluteal', 'lower-back'],
         'secondary' => ['quadriceps', 'trapezius', 'upper-back', 'forearm'],
         'steps' => [
@@ -2348,6 +2475,7 @@ return [
         'group' => 'dos',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'hamstring', 'adductors'],
         'secondary' => ['quadriceps', 'lower-back', 'trapezius', 'forearm'],
         'steps' => [
@@ -2367,6 +2495,7 @@ return [
         'group' => 'dos',
         'equipment' => 'trap-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal', 'hamstring'],
         'secondary' => ['lower-back', 'trapezius', 'forearm'],
         'steps' => [
@@ -2386,6 +2515,7 @@ return [
         'group' => 'dos',
         'equipment' => 'rack',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['lower-back', 'gluteal', 'trapezius'],
         'secondary' => ['hamstring', 'upper-back', 'forearm'],
         'steps' => [
@@ -2405,6 +2535,7 @@ return [
         'group' => 'dos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['lower-back'],
         'secondary' => ['gluteal', 'hamstring', 'rear-deltoids'],
         'steps' => [
@@ -2424,6 +2555,7 @@ return [
         'group' => 'bras',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2443,6 +2575,7 @@ return [
         'group' => 'bras',
         'equipment' => 'ez-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2462,6 +2595,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2481,6 +2615,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2500,6 +2635,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2519,6 +2655,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2538,6 +2675,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2557,6 +2695,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2576,6 +2715,7 @@ return [
         'group' => 'bras',
         'equipment' => 'preacher',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2595,6 +2735,7 @@ return [
         'group' => 'bras',
         'equipment' => 'preacher',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2614,6 +2755,7 @@ return [
         'group' => 'bras',
         'equipment' => 'biceps-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2641,6 +2783,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2660,6 +2803,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['biceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2679,6 +2823,7 @@ return [
         'group' => 'bras',
         'equipment' => 'crossover',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => [],
         'steps' => [
@@ -2698,6 +2843,7 @@ return [
         'group' => 'bras',
         'equipment' => 'ez-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => [],
         'steps' => [
@@ -2717,6 +2863,7 @@ return [
         'group' => 'bras',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['forearm', 'biceps'],
         'secondary' => [],
         'steps' => [
@@ -2736,6 +2883,7 @@ return [
         'group' => 'bras',
         'equipment' => 'trx',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['forearm', 'abs'],
         'steps' => [
@@ -2755,6 +2903,7 @@ return [
         'group' => 'bras',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['forearm'],
         'secondary' => [],
         'steps' => [
@@ -2774,6 +2923,7 @@ return [
         'group' => 'bras',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['forearm'],
         'secondary' => [],
         'steps' => [
@@ -2793,6 +2943,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -2812,6 +2963,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -2831,6 +2983,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -2850,6 +3003,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -2869,6 +3023,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -2888,6 +3043,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -2907,6 +3063,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -2926,6 +3083,7 @@ return [
         'group' => 'bras',
         'equipment' => 'ez-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => ['forearm'],
         'steps' => [
@@ -2945,6 +3103,7 @@ return [
         'group' => 'bras',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => ['chest', 'front-deltoids'],
         'steps' => [
@@ -2964,6 +3123,7 @@ return [
         'group' => 'bras',
         'equipment' => 'triceps-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -2988,6 +3148,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dips-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => ['chest', 'front-deltoids'],
         'steps' => [
@@ -3007,6 +3168,7 @@ return [
         'group' => 'bras',
         'equipment' => 'assisted',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => ['chest', 'front-deltoids'],
         'steps' => [
@@ -3026,6 +3188,7 @@ return [
         'group' => 'bras',
         'equipment' => 'parallel-bars',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => ['chest', 'front-deltoids'],
         'steps' => [
@@ -3045,6 +3208,7 @@ return [
         'group' => 'bras',
         'equipment' => 'bench',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => ['chest', 'front-deltoids'],
         'steps' => [
@@ -3064,6 +3228,7 @@ return [
         'group' => 'bras',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -3083,6 +3248,7 @@ return [
         'group' => 'bras',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['triceps'],
         'secondary' => [],
         'steps' => [
@@ -3102,6 +3268,7 @@ return [
         'group' => 'bras',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['triceps'],
         'secondary' => ['chest', 'front-deltoids', 'abs'],
         'steps' => [
@@ -3121,6 +3288,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-press-45',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'adductors'],
         'steps' => [
@@ -3140,6 +3308,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-press',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'adductors'],
         'steps' => [
@@ -3159,6 +3328,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-press-45',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal'],
         'steps' => [
@@ -3178,6 +3348,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-press-45',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -3197,6 +3368,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-press',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring'],
         'steps' => [
@@ -3216,6 +3388,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'hack-squat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'adductors'],
         'steps' => [
@@ -3235,6 +3408,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'hack-squat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'quadriceps'],
         'secondary' => ['hamstring', 'lower-back'],
         'steps' => [
@@ -3254,6 +3428,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'pendulum-squat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'adductors'],
         'steps' => [
@@ -3273,6 +3448,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'v-squat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -3292,6 +3468,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'belt-squat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['adductors', 'hamstring'],
         'steps' => [
@@ -3311,6 +3488,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'rack',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors', 'lower-back', 'abs'],
         'steps' => [
@@ -3330,6 +3508,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'rack',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'abs', 'lower-back'],
         'steps' => [
@@ -3349,6 +3528,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'rack',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors', 'lower-back'],
         'steps' => [
@@ -3368,6 +3548,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'adductors'],
         'steps' => [
@@ -3387,6 +3568,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'adductors', 'abs'],
         'steps' => [
@@ -3406,6 +3588,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'forearm'],
         'steps' => [
@@ -3425,6 +3608,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'adductors', 'gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -3444,6 +3628,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'adductors', 'gluteal'],
         'secondary' => ['hamstring', 'forearm'],
         'steps' => [
@@ -3463,6 +3648,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring'],
         'steps' => [
@@ -3482,6 +3668,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'calves'],
         'steps' => [
@@ -3501,6 +3688,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'abs'],
         'steps' => [
@@ -3520,6 +3708,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['abs'],
         'steps' => [
@@ -3539,6 +3728,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -3558,6 +3748,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -3577,6 +3768,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -3596,6 +3788,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['gluteal', 'quadriceps'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -3615,6 +3808,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -3634,6 +3828,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors', 'abs'],
         'steps' => [
@@ -3653,6 +3848,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['adductors', 'quadriceps', 'gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -3672,6 +3868,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -3691,6 +3888,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'squat-lunge',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -3710,6 +3908,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'plyo-box',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'calves'],
         'steps' => [
@@ -3729,6 +3928,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-extension',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => [],
         'steps' => [
@@ -3753,6 +3953,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-extension',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps'],
         'secondary' => [],
         'steps' => [
@@ -3772,6 +3973,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-curl-lying',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['calves'],
         'steps' => [
@@ -3791,6 +3993,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-curl-seated',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['calves'],
         'steps' => [
@@ -3810,6 +4013,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-curl-standing',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['hamstring'],
         'secondary' => ['calves'],
         'steps' => [
@@ -3834,6 +4038,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['gluteal', 'calves'],
         'steps' => [
@@ -3853,6 +4058,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'ghd',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['gluteal', 'calves', 'lower-back'],
         'steps' => [
@@ -3872,6 +4078,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'swiss-ball',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['gluteal', 'calves'],
         'steps' => [
@@ -3891,6 +4098,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring', 'gluteal'],
         'secondary' => ['lower-back', 'forearm'],
         'steps' => [
@@ -3910,6 +4118,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring', 'gluteal'],
         'secondary' => ['lower-back', 'forearm'],
         'steps' => [
@@ -3929,6 +4138,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring', 'gluteal'],
         'secondary' => ['lower-back', 'forearm'],
         'steps' => [
@@ -3948,6 +4158,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['hamstring', 'gluteal'],
         'secondary' => ['lower-back', 'abs'],
         'steps' => [
@@ -3967,6 +4178,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['gluteal', 'lower-back', 'forearm'],
         'steps' => [
@@ -3986,6 +4198,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'calf-standing',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -4005,6 +4218,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'calf-seated',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -4024,6 +4238,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'leg-press-45',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -4043,6 +4258,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'calf-press',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -4062,6 +4278,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -4081,6 +4298,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -4100,6 +4318,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -4119,6 +4338,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['tibialis'],
         'secondary' => [],
         'steps' => [
@@ -4138,6 +4358,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'hip-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['adductors'],
         'secondary' => [],
         'steps' => [
@@ -4163,6 +4384,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['adductors'],
         'secondary' => [],
         'steps' => [
@@ -4182,6 +4404,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'multi-hip',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['adductors'],
         'secondary' => [],
         'steps' => [
@@ -4201,6 +4424,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'multi-hip',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps'],
         'secondary' => ['abs'],
         'steps' => [
@@ -4220,6 +4444,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal'],
         'steps' => [
@@ -4239,6 +4464,7 @@ return [
         'group' => 'jambes',
         'equipment' => 'bench',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['adductors'],
         'secondary' => ['obliques', 'abs'],
         'steps' => [
@@ -4258,6 +4484,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'hip-thrust-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4277,6 +4504,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'hip-thrust-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4296,6 +4524,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4315,6 +4544,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'smith',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4334,6 +4564,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'bench',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4353,6 +4584,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4372,6 +4604,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4391,6 +4624,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4410,6 +4644,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'leg-press-45',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'hamstring'],
         'secondary' => ['quadriceps', 'adductors'],
         'steps' => [
@@ -4429,6 +4664,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'glute-machine',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4455,6 +4691,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4474,6 +4711,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4493,6 +4731,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'hip-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => [],
         'steps' => [
@@ -4518,6 +4757,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'multi-hip',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => [],
         'steps' => [
@@ -4543,6 +4783,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'multi-hip',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -4562,6 +4803,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => [],
         'steps' => [
@@ -4581,6 +4823,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'bands',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['quadriceps'],
         'steps' => [
@@ -4600,6 +4843,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'bands',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => [],
         'steps' => [
@@ -4619,6 +4863,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'roman-chair',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => ['hamstring', 'lower-back'],
         'steps' => [
@@ -4638,6 +4883,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'reverse-hyper',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'hamstring'],
         'secondary' => ['lower-back'],
         'steps' => [
@@ -4662,6 +4908,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal'],
         'secondary' => ['adductors'],
         'steps' => [
@@ -4681,6 +4928,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'hamstring'],
         'secondary' => ['lower-back'],
         'steps' => [
@@ -4700,6 +4948,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['gluteal'],
         'secondary' => ['quadriceps', 'adductors'],
         'steps' => [
@@ -4719,6 +4968,7 @@ return [
         'group' => 'fessiers',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'hamstring'],
         'secondary' => ['lower-back', 'abs', 'front-deltoids'],
         'steps' => [
@@ -4738,6 +4988,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4757,6 +5008,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'bench',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4776,6 +5028,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4795,6 +5048,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'bench',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4814,6 +5068,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'ghd',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['quadriceps', 'obliques'],
         'steps' => [
@@ -4833,6 +5088,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'ab-machine',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4859,6 +5115,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4878,6 +5135,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4897,6 +5155,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'swiss-ball',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4916,6 +5175,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['obliques'],
         'secondary' => ['abs'],
         'steps' => [
@@ -4935,6 +5195,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['obliques', 'abs'],
         'secondary' => [],
         'steps' => [
@@ -4954,6 +5215,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4973,6 +5235,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'bench',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -4992,6 +5255,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'captain-chair',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -5011,6 +5275,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'pull-up-bar',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques', 'forearm'],
         'steps' => [
@@ -5030,6 +5295,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'bench',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => [],
         'steps' => [
@@ -5049,6 +5315,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => [],
         'steps' => [
@@ -5068,6 +5335,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -5087,6 +5355,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -5106,6 +5375,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques', 'front-deltoids'],
         'steps' => [
@@ -5125,6 +5395,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['abs', 'obliques'],
         'secondary' => ['front-deltoids', 'triceps'],
         'steps' => [
@@ -5144,6 +5415,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['abs'],
         'secondary' => ['triceps', 'front-deltoids', 'chest'],
         'steps' => [
@@ -5163,6 +5435,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['obliques'],
         'secondary' => ['abs', 'gluteal'],
         'steps' => [
@@ -5182,6 +5455,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['abs'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -5201,6 +5475,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'mat',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['abs', 'lower-back'],
         'secondary' => ['gluteal', 'rear-deltoids'],
         'steps' => [
@@ -5220,6 +5495,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['quadriceps', 'front-deltoids', 'obliques'],
         'steps' => [
@@ -5239,6 +5515,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'ab-wheel',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['upper-back', 'front-deltoids', 'obliques'],
         'steps' => [
@@ -5258,6 +5535,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'trx',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['front-deltoids', 'upper-back'],
         'steps' => [
@@ -5277,6 +5555,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'trx',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['front-deltoids', 'quadriceps'],
         'steps' => [
@@ -5296,6 +5575,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'swiss-ball',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['front-deltoids', 'quadriceps'],
         'steps' => [
@@ -5315,6 +5595,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'rotary-torso',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['obliques'],
         'secondary' => ['abs'],
         'steps' => [
@@ -5334,6 +5615,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['obliques'],
         'secondary' => ['abs', 'front-deltoids'],
         'steps' => [
@@ -5353,6 +5635,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['obliques'],
         'secondary' => ['abs', 'front-deltoids'],
         'steps' => [
@@ -5372,6 +5655,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'cable',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['obliques'],
         'secondary' => ['abs'],
         'steps' => [
@@ -5391,6 +5675,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['obliques'],
         'secondary' => ['abs'],
         'steps' => [
@@ -5410,6 +5695,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['obliques'],
         'secondary' => ['abs'],
         'steps' => [
@@ -5429,6 +5715,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['obliques'],
         'secondary' => ['front-deltoids', 'hamstring', 'gluteal'],
         'steps' => [
@@ -5448,6 +5735,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'parallel-bars',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['triceps', 'quadriceps'],
         'steps' => [
@@ -5467,6 +5755,7 @@ return [
         'group' => 'abdos',
         'equipment' => 'bench',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs'],
         'secondary' => ['obliques', 'upper-back'],
         'steps' => [
@@ -5486,6 +5775,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'treadmill',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['calves', 'gluteal', 'hamstring'],
         'steps' => [
@@ -5505,6 +5795,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'treadmill',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['gluteal', 'calves'],
         'secondary' => ['quadriceps', 'hamstring'],
         'steps' => [
@@ -5524,6 +5815,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'treadmill',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'calves'],
         'steps' => [
@@ -5543,6 +5835,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'curve-treadmill',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'hamstring'],
         'secondary' => ['gluteal', 'calves'],
         'steps' => [
@@ -5562,6 +5855,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'bike',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['calves', 'gluteal', 'hamstring'],
         'steps' => [
@@ -5581,6 +5875,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'recumbent-bike',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'calves'],
         'steps' => [
@@ -5600,6 +5895,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'spin-bike',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'calves'],
         'steps' => [
@@ -5619,6 +5915,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'air-bike',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'front-deltoids', 'triceps'],
         'steps' => [
@@ -5638,6 +5935,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'elliptical',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['gluteal', 'hamstring', 'front-deltoids'],
         'steps' => [
@@ -5657,6 +5955,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'stepper',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['calves', 'hamstring'],
         'steps' => [
@@ -5676,6 +5975,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'stair-climber',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['calves', 'hamstring'],
         'steps' => [
@@ -5695,6 +5995,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'rower',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['upper-back', 'quadriceps'],
         'secondary' => ['biceps', 'gluteal', 'hamstring', 'lower-back'],
         'steps' => [
@@ -5714,6 +6015,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'skierg',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['upper-back', 'triceps'],
         'secondary' => ['abs', 'rear-deltoids', 'gluteal', 'hamstring'],
         'steps' => [
@@ -5733,6 +6035,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'arm-ergometer',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'upper-back'],
         'secondary' => ['biceps', 'triceps', 'forearm'],
         'steps' => [
@@ -5752,6 +6055,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'jump-rope',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => ['quadriceps', 'front-deltoids', 'forearm'],
         'steps' => [
@@ -5771,6 +6075,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'chest'],
         'secondary' => ['gluteal', 'front-deltoids', 'triceps', 'abs'],
         'steps' => [
@@ -5790,6 +6095,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['calves'],
         'secondary' => ['front-deltoids', 'rear-deltoids', 'gluteal', 'quadriceps'],
         'steps' => [
@@ -5809,6 +6115,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps'],
         'secondary' => ['abs', 'calves'],
         'steps' => [
@@ -5828,6 +6135,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['calves', 'quadriceps'],
         'steps' => [
@@ -5847,6 +6155,7 @@ return [
         'group' => 'cardio',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['obliques', 'triceps', 'calves'],
         'steps' => [
@@ -5866,6 +6175,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'sled',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['calves', 'hamstring', 'triceps', 'chest'],
         'steps' => [
@@ -5885,6 +6195,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'sled',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'upper-back'],
         'secondary' => ['gluteal', 'biceps', 'forearm', 'calves'],
         'steps' => [
@@ -5904,6 +6215,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'sled',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['upper-back', 'biceps'],
         'secondary' => ['forearm', 'gluteal', 'hamstring', 'lower-back'],
         'steps' => [
@@ -5923,6 +6235,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'kettlebell',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['forearm', 'trapezius'],
         'secondary' => ['abs', 'obliques', 'gluteal', 'quadriceps'],
         'steps' => [
@@ -5942,6 +6255,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'sandbag',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'abs', 'trapezius'],
         'steps' => [
@@ -5961,6 +6275,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'sandbag',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['abs', 'upper-back'],
         'secondary' => ['biceps', 'forearm', 'gluteal', 'quadriceps'],
         'steps' => [
@@ -5980,6 +6295,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'sandbag',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'hamstring'],
         'secondary' => ['upper-back', 'biceps', 'quadriceps', 'lower-back'],
         'steps' => [
@@ -5999,6 +6315,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'wall-ball',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'front-deltoids'],
         'secondary' => ['gluteal', 'triceps', 'abs'],
         'steps' => [
@@ -6018,6 +6335,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'slam-ball',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['abs', 'upper-back'],
         'secondary' => ['front-deltoids', 'triceps', 'gluteal'],
         'steps' => [
@@ -6037,6 +6355,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'battle-rope',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['front-deltoids'],
         'secondary' => ['forearm', 'abs', 'biceps', 'quadriceps'],
         'steps' => [
@@ -6056,6 +6375,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'battle-rope',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'abs'],
         'secondary' => ['upper-back', 'triceps', 'gluteal', 'quadriceps'],
         'steps' => [
@@ -6075,6 +6395,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal', 'hamstring'],
         'secondary' => ['front-deltoids', 'trapezius', 'forearm', 'lower-back'],
         'steps' => [
@@ -6094,6 +6415,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['gluteal', 'front-deltoids'],
         'secondary' => ['hamstring', 'trapezius', 'lower-back', 'triceps'],
         'steps' => [
@@ -6113,6 +6435,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['abs', 'front-deltoids'],
         'secondary' => ['gluteal', 'quadriceps', 'triceps', 'obliques'],
         'steps' => [
@@ -6132,6 +6455,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'barbell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'front-deltoids'],
         'secondary' => ['gluteal', 'triceps', 'abs'],
         'steps' => [
@@ -6151,6 +6475,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'front-deltoids'],
         'secondary' => ['gluteal', 'triceps', 'abs'],
         'steps' => [
@@ -6170,6 +6495,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'front-deltoids'],
         'secondary' => ['chest', 'hamstring', 'triceps', 'quadriceps'],
         'steps' => [
@@ -6189,6 +6515,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['gluteal', 'hamstring'],
         'secondary' => ['trapezius', 'front-deltoids', 'quadriceps', 'forearm'],
         'steps' => [
@@ -6208,6 +6535,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['gluteal', 'front-deltoids'],
         'secondary' => ['hamstring', 'trapezius', 'quadriceps', 'triceps'],
         'steps' => [
@@ -6227,6 +6555,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'dumbbells',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['chest', 'gluteal'],
         'secondary' => ['upper-back', 'front-deltoids', 'quadriceps', 'abs'],
         'steps' => [
@@ -6246,6 +6575,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'kettlebell',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['upper-back', 'abs'],
         'secondary' => ['obliques', 'biceps', 'rear-deltoids', 'triceps'],
         'steps' => [
@@ -6265,6 +6595,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'plyo-box',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['calves', 'hamstring'],
         'steps' => [
@@ -6284,6 +6615,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'plyo-box',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'calves'],
         'steps' => [
@@ -6303,6 +6635,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'bodyweight',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['chest', 'hamstring', 'calves', 'triceps'],
         'steps' => [
@@ -6322,6 +6655,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['abs', 'front-deltoids'],
         'secondary' => ['quadriceps', 'triceps', 'obliques'],
         'steps' => [
@@ -6341,6 +6675,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'punching-bag',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'obliques'],
         'secondary' => ['triceps', 'chest', 'calves', 'abs'],
         'steps' => [
@@ -6360,6 +6695,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'trx',
         'mode' => 'reps',
+        'sides' => 'both',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring'],
         'steps' => [
@@ -6379,6 +6715,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'trx',
         'mode' => 'reps',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'gluteal'],
         'secondary' => ['hamstring', 'adductors'],
         'steps' => [
@@ -6398,6 +6735,7 @@ return [
         'group' => 'fonctionnel',
         'equipment' => 'landmine',
         'mode' => 'reps',
+        'sides' => 'alternate',
         'primary' => ['obliques'],
         'secondary' => ['abs', 'front-deltoids', 'gluteal'],
         'steps' => [
@@ -6417,6 +6755,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['trapezius'],
         'secondary' => ['front-deltoids', 'rear-deltoids'],
         'steps' => [
@@ -6436,6 +6775,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'rear-deltoids'],
         'secondary' => ['trapezius'],
         'steps' => [
@@ -6455,6 +6795,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['gluteal', 'adductors'],
         'secondary' => [],
         'steps' => [
@@ -6475,6 +6816,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['calves', 'tibialis'],
         'secondary' => [],
         'steps' => [
@@ -6494,6 +6836,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['hamstring'],
         'secondary' => ['quadriceps', 'gluteal'],
         'steps' => [
@@ -6513,6 +6856,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['quadriceps', 'hamstring', 'upper-back'],
         'secondary' => ['gluteal', 'adductors'],
         'steps' => [
@@ -6532,6 +6876,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['lower-back', 'upper-back'],
         'secondary' => ['abs', 'neck'],
         'steps' => [
@@ -6551,6 +6896,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['gluteal', 'adductors'],
         'secondary' => ['lower-back'],
         'steps' => [
@@ -6570,6 +6916,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['upper-back', 'chest'],
         'secondary' => ['obliques'],
         'steps' => [
@@ -6589,6 +6936,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['gluteal', 'adductors', 'calves'],
         'secondary' => ['lower-back'],
         'steps' => [
@@ -6608,6 +6956,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['abs', 'front-deltoids', 'calves'],
         'steps' => [
@@ -6627,6 +6976,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bands',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['front-deltoids', 'chest'],
         'secondary' => ['rear-deltoids', 'trapezius'],
         'steps' => [
@@ -6646,6 +6996,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['calves'],
         'secondary' => ['tibialis'],
         'steps' => [
@@ -6665,6 +7016,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['chest'],
         'secondary' => ['front-deltoids', 'biceps'],
         'steps' => [
@@ -6684,6 +7036,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['rear-deltoids'],
         'secondary' => ['upper-back', 'trapezius'],
         'steps' => [
@@ -6703,6 +7056,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['triceps'],
         'secondary' => ['upper-back'],
         'steps' => [
@@ -6722,6 +7076,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['biceps'],
         'secondary' => ['chest', 'front-deltoids'],
         'steps' => [
@@ -6741,6 +7096,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['forearm'],
         'secondary' => [],
         'steps' => [
@@ -6760,6 +7116,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'pull-up-bar',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['upper-back'],
         'secondary' => ['forearm', 'chest'],
         'steps' => [
@@ -6779,6 +7136,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['upper-back', 'lower-back'],
         'secondary' => ['gluteal'],
         'steps' => [
@@ -6798,6 +7156,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['trapezius', 'neck'],
         'secondary' => [],
         'steps' => [
@@ -6817,6 +7176,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['lower-back'],
         'secondary' => ['gluteal'],
         'steps' => [
@@ -6836,6 +7196,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['lower-back', 'obliques'],
         'secondary' => ['gluteal', 'chest'],
         'steps' => [
@@ -6855,6 +7216,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['lower-back'],
         'steps' => [
@@ -6874,6 +7236,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['quadriceps'],
         'steps' => [
@@ -6893,6 +7256,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['quadriceps'],
         'secondary' => [],
         'steps' => [
@@ -6912,6 +7276,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['quadriceps'],
         'secondary' => [],
         'steps' => [
@@ -6931,6 +7296,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['quadriceps'],
         'secondary' => [],
         'steps' => [
@@ -6950,6 +7316,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['hamstring'],
         'secondary' => ['calves', 'lower-back'],
         'steps' => [
@@ -6969,6 +7336,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['hamstring'],
         'secondary' => ['calves', 'lower-back'],
         'steps' => [
@@ -6988,6 +7356,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bands',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['hamstring'],
         'secondary' => ['calves'],
         'steps' => [
@@ -7007,6 +7376,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['adductors'],
         'secondary' => ['lower-back'],
         'steps' => [
@@ -7026,6 +7396,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['adductors', 'hamstring'],
         'secondary' => [],
         'steps' => [
@@ -7045,6 +7416,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -7064,6 +7436,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'bodyweight',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -7083,6 +7456,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'mat',
         'mode' => 'time',
+        'sides' => 'both',
         'primary' => ['tibialis'],
         'secondary' => ['quadriceps'],
         'steps' => [
@@ -7102,6 +7476,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'foam-roller',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['quadriceps'],
         'secondary' => [],
         'steps' => [
@@ -7121,6 +7496,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'foam-roller',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['hamstring'],
         'secondary' => [],
         'steps' => [
@@ -7140,6 +7516,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'foam-roller',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['calves'],
         'secondary' => [],
         'steps' => [
@@ -7159,6 +7536,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'foam-roller',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['upper-back'],
         'secondary' => [],
         'steps' => [
@@ -7178,6 +7556,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'foam-roller',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => [],
         'steps' => [
@@ -7197,6 +7576,7 @@ return [
         'group' => 'mobilite',
         'equipment' => 'foam-roller',
         'mode' => 'time',
+        'sides' => 'each',
         'primary' => ['gluteal'],
         'secondary' => ['quadriceps'],
         'steps' => [

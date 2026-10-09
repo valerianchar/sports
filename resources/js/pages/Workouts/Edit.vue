@@ -426,12 +426,34 @@ function destroy() {
                     </button>
                 </div>
 
+                <!-- Les côtés : un côté puis l'autre, ou en alternant (par côté ou au total). -->
+                <p v-if="catalog[item.exercise].sides === 'each'" class="-mt-1 rounded-xl bg-bg px-3 py-2 text-[12.5px] font-semibold text-text-soft">
+                    <span class="font-extrabold text-accent">Droite puis gauche</span> : {{ item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value) }} de chaque côté, le lecteur annonce chaque côté.
+                </p>
+                <div v-else-if="catalog[item.exercise].sides === 'alternate'" class="-mt-1 flex flex-col gap-1.5">
+                    <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">En alternant les côtés, les {{ item.mode === 'reps' ? 'répétitions' : 'secondes' }} comptent…</span>
+                    <div class="grid grid-cols-2 gap-[3px] rounded-xl bg-bg p-[3px]" role="radiogroup" aria-label="Comment comptent les côtés">
+                        <button
+                            v-for="option in [{ value: true, label: `${item.value} par côté` }, { value: false, label: `${item.value} au total` }]"
+                            :key="String(option.value)"
+                            type="button"
+                            role="radio"
+                            :aria-checked="(item.per_side ?? true) === option.value"
+                            class="h-8 rounded-[9px] text-[12.5px] font-bold"
+                            :class="(item.per_side ?? true) === option.value ? 'bg-surface-3 text-text' : 'bg-transparent text-text-faint'"
+                            @click="update(index, { per_side: option.value })"
+                        >
+                            {{ option.label }}
+                        </button>
+                    </div>
+                </div>
+
                 <LoadEditor v-if="usesWeight(catalog[item.exercise])" :item="item" @update="update(index, $event)" />
                 <MachineSettingsEditor :item="item" :exercise="catalog[item.exercise]" @update="update(index, $event)" />
 
                 <div class="grid grid-cols-2 gap-x-3 gap-y-3.5">
                     <Stepper
-                        :label="item.mode === 'reps' ? 'Répétitions' : 'Durée effort'"
+                        :label="`${item.mode === 'reps' ? 'Répétitions' : 'Durée effort'}${item.per_side ? ' / côté' : ''}`"
                         :display="item.mode === 'reps' ? String(item.value) : formatShort(item.value)"
                         @decrease="update(index, { value: stepValue(item, -1) })"
                         @increase="update(index, { value: stepValue(item, 1) })"

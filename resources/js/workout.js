@@ -23,8 +23,24 @@ export function formatShort(seconds) {
 
 export const formatMinutes = (seconds) => `${Math.max(1, Math.round(seconds / 60))} min`;
 
-/** Ce qu'on vise sur une série : « 10 reps » ou « 45 s ». */
-export const targetLabel = (item) => (item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value));
+/** Ce qu'on vise sur une série : « 10 reps », « 45 s », « 10 reps / côté ». */
+export const targetLabel = (item) => `${item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value)}${item.per_side ? ' / côté' : ''}`;
+
+/** La valeur compte-t-elle par côté par défaut ? Oui dès que l'exercice a des côtés. */
+export const perSideDefault = (exercise) => (exercise?.sides && exercise.sides !== 'both' ? true : null);
+
+/** « droite puis gauche », « en alternant » : comment se font les côtés d'un exercice. */
+export function sidesLabel(exercise, item) {
+    if (exercise?.sides === 'each') {
+        return 'droite, puis gauche';
+    }
+
+    if (exercise?.sides === 'alternate') {
+        return item?.per_side === false ? `en alternant · ${Math.ceil(item.value / 2)} par côté` : 'en alternant · par côté';
+    }
+
+    return null;
+}
 
 /**
  * Durée estimée : les répétitions au tempo réglé, les séries chronométrées à leur
@@ -34,7 +50,7 @@ export function estimate(items, secondsPerRep = 3) {
     return items.reduce(
         (total, item, index) =>
             total +
-            item.sets * (item.mode === 'reps' ? item.value * secondsPerRep : item.value) +
+            item.sets * (item.mode === 'reps' ? item.value * secondsPerRep : item.value) * (item.per_side ? 2 : 1) +
             (item.sets - 1) * item.rest_sets +
             dropReps(item) * secondsPerRep +
             (index < items.length - 1 ? item.rest_after : 0),
@@ -80,7 +96,15 @@ export function defaultsFor(exercise) {
 
 /** `machine` : les réglages des machines partagés par le serveur (props `machine_settings`). */
 export function newItem(exercise, machine = null) {
-    return { key: crypto.randomUUID(), exercise: exercise.slug, mode: exercise.mode, weight: null, ...defaultsFor(exercise), ...machineDefaults(exercise, machine) };
+    return {
+        key: crypto.randomUUID(),
+        exercise: exercise.slug,
+        mode: exercise.mode,
+        per_side: perSideDefault(exercise),
+        weight: null,
+        ...defaultsFor(exercise),
+        ...machineDefaults(exercise, machine),
+    };
 }
 
 /*
@@ -134,7 +158,7 @@ export function stepSetting(field, value, direction, machine) {
  * l'exercice ne s'y prête plus.
  */
 export function replaceExercise(item, exercise, previous, machine) {
-    const next = { ...item, exercise: exercise.slug, mode: exercise.mode, ...machineDefaults(exercise, machine) };
+    const next = { ...item, exercise: exercise.slug, mode: exercise.mode, per_side: perSideDefault(exercise), ...machineDefaults(exercise, machine) };
 
     if (exercise.mode !== item.mode) {
         Object.assign(next, { value: defaultsFor(exercise).value, set_weights: null, drops: null, drop_on: null });

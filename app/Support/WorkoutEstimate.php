@@ -7,6 +7,7 @@ namespace App\Support;
  * (resources/js/workout.js, estimate) : les répétitions au tempo réglé, les
  * séries chronométrées à leur durée, les repos entre séries et entre
  * exercices, sauf après le dernier ; les paliers de drop set au même tempo.
+ * Un exercice compté par côté dure deux fois sa valeur : droite, puis gauche.
  */
 final class WorkoutEstimate
 {
@@ -20,7 +21,7 @@ final class WorkoutEstimate
         $last = count($items) - 1;
 
         foreach (array_values($items) as $index => $item) {
-            $effort = $item['mode'] === 'reps' ? $item['value'] * $tempo : $item['value'];
+            $effort = ($item['mode'] === 'reps' ? $item['value'] * $tempo : $item['value']) * (empty($item['per_side']) ? 1 : 2);
             $total += $item['sets'] * $effort + ($item['sets'] - 1) * $item['rest_sets'];
 
             // Les paliers d'un drop set s'enchaînent sans repos, sur la dernière série ou sur chacune.

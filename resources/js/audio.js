@@ -8,10 +8,13 @@
  * Les sons du compte à rebours sont synthétisés ici même — rien à télécharger,
  * rien sous droits — sauf « Mon son », le fichier envoyé par l'utilisateur.
  */
+import { primeNowPlaying } from './nowPlaying';
+
 let context = null;
 let customBuffer = null;
 let customUrl = null;
 let mode = 'melange';
+
 
 /*
  * La place du son de l'appli face à la musique (API Audio Session, Safari
@@ -47,6 +50,12 @@ export function unlockAudio() {
     try {
         // Déclarée à chaque réveil : c'est elle qui décide si la musique continue.
         applySession();
+
+        // « Comme une vidéo » : l'élément audio de la séance doit jouer une première
+        // fois pendant ce geste pour pouvoir jouer ensuite, y compris en arrière-plan.
+        if (mode === 'prioritaire') {
+            primeNowPlaying();
+        }
 
         ensureContext();
 

@@ -33,6 +33,8 @@ class StoreWorkoutLogRequest extends FormRequest
             'sets.*.target_reps' => ['nullable', 'integer', 'min:0', 'max:500'],
             'sets.*.seconds' => ['nullable', 'integer', 'min:0', 'max:7200'],
             'sets.*.weight' => ['nullable', 'numeric', 'min:0', 'max:999'],
+            // Répétitions comptées par côté : le volume soulevé double.
+            'sets.*.per_side' => ['nullable', 'boolean'],
             'sets.*.at' => ['nullable', 'date'],
         ];
     }

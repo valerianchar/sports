@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['position', 'exercise', 'mode', 'value', 'weight', 'set_weights', 'drops', 'drop_on', 'speed', 'incline', 'level', 'sets', 'rest_sets', 'rest_after'])]
+#[Fillable(['position', 'exercise', 'mode', 'per_side', 'value', 'weight', 'set_weights', 'drops', 'drop_on', 'speed', 'incline', 'level', 'sets', 'rest_sets', 'rest_after'])]
 class WorkoutItem extends Model
 {
     public $timestamps = false;
@@ -21,6 +21,7 @@ class WorkoutItem extends Model
             'mode' => ExerciseMode::class,
             'position' => 'integer',
             'value' => 'integer',
+            'per_side' => 'boolean',
             'weight' => 'float',
             'set_weights' => 'array',
             'drops' => 'array',

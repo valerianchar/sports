@@ -21,6 +21,8 @@ class SaveWorkoutRequest extends FormRequest
             'items.*.exercise' => ['required', 'string', Rule::in(ExerciseCatalog::slugs())],
             'items.*.mode' => ['required', Rule::enum(ExerciseMode::class)],
             'items.*.value' => ['required', 'integer', 'min:1', 'max:3600'],
+            // Un côté puis l'autre, ou en alternant : la valeur compte pour chaque côté.
+            'items.*.per_side' => ['nullable', 'boolean'],
             // Charge en kilos ; vide au poids du corps.
             'items.*.weight' => ['nullable', 'numeric', 'min:0', 'max:999'],
             // Dégressif / pyramide : une charge par série.
@@ -98,13 +100,14 @@ class SaveWorkoutRequest extends FormRequest
     }
 
     /**
-     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, set_weights: list<float|null>|null, drops: list<array{reps: int, weight: float|null}>|null, drop_on: string|null, speed: float|null, incline: float|null, level: int|null, sets: int, rest_sets: int, rest_after: int}>
+     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, set_weights: list<float|null>|null, drops: list<array{reps: int, weight: float|null}>|null, drop_on: string|null, per_side: bool|null, speed: float|null, incline: float|null, level: int|null, sets: int, rest_sets: int, rest_after: int}>
      */
     public function items(): array
     {
         return array_values(array_map(fn (array $item): array => [
             'exercise' => $item['exercise'],
             'mode' => $item['mode'],
+            'per_side' => $this->perSide($item),
             'value' => (int) $item['value'],
             'weight' => self::kilos($item['weight'] ?? null),
             'set_weights' => $this->setWeights($item),
@@ -117,6 +120,21 @@ class SaveWorkoutRequest extends FormRequest
             'rest_sets' => (int) $item['rest_sets'],
             'rest_after' => (int) $item['rest_after'],
         ], $this->validated('items')));
+    }
+
+    /**
+     * Un exercice symétrique n'a pas de côté ; un exercice d'un côté puis de
+     * l'autre compte toujours par côté ; en alternant, c'est au choix.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function perSide(array $item): ?bool
+    {
+        return match (ExerciseCatalog::sides($item['exercise'])) {
+            'each' => true,
+            'alternate' => array_key_exists('per_side', $item) && $item['per_side'] !== null ? (bool) $item['per_side'] : true,
+            default => null,
+        };
     }
 
     /** Vitesse ou inclinaison, au dixième. */

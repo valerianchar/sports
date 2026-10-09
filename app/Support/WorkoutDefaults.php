@@ -30,6 +30,8 @@ final class WorkoutDefaults
         return [
             'exercise' => $slug,
             'mode' => $mode->value,
+            // Un côté puis l'autre, ou en alternant : les répétitions comptent par côté.
+            'per_side' => ExerciseCatalog::sides($slug) === 'both' ? null : true,
             'value' => $values[0],
             'sets' => $values[1],
             'rest_sets' => $values[2],

@@ -11,7 +11,7 @@ import ZoneCoverage from '../../components/ZoneCoverage.vue';
 import Stepper from '../../components/Stepper.vue';
 import { unlockAudio } from '../../audio';
 import { routes } from '../../routes';
-import { MUSCLE_REGIONS, bySlug, clamp, formatShort, machineFields, replaceExercise, settingsLabel, stepRest, summary } from '../../workout';
+import { MUSCLE_REGIONS, bySlug, perSideDefault, clamp, formatShort, machineFields, replaceExercise, settingsLabel, stepRest, summary } from '../../workout';
 
 const props = defineProps({
     proposal: { type: Object, default: null },
@@ -319,6 +319,7 @@ function addForZone(exercise) {
     const item = {
         exercise: exercise.slug,
         mode: exercise.mode,
+        per_side: perSideDefault(exercise),
         value: exercise.group === 'cardio' ? 300 : prescription.value,
         sets: prescription.sets,
         rest_sets: prescription.rest_sets,
@@ -355,7 +356,7 @@ const browsingGroup = computed(() => (browsing.value === null ? 'all' : catalog.
 const proposalSummary = computed(() => (props.proposal ? summary(items.value, page.props.seconds_per_rep) : ''));
 
 const prescription = (item) => {
-    const effort = item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value);
+    const effort = `${item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value)}${item.per_side ? ' / côté' : ''}`;
     const settings = settingsLabel(item, machineFields(catalog.value[item.exercise], page.props.machine_settings));
     const rest = item.sets > 1 && item.rest_sets ? `repos ${formatShort(item.rest_sets)}` : '';
 

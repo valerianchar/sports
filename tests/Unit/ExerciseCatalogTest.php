@@ -157,7 +157,7 @@ class ExerciseCatalogTest extends TestCase
 
     public function test_cardio_defaults_to_one_long_set(): void
     {
-        $this->assertSame(['exercise' => 'rameur', 'mode' => 'time', 'value' => 300, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => 60, 'level' => 5], WorkoutDefaults::for('rameur'));
+        $this->assertSame(['exercise' => 'rameur', 'mode' => 'time', 'per_side' => null, 'value' => 300, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => 60, 'level' => 5], WorkoutDefaults::for('rameur'));
         $this->assertSame(10, WorkoutDefaults::for('squat')['value']);
         $this->assertSame(30, WorkoutDefaults::for('gainage-planche')['value']);
     }
@@ -223,5 +223,52 @@ class ExerciseCatalogTest extends TestCase
         // Un étirement ne travaille pas de zone.
         $this->assertSame([], ExerciseCatalog::find('etirement-pectoraux-mur')['zones']);
         $this->assertSame(ExerciseCatalog::find('butterfly')['zones'], collect(ExerciseCatalog::forClient(['butterfly']))->first()['zones']);
+    }
+
+    public function test_every_exercise_says_how_its_sides_work(): void
+    {
+        foreach (ExerciseCatalog::all() as $slug => $exercise) {
+            $this->assertArrayHasKey('sides', $exercise, $slug);
+            $this->assertContains($exercise['sides'], ['both', 'each', 'alternate'], $slug);
+            $this->assertSame($exercise['sides'], ExerciseCatalog::sides($slug), $slug);
+
+            // Alterner n'a de sens que compté en répétitions : un exercice chronométré
+            // se tient des deux côtés à la fois ou d'un côté puis de l'autre.
+            if ($exercise['sides'] === 'alternate') {
+                $this->assertSame('reps', $exercise['mode'], $slug);
+            }
+        }
+    }
+
+    public function test_the_sides_match_the_classic_exercises(): void
+    {
+        $expected = [
+            'rowing-haltere-un-bras' => 'each',
+            'squat-bulgare' => 'each',
+            'curl-concentration' => 'each',
+            'gainage-lateral' => 'each',
+            'etirement-quadriceps-debout' => 'each',
+            'presse-pectorale-unilaterale' => 'each',
+            'curl-halteres-alterne' => 'alternate',
+            'fentes-marchees' => 'alternate',
+            'russian-twist' => 'alternate',
+            'bird-dog' => 'alternate',
+            'developpe-couche' => 'both',
+            'squat' => 'both',
+            'curl-barre' => 'both',
+            'rameur' => 'both',
+            'gainage-planche' => 'both',
+            // Iso-latérale : les deux bras poussent ensemble par défaut.
+            'presse-pectorale-iso-laterale' => 'both',
+            // Chronométré : l'alternance des jambes ne change pas la durée.
+            'mountain-climbers' => 'both',
+        ];
+
+        foreach ($expected as $slug => $sides) {
+            $this->assertSame($sides, ExerciseCatalog::sides($slug), $slug);
+        }
+
+        $this->assertSame('both', ExerciseCatalog::sides('exercice-inconnu'));
+        $this->assertSame('each', collect(ExerciseCatalog::forClient(['squat-bulgare']))->first()['sides']);
     }
 }

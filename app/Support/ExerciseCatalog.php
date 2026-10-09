@@ -59,6 +59,17 @@ final class ExerciseCatalog
     }
 
     /**
+     * Comment une série se répartit entre les côtés : 'both' (les deux côtés
+     * ensemble), 'each' (la série entière d'un côté puis de l'autre) ou
+     * 'alternate' (on change de côté à chaque répétition). 'both' quand
+     * l'exercice est inconnu.
+     */
+    public static function sides(string $slug): string
+    {
+        return self::find($slug)['sides'] ?? 'both';
+    }
+
+    /**
      * Chemins publics des images d'un exercice : départ puis arrivée, ou une
      * seule quand la source n'en propose qu'une.
      *
@@ -93,6 +104,8 @@ final class ExerciseCatalog
             'equipment' => $exercise['equipment'],
             'equipment_label' => Equipment::from($exercise['equipment'])->label(),
             'mode' => $exercise['mode'],
+            // Les deux côtés ensemble (both), l'un puis l'autre (each) ou en alternance (alternate).
+            'sides' => $exercise['sides'] ?? 'both',
             'primary' => $exercise['primary'],
             'secondary' => $exercise['secondary'],
             'steps' => $exercise['steps'],

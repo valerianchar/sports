@@ -64,6 +64,16 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   de repos, envoyées en notifications web par le conteneur `alertes` (`php artisan
   alertes:envoyer`, clés VAPID du .env via `php artisan alertes:cles` ; sur iPhone, appli ajoutée
   à l'écran d'accueil).
+- **Côtés** — chaque exercice dit s'il se fait des deux côtés à la fois, d'un côté puis de
+  l'autre (`each` : le lecteur joue « côté droit » puis « côté gauche ») ou en alternant
+  (`alternate` : la valeur compte par côté ou au total, au choix dans l'éditeur) ; champ
+  `sides` du catalogue, `per_side` de chaque exercice d'une séance (durée et volume doublés).
+- **Comme une vidéo** — le mode de son « Comme une vidéo » fait de la séance un média en
+  lecture (`resources/js/nowPlaying.js`) : une piste fabriquée à la volée, silence et bips du
+  décompte à la seconde, garde la page éveillée en arrière-plan ; l'écran verrouillé et le
+  centre de contrôle montrent l'exercice, la série, la fin du repos et la progression, avec
+  pause, « suivant » (série faite) et « précédent ». La musique se met en pause. Sinon, une
+  notification silencieuse « Séance en cours » tient le centre de notifications à jour.
 - **Zones** — chaque grand muscle a ses zones (`database/data/zones.php` : haut, milieu, bas,
   intérieur, extérieur des pectoraux…), et chaque exercice celles qu'il travaille (`zones`).
   L'éditeur et l'assistant montrent la couverture d'une séance ; toucher une zone oubliée

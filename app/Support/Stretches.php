@@ -24,7 +24,8 @@ final class Stretches
                 && array_intersect($exercise['primary'], $targets) !== [])
             ->sortByDesc(fn (array $exercise): float => count(array_intersect($exercise['primary'], $targets)) + $random->getFloat(0, 0.5))
             ->take(2)
-            ->map(fn (array $exercise): array => ['exercise' => $exercise['slug'], 'mode' => 'time', 'value' => 30, 'sets' => 2, 'rest_sets' => 10, 'rest_after' => 15])
+            // Un étirement d'un côté puis de l'autre se tient 30 secondes par côté.
+            ->map(fn (array $exercise): array => ['exercise' => $exercise['slug'], 'mode' => 'time', 'per_side' => ($exercise['sides'] ?? 'both') === 'each' ? true : null, 'value' => 30, 'sets' => 2, 'rest_sets' => 10, 'rest_after' => 15])
             ->values()
             ->all();
     }

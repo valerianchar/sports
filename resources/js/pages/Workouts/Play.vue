@@ -8,7 +8,8 @@ import FlashToast from '../../components/FlashToast.vue';
 import { useWakeLock } from '../../composables/useWakeLock';
 import { beep, countdownSound, goSound, loadCustomSound, restSound, unlockAudio, vibrate } from '../../audio';
 import { sendLog } from '../../pendingLogs';
-import { alertsAllowed, cancelAlerts, scheduleAlerts } from '../../alerts';
+import { alertsAllowed, cancelAlerts, clearStatus, scheduleAlerts, showStatus } from '../../alerts';
+import { describe, nowPlayingSupported, pauseNowPlaying, playTimeline, progress as mediaProgress, startNowPlaying, stopNowPlaying } from '../../nowPlaying';
 import { routes } from '../../routes';
 import { patchJson } from '../../http';
 import { formatKg, formatSet, formatTonnage } from '../../format';
@@ -25,6 +26,7 @@ import {
     settingsLabel,
     stepSetting,
     stepWeight,
+    sidesLabel,
     targetLabel,
     usesWeight,
 } from '../../workout';
@@ -66,8 +68,11 @@ function upcoming(order, passed = {}) {
     pending.forEach((index, position) => {
         const item = items[index];
 
+        // Un côté puis l'autre : chaque série se joue en deux temps, côté droit puis côté gauche.
+        const sides = catalog[item.exercise]?.sides === 'each' ? ['droit', 'gauche'] : [undefined];
+
         for (let set = (passed[index] ?? 0) + 1; set <= item.sets; set++) {
-            list.push({ kind: 'work', item: index, set, mode: item.mode, duration: item.mode === 'time' ? item.value : null });
+            sides.forEach((side) => list.push({ kind: 'work', item: index, set, mode: item.mode, duration: item.mode === 'time' ? item.value : null, side }));
 
             // Drop set : les paliers suivent la série sans repos.
             if (dropsOn(item, set)) {
@@ -99,12 +104,15 @@ function buildSteps() {
     return list;
 }
 
+/** L'étape qui achève une série : ni un palier de drop, ni le côté droit d'une série à deux côtés. */
+const isSetEnd = (s) => s.kind === 'work' && s.drop === undefined && s.side !== 'droit';
+
 /** Séries principales passées de chaque exercice (les paliers de drop n'en sont pas). */
 function countPassed(list) {
     const passed = {};
 
     for (const s of list) {
-        if (s.kind === 'work' && s.drop === undefined) {
+        if (isSetEnd(s)) {
             passed[s.item] = (passed[s.item] ?? 0) + 1;
         }
     }
@@ -119,7 +127,7 @@ const initialSteps = buildSteps();
  * séries prévues faites (les paliers de drop prolongent une série, ils ne
  * s'ajoutent pas au compte).
  */
-const plannedSets = initialSteps.filter((s) => s.kind === 'work' && s.drop === undefined).length;
+const plannedSets = initialSteps.filter(isSetEnd).length;
 
 /*
  * Tous les instants sont absolus (Date.now) : un onglet endormi ou un écran
@@ -221,8 +229,16 @@ function restore() {
 const volume = () => (props.preferences.volume ?? 80) / 100;
 const cue = () => props.preferences.countdown_sound ?? 'bip';
 
+/*
+ * « Comme une vidéo » : la séance joue sa propre piste (bips compris), affichée
+ * sur l'écran verrouillé. Les bips du Web Audio se taisent alors pour ne pas
+ * sonner deux fois.
+ */
+const videoMode = props.preferences.sound && props.preferences.audio_mode === 'prioritaire' && nowPlayingSupported();
+const beeps = () => props.preferences.sound && !videoMode;
+
 function sound(frequency, duration) {
-    if (props.preferences.sound) {
+    if (beeps()) {
         beep(frequency, duration, volume());
     }
 }
@@ -247,7 +263,7 @@ function goTo(target, countSet = false, startAt = null) {
     lastBeep = null;
 
     // Un palier de drop prolonge la série : il ne compte pas comme une série de plus.
-    if (countSet && current && current.drop === undefined) {
+    if (countSet && current && isSetEnd(current)) {
         state.doneSets += 1;
         state.doneItems = { ...state.doneItems, [current.item]: true };
     }
@@ -276,19 +292,22 @@ function goTo(target, countSet = false, startAt = null) {
     });
 
     if (late) {
+        syncMedia(false);
         persist(true);
 
         return;
     }
 
+    syncMedia(true);
+
     if (step.kind === 'work') {
-        if (props.preferences.sound) {
+        if (beeps()) {
             goSound(cue(), volume());
         }
 
         buzz(200);
     } else if (step.kind === 'rest') {
-        if (props.preferences.sound) {
+        if (beeps()) {
             restSound(cue(), volume());
         }
 
@@ -302,6 +321,8 @@ function finish(at) {
     state.done = true;
     state.endedAt = at;
     forget();
+    stopNowPlaying();
+    clearStatus();
 
     sound(880, 0.15);
     setTimeout(() => sound(1175, 0.3), 180);
@@ -327,6 +348,11 @@ function finish(at) {
  * faites (ajustées au − / + si besoin), objectif, ou durée au chrono.
  */
 function perform(s, seconds = null) {
+    // Le côté droit n'est que la moitié de la série : elle se note une fois le côté gauche fait.
+    if (s.side === 'droit') {
+        return;
+    }
+
     const it = items[s.item];
     const { reps, weight } = load(s);
     const timed = it.mode === 'time' && s.drop === undefined;
@@ -340,6 +366,7 @@ function perform(s, seconds = null) {
         target_reps: timed ? null : reps,
         seconds: timed ? (seconds ?? it.value) : Math.round((state.elapsedBase + (state.paused ? 0 : Date.now() - state.startAt)) / 1000),
         weight,
+        per_side: Boolean(it.per_side),
         at: new Date().toISOString(),
     });
 }
@@ -413,7 +440,7 @@ function tick() {
             const first = lastBeep === null;
             lastBeep = seconds;
 
-            if (props.preferences.sound) {
+            if (beeps()) {
                 countdownSound(cue(), seconds, volume(), { first });
             }
         }
@@ -446,6 +473,7 @@ function pause() {
         elapsedBase: state.elapsedBase + (at - state.startAt),
     });
     now.value = at;
+    pauseNowPlaying();
     persist(true);
 }
 
@@ -463,6 +491,7 @@ function resume() {
         pausedTotal: state.pausedTotal + (at - state.pausedAt),
     });
     now.value = at;
+    syncMedia(true);
     persist(true);
 }
 
@@ -479,6 +508,8 @@ function addTime(seconds) {
         state.endAt = Math.max(Date.now() + 1000, state.endAt + seconds * 1000);
     }
 
+    // Le décompte bouge : la piste de l'écran verrouillé aussi.
+    syncMedia(true);
     persist(true);
 }
 
@@ -497,7 +528,7 @@ function load(s) {
 function target(s) {
     const it = items[s.item];
     const { reps, weight } = load(s);
-    const effort = it.mode === 'reps' || s.drop !== undefined ? `${reps} reps` : targetLabel(it);
+    const effort = it.mode === 'reps' || s.drop !== undefined ? `${reps} reps${it.per_side && s.drop === undefined ? ' / côté' : ''}` : targetLabel(it);
 
     return [effort, formatWeight(weight)].filter(Boolean).join(' · ');
 }
@@ -643,6 +674,8 @@ const finishNow = () => goTo(state.steps.length);
 
 function quit() {
     forget();
+    stopNowPlaying();
+    clearStatus();
     router.visit(routes.home);
 }
 
@@ -722,6 +755,7 @@ function rearrange(order, { restart = false, redo = null } = {}) {
         }
 
         state.steps = [...state.steps.slice(0, end), ...tail];
+        syncMedia(true);
         persist(true);
 
         return;
@@ -947,7 +981,9 @@ const remaining = computed(() => {
 const fraction = computed(() => (state.currentDuration ? clamp(remaining.value / (state.currentDuration * 1000), 0, 1) : 0));
 const seconds = computed(() => Math.ceil(remaining.value / 1000));
 const elapsed = computed(() => formatClock((state.elapsedBase + (state.paused ? 0 : now.value - state.startAt)) / 1000));
-const setLabel = computed(() => (item.value ? `Série ${step.value.set} / ${item.value.sets}` : ''));
+const setLabel = computed(() => (item.value ? `Série ${step.value.set} / ${item.value.sets}${step.value.side ? ` · côté ${step.value.side}` : ''}` : ''));
+// « en alternant les côtés », « tout d'un côté, puis l'autre » : rappelé sous l'exercice.
+const sidesHint = computed(() => (item.value ? sidesLabel(exercise.value, item.value) : null));
 const counter = computed(() => (step.value ? `Exercice ${Math.min(items.length, program.value.done.length + 1)} / ${items.length}` : ''));
 
 const nextLabel = computed(() => {
@@ -960,7 +996,7 @@ const nextLabel = computed(() => {
     const s = state.steps[upcoming];
     const i = items[s.item];
 
-    const label = s.drop !== undefined ? `drop ${s.drop + 1}/${i.drops.length}` : `série ${s.set}/${i.sets}`;
+    const label = s.drop !== undefined ? `drop ${s.drop + 1}/${i.drops.length}` : `série ${s.set}/${i.sets}${s.side ? ` · côté ${s.side}` : ''}`;
 
     return `${catalog[i.exercise].name} · ${label} · ${target(s)}`;
 });
@@ -990,6 +1026,141 @@ function onKey(event) {
     }
 }
 
+// ---------------------------------------------------------------- comme une vidéo
+
+/*
+ * La piste de la séance depuis maintenant : les bips de début d'étape et du
+ * décompte de chaque étape chronométrée, jusqu'à la prochaine série en
+ * répétitions (qui attend qu'on la valide) ou vingt minutes.
+ */
+function timeline() {
+    const current = state.steps[state.index];
+    const events = [];
+
+    if (!current || state.paused || state.done) {
+        return { seconds: 1, events };
+    }
+
+    const lead = props.preferences.countdown_seconds ?? 5;
+    const startBeep = (s, at) => events.push(s.kind === 'work' ? { at, frequency: 990, duration: 0.35 } : { at, frequency: 520, duration: 0.3 });
+
+    // L'étape vient de commencer : son bip d'entrée ouvre la piste.
+    if (current.kind !== 'prep' && Date.now() - state.startAt < 1500) {
+        startBeep(current, 0);
+    }
+
+    let index = state.index;
+    let s = current;
+    let end = s.duration != null ? (state.endAt - Date.now()) / 1000 : 0;
+
+    while (s && s.duration != null && end <= 20 * 60) {
+        for (let k = lead; k >= 1; k--) {
+            if (end - k >= 0) {
+                events.push({ at: end - k, frequency: k === 1 ? 1320 : 880, duration: k === 1 ? 0.28 : 0.12 });
+            }
+        }
+
+        const following = state.steps[index + 1];
+
+        if (!following) {
+            events.push({ at: end, frequency: 1175, duration: 0.45 });
+            break;
+        }
+
+        startBeep(following, end);
+
+        if (following.duration == null) {
+            break;
+        }
+
+        index++;
+        s = following;
+        end += s.duration;
+    }
+
+    return { seconds: Math.min(end, 20 * 60) + 1, events };
+}
+
+/** L'écran verrouillé suit l'étape : exercice, série, reprise, progression. */
+function syncMedia(rebuild) {
+    if (!videoMode || state.done) {
+        return;
+    }
+
+    const s = state.steps[state.index];
+
+    if (!s) {
+        return;
+    }
+
+    const it = items[s.item];
+    const exercise = catalog[it.exercise];
+    const clock = (ms) => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const label = s.drop !== undefined ? `drop ${s.drop + 1}` : `série ${s.set}/${it.sets}${s.side ? ` · côté ${s.side}` : ''}`;
+    const artist = {
+        prep: `Prépare-toi · ${target(s)}`,
+        rest: `Repos jusqu'à ${clock(state.endAt)} · puis ${label}`,
+        work: `${label.charAt(0).toUpperCase()}${label.slice(1)} · ${target(s)}`,
+    }[s.kind];
+
+    describe({ title: exercise.name, artist, album: `${props.workout.name} · ${counter.value}`, image: exercise.images[0] });
+    mediaProgress(s.duration ?? 0, (Date.now() - state.startAt) / 1000, !state.paused);
+
+    // Une nouvelle piste ne se lance qu'appli à l'écran ou depuis un bouton de
+    // l'écran verrouillé : en arrière-plan, la piste en cours porte déjà la suite.
+    if (rebuild && (!document.hidden || mediaAction)) {
+        playTimeline(timeline(), volume());
+    }
+}
+
+let mediaAction = false;
+
+/** Un bouton de l'écran verrouillé : il vaut un geste, la piste peut repartir. */
+function fromLockScreen(action) {
+    mediaAction = true;
+
+    try {
+        action();
+    } finally {
+        mediaAction = false;
+    }
+}
+
+function startVideoMode() {
+    startNowPlaying({
+        play: () => fromLockScreen(resume),
+        pause: () => fromLockScreen(pause),
+        // « Suivant » : la série en répétitions est faite ; ailleurs, l'étape suivante.
+        next: () => fromLockScreen(() => (step.value?.kind === 'work' && step.value.mode === 'reps' && step.value.duration == null ? completeSet() : next())),
+        previous: () => fromLockScreen(previous),
+        tick: () => tick(),
+    });
+}
+
+/** « 18:42 » : l'heure de fin d'une étape chronométrée, pour le centre de notifications. */
+function statusLine() {
+    const s = state.steps[state.index];
+
+    if (!s || state.done) {
+        return null;
+    }
+
+    const it = items[s.item];
+    const name = catalog[it.exercise].name;
+    const label = s.drop !== undefined ? `drop ${s.drop + 1}` : `série ${s.set}/${it.sets}${s.side ? ` · côté ${s.side}` : ''}`;
+    const until = s.duration != null && !state.paused ? ` jusqu'à ${new Date(state.endAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}` : '';
+
+    if (state.paused) {
+        return `En pause · ${name}, ${label}`;
+    }
+
+    if (s.kind === 'prep') {
+        return `Départ${until} · ${name}, ${label} · ${target(s)}`;
+    }
+
+    return s.kind === 'rest' ? `Repos${until} · puis ${name}, ${label} · ${target(s)}` : `${name} · ${label} · ${target(s)}${until}`;
+}
+
 // ---------------------------------------------------------------- alertes en arrière-plan
 
 /*
@@ -1013,7 +1184,7 @@ function announce(s) {
         return { title: 'Repos', body: `${formatClock(s.duration)} de repos, puis ${name}` };
     }
 
-    const label = s.drop !== undefined ? `drop ${s.drop + 1}` : `série ${s.set}/${it.sets}`;
+    const label = s.drop !== undefined ? `drop ${s.drop + 1}` : `série ${s.set}/${it.sets}${s.side ? ` · côté ${s.side}` : ''}`;
 
     return { title: 'C’est reparti !', body: [name, label, target(s), itemSettings(s.item)].filter(Boolean).join(' · ') };
 }
@@ -1053,7 +1224,25 @@ function upcomingAlerts() {
 }
 
 function onVisibility() {
-    if (!props.preferences.sound || !alertsAllowed()) {
+    // Comme une vidéo : la piste et l'écran verrouillé suffisent ; au retour, on resynchronise.
+    if (videoMode) {
+        if (document.visibilityState === 'visible') {
+            syncMedia(true);
+        }
+
+        return;
+    }
+
+    if (!alertsAllowed()) {
+        return;
+    }
+
+    // La séance en cours, dans le centre de notifications.
+    if (document.visibilityState === 'hidden' && !state.done) {
+        showStatus(`Séance en cours · ${props.workout.name}`, statusLine());
+    }
+
+    if (!props.preferences.sound) {
         return;
     }
 
@@ -1076,8 +1265,19 @@ onMounted(() => {
         loadCustomSound(props.preferences.custom_sound_url);
     }
 
+    if (videoMode) {
+        startVideoMode();
+    }
+
     if (!restore()) {
         goTo(0);
+    } else {
+        syncMedia(false);
+    }
+
+    // La séance lancée apparaît dans le centre de notifications.
+    if (!videoMode && alertsAllowed()) {
+        showStatus(`Séance lancée · ${props.workout.name}`, `${items.length} exercice${items.length > 1 ? 's' : ''} · ${statusLine() ?? ''}`);
     }
 
     timer = setInterval(tick, 200);
@@ -1093,6 +1293,8 @@ onUnmounted(() => {
     if (alertsOut) {
         cancelAlerts(state.clientId);
     }
+
+    stopNowPlaying();
 });
 </script>
 
@@ -1249,6 +1451,7 @@ onUnmounted(() => {
                         </span>
                         <span class="flex min-w-0 flex-1 flex-col gap-0.5">
                             <span class="truncate text-[13px] font-semibold text-text-soft">{{ exercise.equipment_label }}</span>
+                            <span v-if="sidesHint" class="text-[11.5px] leading-tight font-bold text-accent">{{ sidesHint }}</span>
                             <span v-if="lastTime" class="truncate text-[11.5px] font-semibold text-text-muted">
                                 Dernière fois : {{ lastTimeText }}
                             </span>
@@ -1289,7 +1492,11 @@ onUnmounted(() => {
                                     :aria-label="`${shownReps} répétitions : toucher pour taper le nombre fait`"
                                     @click="openQuick('reps', 'Répétitions faites', shownReps, (reps) => (state.repsDone = reps))"
                                 >{{ shownReps }}</button>
-                                <span class="font-display text-[28px] font-bold">REPS</span>
+                                <span class="flex flex-col font-display leading-none font-bold">
+                                    <span class="text-[28px]">REPS</span>
+                                    <span v-if="item.per_side && step.drop === undefined" class="text-[17px]">{{ step.side ? `CÔTÉ ${step.side.toUpperCase()}` : 'PAR CÔTÉ' }}</span>
+                                    <span v-else-if="item.per_side === false" class="text-[17px]">AU TOTAL</span>
+                                </span>
                             </div>
                             <button type="button" class="iconbtn size-11 bg-surface! text-[22px] font-semibold" aria-label="Une répétition de plus" @click="adjustReps(1)">+</button>
                         </div>

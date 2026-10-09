@@ -8,7 +8,7 @@
  * au sous-sol sans réseau n'affiche pas de trous.
  */
 
-const CACHE_VERSION = 'seance-v2';
+const CACHE_VERSION = 'seance-v3';
 const IMAGE_CACHE = 'seance-exercices-v2';
 const OFFLINE_PAGE = '/offline.html';
 
@@ -116,8 +116,12 @@ self.addEventListener('push', (event) => {
         data = { title: 'Séance', body: event.data?.text() };
     }
 
+    // iOS ne remplace pas toujours une notification de même étiquette : on ferme
+    // d'abord celles de la séance, pour n'en garder qu'une, à jour.
     event.waitUntil(
-        self.registration.showNotification(data.title || 'Séance', {
+        self.registration.getNotifications()
+            .then((shown) => shown.filter((notification) => notification.tag?.startsWith('seance')).forEach((notification) => notification.close()))
+            .then(() => self.registration.showNotification(data.title || 'Séance', {
             body: data.body || '',
             tag: data.tag || 'seance',
             renotify: true,
@@ -126,7 +130,7 @@ self.addEventListener('push', (event) => {
             icon: '/icons/icon-192.png',
             badge: '/icons/icon-192.png',
             data: { url: data.url || '/' },
-        }),
+        })),
     );
 });
 

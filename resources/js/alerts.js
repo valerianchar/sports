@@ -74,3 +74,46 @@ export const testAlert = () => postJson('/notifications/essai', {});
 export const scheduleAlerts = (session, alerts) => sendKeepalive(`/seances/alertes/${session}`, 'PUT', { alerts });
 
 export const cancelAlerts = (session) => sendKeepalive(`/seances/alertes/${session}`, 'DELETE');
+
+/*
+ * La séance en cours, dans le centre de notifications : une notification
+ * silencieuse, remplacée à chaque mise à jour. iOS ne remplace pas toujours
+ * une notification de même étiquette : on ferme donc d'abord les anciennes.
+ */
+async function closeSessionNotifications(worker) {
+    const shown = await worker.getNotifications();
+    shown.filter((notification) => notification.tag?.startsWith('seance')).forEach((notification) => notification.close());
+}
+
+export async function showStatus(title, body) {
+    if (!alertsAllowed()) {
+        return;
+    }
+
+    try {
+        const worker = await registration();
+        await closeSessionNotifications(worker);
+        await worker.showNotification(title, {
+            body,
+            tag: 'seance-statut',
+            silent: true,
+            icon: '/icons/icon-192.png',
+            badge: '/icons/icon-192.png',
+            data: { url: location.pathname },
+        });
+    } catch {
+        // Pas de notification possible ici : le lecteur suffit.
+    }
+}
+
+export async function clearStatus() {
+    if (!alertsAllowed()) {
+        return;
+    }
+
+    try {
+        await closeSessionNotifications(await registration());
+    } catch {
+        // Rien à fermer.
+    }
+}

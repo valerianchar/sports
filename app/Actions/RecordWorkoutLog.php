@@ -83,7 +83,7 @@ final class RecordWorkoutLog
             'seconds' => isset($set['seconds']) ? (int) $set['seconds'] : null,
             'weight' => $weight,
             'e1rm' => Strength::oneRepMax($weight, $reps),
-            'volume' => $weight !== null && $reps !== null ? round($weight * $reps, 2) : 0,
+            'volume' => $weight !== null && $reps !== null ? round($weight * $reps * (empty($set['per_side']) ? 1 : 2), 2) : 0,
             'performed_at' => $set['at'] ?? $log->finished_at,
         ];
     }

@@ -1155,7 +1155,7 @@ function statusLine() {
     }
 
     if (s.kind === 'prep') {
-        return `Départ${until} · ${name}, ${label} · ${target(s)}`;
+        return `Départ${until.replace('jusqu\'à', 'à')} · ${name}, ${label} · ${target(s)}`;
     }
 
     return s.kind === 'rest' ? `Repos${until} · puis ${name}, ${label} · ${target(s)}` : `${name} · ${label} · ${target(s)}${until}`;

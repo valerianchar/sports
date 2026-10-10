@@ -74,7 +74,7 @@ async function sendMail() {
         message.value = `Envoyée à ${email.value.trim()}.`;
         email.value = '';
     } catch (failure) {
-        error.value = failure.status === 422 ? 'Cette adresse mail ne semble pas valide.' : failure.status === 429 ? 'Trop d’envois d’un coup : réessaie dans un moment.' : 'Envoi impossible pour le moment.';
+        error.value = failure.status === 422 ? 'Cette adresse est invalide ou refusée par le serveur de mail.' : failure.status === 429 ? 'Trop d’envois d’un coup : réessaie dans un moment.' : 'Envoi impossible pour le moment.';
     } finally {
         sending.value = false;
     }

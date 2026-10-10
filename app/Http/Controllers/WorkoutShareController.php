@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 /**
  * Dupliquer une séance, et la partager : un lien qu'un autre membre ouvre
@@ -61,7 +62,14 @@ class WorkoutShareController extends Controller
         $workout->share_token ??= Str::random(24);
         $workout->save();
 
-        Notification::route('mail', $data['email'])->notify(new WorkoutShared($workout->load('items'), $request->user()));
+        try {
+            Notification::route('mail', $data['email'])->notify(new WorkoutShared($workout->load('items'), $request->user()));
+        } catch (TransportExceptionInterface $exception) {
+            // Adresse inconnue ou refusée par le serveur de mail : on le dit, sans planter.
+            report($exception);
+
+            return response()->json(['message' => 'Le serveur de mail refuse cette adresse.', 'errors' => ['email' => ['Le serveur de mail refuse cette adresse.']]], 422);
+        }
 
         return response()->json(['sent' => true]);
     }

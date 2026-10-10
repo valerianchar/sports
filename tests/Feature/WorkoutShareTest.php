@@ -8,8 +8,12 @@ use App\Notifications\WorkoutShared;
 use App\Support\WorkoutEstimate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia;
+use Symfony\Component\Mailer\Exception\TransportException;
+use Symfony\Component\Mailer\SentMessage;
+use Symfony\Component\Mailer\Transport\AbstractTransport;
 use Tests\TestCase;
 
 /**
@@ -110,5 +114,29 @@ class WorkoutShareTest extends TestCase
 
         $this->actingAs($user)->get("/seances/{$workout->id}/lancer")
             ->assertInertia(fn (AssertableInertia $page) => $page->where('preferences.warmup_sets', true));
+    }
+
+    public function test_an_address_refused_by_the_mail_server_is_reported_not_crashed(): void
+    {
+        $owner = User::factory()->create();
+        $workout = Workout::factory()->for($owner)->withItems()->create();
+        // Un serveur de mail qui refuse l'adresse, comme IONOS pour une boîte inconnue.
+        Mail::extend('refuse', fn (): AbstractTransport => new class extends AbstractTransport
+        {
+            protected function doSend(SentMessage $message): void
+            {
+                throw new TransportException('550 mailbox unavailable');
+            }
+
+            public function __toString(): string
+            {
+                return 'refuse';
+            }
+        });
+        config(['mail.mailers.refuse' => ['transport' => 'refuse'], 'mail.default' => 'refuse']);
+
+        $this->actingAs($owner)->postJson("/seances/{$workout->id}/partage/mail", ['email' => 'inconnu@exemple.fr'])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.email.0', 'Le serveur de mail refuse cette adresse.');
     }
 }

@@ -113,6 +113,25 @@ class PushAlertTest extends TestCase
         $this->assertSame(0, $user->pushAlerts()->count());
     }
 
+    public function test_coming_back_anywhere_cancels_every_pending_alert(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+
+        foreach ([$user, $user, $other] as $owner) {
+            $owner->pushAlerts()->create(['session' => (string) Str::uuid(), 'send_at' => now()->addMinute(), 'title' => 'Repos']);
+        }
+
+        $user->pushAlerts()->create(['session' => (string) Str::uuid(), 'send_at' => now()->subMinute(), 'title' => 'Déjà partie', 'sent_at' => now()]);
+
+        // Une séance abandonnée sans repasser par le lecteur : l'appli revenue à l'écran suffit.
+        $this->actingAs($user)->deleteJson('/seances/alertes')->assertOk();
+
+        $this->assertSame(0, $user->pushAlerts()->whereNull('sent_at')->count());
+        $this->assertSame(1, $user->pushAlerts()->count(), 'Les alertes déjà parties restent');
+        $this->assertSame(1, $other->pushAlerts()->count());
+    }
+
     public function test_alerts_late_by_more_than_a_minute_are_dropped(): void
     {
         $user = User::factory()->create();

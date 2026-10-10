@@ -139,6 +139,9 @@ export const scheduleAlerts = (session, alerts) => sendKeepalive(`/seances/alert
 
 export const cancelAlerts = (session) => sendKeepalive(`/seances/alertes/${session}`, 'DELETE');
 
+/** Toutes les alertes en attente : l'appli est revenue, plus besoin d'être prévenu. */
+export const cancelAllAlerts = () => sendKeepalive('/seances/alertes', 'DELETE');
+
 /*
  * La séance en cours, dans le centre de notifications : une notification
  * silencieuse, remplacée à chaque mise à jour. iOS ne remplace pas toujours

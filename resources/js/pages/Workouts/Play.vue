@@ -383,6 +383,8 @@ function finish(at) {
     forget();
     stopNowPlaying();
     clearStatus();
+    cancelAlerts(state.clientId);
+    alertsOut = false;
 
     sound(880, 0.15);
     setTimeout(() => sound(1175, 0.3), 180);
@@ -750,6 +752,9 @@ function quit() {
     forget();
     stopNowPlaying();
     clearStatus();
+    // Abandonnée : plus aucune alerte de cette séance.
+    cancelAlerts(state.clientId);
+    alertsOut = false;
     router.visit(routes.home);
 }
 
@@ -1286,14 +1291,25 @@ function upcomingAlerts() {
     let s = current;
     let end = (state.endAt - Date.now()) / 1000;
 
-    while (s && s.duration != null && alerts.length < 38 && end <= 7200) {
+    /*
+     * Une notification seulement quand elle sert : la fin d'un repos d'au moins
+     * 15 s (avec un avertissement avant ceux de 30 s et plus), la fin d'un
+     * effort chronométré d'au moins une minute, et la fin de la séance. Le
+     * fractionné court (20 s / 10 s) se joue sans notification à chaque
+     * changement. Douze au plus, sur une demi-heure au plus.
+     */
+    while (s && s.duration != null && alerts.length < 12 && end <= 30 * 60) {
         const following = state.steps[index + 1];
 
-        if (s.kind === 'rest' && s.duration >= 20 && end - lead > 1) {
-            alerts.push({ in: end - lead, title: `Plus que ${lead} s de repos`, body: announce(following).body });
-        }
+        if (s.kind === 'rest' && s.duration >= 15) {
+            if (s.duration >= 30 && end - lead > 1) {
+                alerts.push({ in: end - lead, title: `Plus que ${lead} s de repos`, body: announce(following).body });
+            }
 
-        alerts.push({ in: Math.max(0, end), ...announce(following) });
+            alerts.push({ in: Math.max(0, end), ...announce(following) });
+        } else if ((s.kind === 'work' && s.duration >= 60) || s.kind === 'prep' || !following) {
+            alerts.push({ in: Math.max(0, end), ...announce(following) });
+        }
 
         if (!following || following.duration == null) {
             break;
@@ -1304,7 +1320,7 @@ function upcomingAlerts() {
         end += s.duration;
     }
 
-    return alerts;
+    return alerts.slice(0, 12);
 }
 
 function onVisibility() {

@@ -1,6 +1,7 @@
 import { createApp, h } from 'vue';
 import { createInertiaApp, router } from '@inertiajs/vue3';
 import { setAudioMode } from './audio';
+import { alertsAllowed, cancelAllAlerts } from './alerts';
 import AppLayout from './layouts/AppLayout.vue';
 import { registerServiceWorker } from './pwa';
 
@@ -22,6 +23,18 @@ createInertiaApp({
         // Le mode du son (avec la musique ou prioritaire) suit le compte connecté.
         setAudioMode(props.initialPage.props.auth?.user?.audio_mode);
         router.on('navigate', (event) => setAudioMode(event.detail.page.props.auth?.user?.audio_mode));
+
+        // L'appli à l'écran, sur n'importe quelle page : les alertes en attente n'ont plus lieu
+        // d'être — séance reprise, finie ou abandonnée, même sans repasser par le lecteur.
+        const signedIn = () => Boolean(router.page?.props?.auth?.user ?? props.initialPage.props.auth?.user);
+        const stopAlerts = () => {
+            if (document.visibilityState === 'visible' && signedIn() && alertsAllowed()) {
+                cancelAllAlerts();
+            }
+        };
+
+        stopAlerts();
+        document.addEventListener('visibilitychange', stopAlerts);
 
         createApp({ render: () => h(App, props) })
             .use(plugin)

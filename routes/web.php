@@ -55,6 +55,9 @@ Route::middleware('auth')->group(function () {
     // Avant la route paramétrée : « nouvelle » et « assistant » ne sont pas des identifiants de séance.
     Route::get('/seances/nouvelle', [WorkoutController::class, 'create'])->name('workouts.create');
     Route::get('/seances/assistant', [WorkoutAssistantController::class, 'create'])->name('workouts.assistant');
+    // Toutes les alertes en attente (l'appli est revenue à l'écran) — JSON. Avant /seances/{workout}.
+    Route::delete('/seances/alertes', [PushAlertController::class, 'destroyAll'])
+        ->middleware('throttle:120,1')->name('push.alerts.destroy-all');
     Route::get('/seances/assistant/proposition', [WorkoutAssistantController::class, 'suggest'])->name('workouts.assistant.suggest');
     // Compléter une séance en cours d'édition — JSON.
     Route::post('/seances/assistant/completer', [WorkoutAssistantController::class, 'complete'])

@@ -36,6 +36,18 @@ class PushAlertController extends Controller
         return response()->json(['scheduled' => count($data['alerts'])]);
     }
 
+    /**
+     * L'appli est revenue à l'écran : plus aucune alerte n'a lieu d'arriver,
+     * quelle que soit la séance — y compris une séance abandonnée sans
+     * repasser par le lecteur.
+     */
+    public function destroyAll(Request $request): JsonResponse
+    {
+        $request->user()->pushAlerts()->whereNull('sent_at')->delete();
+
+        return response()->json(['scheduled' => 0]);
+    }
+
     public function destroy(Request $request, string $session): JsonResponse
     {
         $request->user()->pushAlerts()->where('session', $session)->whereNull('sent_at')->delete();

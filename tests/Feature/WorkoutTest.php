@@ -198,7 +198,7 @@ class WorkoutTest extends TestCase
                 // Les variantes de chaque exercice voyagent avec, pour en changer hors réseau.
                 ->where('alternatives.developpe-couche', fn ($slugs) => count($slugs) > 0)
                 ->where('exercises', fn ($exercises) => count($exercises) > 2)
-                ->where('preferences', ['sound' => false, 'prep_seconds' => 8, 'countdown_seconds' => 5, 'volume' => 80, 'countdown_sound' => 'bip', 'custom_sound_url' => null, 'audio_mode' => 'melange']));
+                ->where('preferences', ['sound' => false, 'prep_seconds' => 8, 'countdown_seconds' => 5, 'volume' => 80, 'countdown_sound' => 'bip', 'custom_sound_url' => null, 'audio_mode' => 'melange', 'warmup_sets' => true]));
     }
 
     public function test_an_empty_workout_cannot_be_played(): void

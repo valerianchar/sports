@@ -40,6 +40,8 @@ class SaveWorkoutRequest extends FormRequest
             'items.*.sets' => ['required', 'integer', 'min:1', 'max:20'],
             'items.*.rest_sets' => ['required', 'integer', 'min:0', 'max:900'],
             'items.*.rest_after' => ['required', 'integer', 'min:0', 'max:900'],
+            // Enchaîné avec l'exercice suivant sans repos (superset, circuit).
+            'items.*.superset' => ['nullable', 'boolean'],
             // Enregistrer puis lancer aussitôt : « Lancer la séance » depuis l'éditeur.
             'start' => ['boolean'],
             // Enregistrer puis ouvrir l'éditeur : une proposition de l'assistant qu'on veut retoucher.
@@ -100,11 +102,11 @@ class SaveWorkoutRequest extends FormRequest
     }
 
     /**
-     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, set_weights: list<float|null>|null, drops: list<array{reps: int, weight: float|null}>|null, drop_on: string|null, per_side: bool|null, speed: float|null, incline: float|null, level: int|null, sets: int, rest_sets: int, rest_after: int}>
+     * @return list<array{exercise: string, mode: string, value: int, weight: float|null, set_weights: list<float|null>|null, drops: list<array{reps: int, weight: float|null}>|null, drop_on: string|null, superset: bool, per_side: bool|null, speed: float|null, incline: float|null, level: int|null, sets: int, rest_sets: int, rest_after: int}>
      */
     public function items(): array
     {
-        return array_values(array_map(fn (array $item): array => [
+        $items = array_values(array_map(fn (array $item): array => [
             'exercise' => $item['exercise'],
             'mode' => $item['mode'],
             'per_side' => $this->perSide($item),
@@ -119,7 +121,15 @@ class SaveWorkoutRequest extends FormRequest
             'sets' => (int) $item['sets'],
             'rest_sets' => (int) $item['rest_sets'],
             'rest_after' => (int) $item['rest_after'],
+            'superset' => (bool) ($item['superset'] ?? false),
         ], $this->validated('items')));
+
+        // Le dernier exercice n'a rien à quoi s'enchaîner.
+        if ($items !== []) {
+            $items[array_key_last($items)]['superset'] = false;
+        }
+
+        return $items;
     }
 
     /**

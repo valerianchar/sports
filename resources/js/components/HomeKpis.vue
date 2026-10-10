@@ -56,7 +56,10 @@ const recordText = computed(() => {
     <section class="mb-6 flex flex-col gap-3" aria-labelledby="kpis-title">
         <div class="flex items-baseline justify-between">
             <h2 id="kpis-title" class="display text-[22px] font-bold">Cette semaine</h2>
-            <Link :href="routes.progress" class="text-[13px] font-bold">Mes progrès →</Link>
+            <span class="flex gap-4">
+                <Link :href="routes.journal" class="text-[13px] font-bold">Journal</Link>
+                <Link :href="routes.progress" class="text-[13px] font-bold">Progrès →</Link>
+            </span>
         </div>
 
         <p v-if="!props.kpis.has_data" class="rounded-[22px] bg-surface p-4 text-[14px] leading-normal font-medium text-text-muted">

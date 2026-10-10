@@ -76,9 +76,65 @@ jobs:
             - name: Vérifier le style
               run: vendor/bin/pint --test
 
+    # Les parcours de l'application dans un vrai navigateur : inscription,
+    # assistant, éditeur, lecteur (échauffement, superset, hors ligne), partage,
+    # programme, réglages. Contre l'application servie par PHP, base SQLite.
+    parcours:
+        name: Parcours
+        runs-on: ubuntu-latest
+        env:
+            APP_ENV: local
+            DB_CONNECTION: sqlite
+            DB_DATABASE: /tmp/parcours.sqlite
+            MAIL_MAILER: log
+            CACHE_STORE: file
+            SESSION_DRIVER: file
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: '8.4'
+                  extensions: pdo_sqlite, intl, gmp
+                  coverage: none
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: npm
+
+            - name: Installer et construire
+              run: |
+                  composer install --prefer-dist --no-interaction --no-progress
+                  npm ci --no-audit --no-fund
+                  npm run build
+
+            - name: Démarrer l'application
+              run: |
+                  cp .env.example .env && php artisan key:generate
+                  touch /tmp/parcours.sqlite && php artisan migrate --force
+                  php artisan serve --host=127.0.0.1 --port=8091 > /tmp/serve.log 2>&1 &
+                  for i in $(seq 1 30); do curl -sf http://127.0.0.1:8091/up > /dev/null && break; sleep 1; done
+
+            - name: Jouer les parcours
+              run: |
+                  mkdir -p /tmp/captures && chmod 777 /tmp/captures
+                  docker run --rm --network host -e BASE=http://127.0.0.1:8091 -e SHOTS=/captures \
+                    -v "$PWD/tests/e2e:/w:ro" -v /tmp/captures:/captures ghcr.io/puppeteer/puppeteer \
+                    sh -c 'cd /home/pptruser && cp /w/*.mjs . && node regression.mjs && node features.mjs'
+
+            - name: Garder les captures d'un échec
+              if: failure()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: parcours
+                  path: |
+                      /tmp/captures
+                      /tmp/serve.log
+
     image:
         name: Image
-        needs: tests
+        needs: [tests, parcours]
         runs-on: ubuntu-latest
         permissions:
             contents: read

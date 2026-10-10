@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import BodyMap from '../../components/BodyMap.vue';
+import BodyMeasurements from '../../components/body/BodyMeasurements.vue';
+import ProgressPhotos from '../../components/body/ProgressPhotos.vue';
 import TabBar from '../../components/TabBar.vue';
 import BarChart from '../../components/charts/BarChart.vue';
 import CalendarHeat from '../../components/charts/CalendarHeat.vue';
@@ -357,6 +359,10 @@ const trendWord = { up: 'monte', keep: 'garde', down: 'allège' };
                 <h2 class="mb-1 text-[15px] font-bold">Poids de corps</h2>
                 <LineChart :data="body.chart" label="Évolution du poids de corps" :format="(v) => formatKg(v)" />
             </section>
+
+            <BodyMeasurements :measurements="body.measurements" />
+
+            <ProgressPhotos :photos="body.photos" :poses="body.poses" />
 
             <section v-if="body.lifts.length" class="rounded-[22px] bg-surface p-4">
                 <h2 class="text-[15px] font-bold">Force relative</h2>

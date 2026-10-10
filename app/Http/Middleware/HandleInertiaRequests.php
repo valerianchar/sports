@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
                     'volume' => $user->volume,
                     'countdown_sound' => $user->countdown_sound->value,
                     'audio_mode' => $user->audio_mode->value,
+                    'warmup_sets' => $user->warmup_sets,
                     'custom_sound_url' => $user->custom_sound_url,
                     'custom_sound_name' => $user->custom_sound_name,
                 ],

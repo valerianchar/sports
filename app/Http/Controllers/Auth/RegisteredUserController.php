@@ -27,7 +27,8 @@ class RegisteredUserController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('workouts.index')
+        // Venu d'un lien de séance partagée : on y retourne.
+        return redirect()->intended(route('workouts.index'))
             ->with('success', "Bienvenue {$user->first_name} ! L'assistant compose ta première séance.");
     }
 }

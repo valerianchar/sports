@@ -2,7 +2,11 @@
 
 namespace App\Queries;
 
+use App\Enums\BodyMeasure;
 use App\Enums\Muscle;
+use App\Enums\PhotoPose;
+use App\Models\BodyMeasurement;
+use App\Models\BodyPhoto;
 use App\Models\BodyWeight;
 use App\Models\SetLog;
 use App\Models\User;
@@ -353,7 +357,89 @@ final class PerformanceStats
             ])->values()->all(),
             ...$this->bodySummary(),
             'lifts' => $lifts,
+            'measurements' => $this->measurements(),
+            'photos' => $this->photos(),
+            'poses' => array_map(fn (PhotoPose $pose): array => ['value' => $pose->value, 'label' => $pose->label()], PhotoPose::cases()),
         ];
+    }
+
+    /**
+     * Les mensurations : pour chaque mesure, la dernière valeur, l'écart sur
+     * 30 jours et depuis la première, et sa courbe ; puis les dernières
+     * saisies, jour par jour.
+     *
+     * @return array{kinds: list<array<string, mixed>>, entries: list<array<string, mixed>>}
+     */
+    private function measurements(): array
+    {
+        $rows = $this->user->bodyMeasurements()->orderBy('measured_on')->get();
+        $monthAgo = $this->now->subDays(30);
+
+        $kinds = array_map(function (BodyMeasure $measure) use ($rows, $monthAgo): array {
+            $column = $measure->value;
+            $points = $rows->filter(fn (BodyMeasurement $m): bool => $m->{$column} !== null)->values();
+            $latest = $points->last();
+            $first = $points->first();
+            // Comme pour le poids : la dernière mesure prise il y a au moins 30 jours.
+            $reference = $points->filter(fn (BodyMeasurement $m): bool => $m->measured_on->lte($monthAgo))->last();
+
+            return [
+                'key' => $column,
+                'label' => $measure->label(),
+                'hint' => $measure->hint(),
+                'latest' => $latest?->{$column},
+                'latest_label' => $latest?->measured_on->translatedFormat('j M'),
+                'change_30d' => $latest && $reference && $reference->isNot($latest) ? round($latest->{$column} - $reference->{$column}, 1) : null,
+                'change_total' => $points->count() > 1 ? round($latest->{$column} - $first->{$column}, 1) : null,
+                'first_label' => $points->count() > 1 ? $first->measured_on->translatedFormat($first->measured_on->year === $this->now->year ? 'j M' : 'j M Y') : null,
+                'chart' => $points->take(-30)->map(fn (BodyMeasurement $m): array => [
+                    'label' => $m->measured_on->translatedFormat('j M'),
+                    'value' => $m->{$column},
+                ])->values()->all(),
+            ];
+        }, BodyMeasure::cases());
+
+        return [
+            'kinds' => $kinds,
+            'entries' => $rows->reverse()->take(30)->map(fn (BodyMeasurement $m): array => [
+                'id' => $m->id,
+                'date' => $m->measured_on->toDateString(),
+                'label' => $m->measured_on->translatedFormat('j M Y'),
+                'values' => collect(BodyMeasure::columns())
+                    ->filter(fn (string $column): bool => $m->{$column} !== null)
+                    ->mapWithKeys(fn (string $column): array => [$column => $m->{$column}])
+                    ->all(),
+            ])->values()->all(),
+        ];
+    }
+
+    /**
+     * Les photos de progression, les plus récentes d'abord : leur adresse
+     * seulement (le fichier est servi à part, au seul propriétaire), et le
+     * poids du moment s'il y a une pesée à une semaine près.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function photos(): array
+    {
+        return $this->user->bodyPhotos()
+            ->orderByDesc('taken_on')
+            ->orderByDesc('id')
+            ->get()
+            ->map(fn (BodyPhoto $photo): array => [
+                'id' => $photo->id,
+                'url' => route('body-photos.show', $photo, false),
+                'pose' => $photo->pose->value,
+                'date' => $photo->taken_on->toDateString(),
+                'label' => $photo->taken_on->translatedFormat('j M Y'),
+                'note' => $photo->note,
+                'kg' => $this->weights()
+                    ->filter(fn (BodyWeight $w): bool => abs($w->measured_on->diffInDays($photo->taken_on)) <= 7)
+                    ->sortBy(fn (BodyWeight $w): float => abs($w->measured_on->diffInDays($photo->taken_on)))
+                    ->first()?->kg,
+            ])
+            ->values()
+            ->all();
     }
 
     /**

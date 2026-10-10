@@ -47,15 +47,23 @@ export function sidesLabel(exercise, item) {
  * durée, les repos entre séries et entre exercices — pas celui après le dernier.
  */
 export function estimate(items, secondsPerRep = 3) {
-    return items.reduce(
-        (total, item, index) =>
-            total +
-            item.sets * (item.mode === 'reps' ? item.value * secondsPerRep : item.value) * (item.per_side ? 2 : 1) +
-            (item.sets - 1) * item.rest_sets +
-            dropReps(item) * secondsPerRep +
-            (index < items.length - 1 ? item.rest_after : 0),
-        0,
-    );
+    let total = 0;
+    // Un superset se compte par tour : le repos n'arrive qu'après le dernier exercice du groupe.
+    let rounds = 0;
+
+    items.forEach((item, index) => {
+        total += item.sets * (item.mode === 'reps' ? item.value * secondsPerRep : item.value) * (item.per_side ? 2 : 1) + dropReps(item) * secondsPerRep;
+        rounds = Math.max(rounds, item.sets);
+
+        if (item.superset && index < items.length - 1) {
+            return;
+        }
+
+        total += (rounds - 1) * item.rest_sets + (index < items.length - 1 ? item.rest_after : 0);
+        rounds = 0;
+    });
+
+    return total;
 }
 
 /** Répétitions des drop sets d'un exercice, sur toute la séance. */
@@ -302,3 +310,50 @@ export function degressive(start, sets) {
 
 /** Les séries d'un exercice qui se prolongent en drop set (dès 1). */
 export const dropsOn = (item, set) => Boolean(item.drops?.length) && (item.drop_on === 'all' || set === item.sets);
+
+// ---------------------------------------------------------------- disques
+
+/** Le poids des barres : olympique 20 kg, EZ 10 kg, hexagonale 25 kg. */
+const BARS = { barbell: 20, rack: 20, 'ez-bar': 10, 'trap-bar': 25 };
+const PLATES = [25, 20, 15, 10, 5, 2.5, 1.25];
+
+/**
+ * Les disques à mettre de chaque côté de la barre pour une charge : 62,5 kg
+ * = barre de 20 + 20 et 1,25 de chaque côté. Rien pour un exercice sans barre.
+ */
+export function platesFor(weight, equipment) {
+    const bar = BARS[equipment];
+
+    if (!bar || !weight) {
+        return null;
+    }
+
+    let rest = Math.max(0, (Number(weight) - bar) / 2);
+    const perSide = [];
+
+    for (const plate of PLATES) {
+        while (rest >= plate - 0.001) {
+            perSide.push(plate);
+            rest = Math.round((rest - plate) * 1000) / 1000;
+        }
+    }
+
+    return { bar, perSide, exact: rest < 0.01 && Number(weight) >= bar };
+}
+
+/** « Barre 20 kg + 20 · 1,25 de chaque côté » ; « Barre seule (20 kg) ». */
+export function platesLabel(weight, equipment) {
+    const plates = platesFor(weight, equipment);
+
+    if (!plates) {
+        return null;
+    }
+
+    if (!plates.perSide.length) {
+        return `Barre seule (${plates.bar} kg)`;
+    }
+
+    const list = plates.perSide.map((plate) => plate.toLocaleString('fr-FR')).join(' · ');
+
+    return `Barre ${plates.bar} kg + ${list} de chaque côté${plates.exact ? '' : ' (au plus près)'}`;
+}

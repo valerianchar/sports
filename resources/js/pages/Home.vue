@@ -8,6 +8,7 @@ import WorkoutCard from '../components/WorkoutCard.vue';
 import { unlockAudio } from '../audio';
 import { routes } from '../routes';
 import { runningSession } from '../session';
+import { warmOfflinePages } from '../offline';
 import { bySlug } from '../workout';
 
 /**
@@ -21,6 +22,8 @@ const props = defineProps({
     workoutNames: { type: Object, required: true },
     exercises: { type: Array, required: true },
     kpis: { type: Object, required: true },
+    week: { type: Object, required: true },
+    todayWorkout: { type: Object, default: null },
 });
 
 const page = usePage();
@@ -32,6 +35,9 @@ const more = ref(null);
 const running = ref(null);
 
 onMounted(() => {
+    // Toutes les séances jouables sans réseau.
+    warmOfflinePages([routes.home, routes.workouts, ...Object.keys(props.workoutNames).map((id) => `${routes.workout(id)}/lancer`)], page.version);
+
     const session = runningSession();
 
     if (session && props.workoutNames[session.workoutId]) {
@@ -70,6 +76,38 @@ function resume() {
                 {{ page.props.auth.user.initials }}
             </Link>
         </header>
+
+        <!-- La semaine en un coup d'œil : jours faits, séances prévues, objectif. -->
+        <Link :href="routes.schedule" class="flex flex-col gap-2.5 rounded-3xl bg-surface p-3.5 text-text!" aria-label="Ma semaine : voir et modifier le programme">
+            <div class="grid grid-cols-7 gap-1.5">
+                <div v-for="day in props.week.days" :key="day.weekday" class="flex flex-col items-center gap-1.5">
+                    <span class="text-[11px] font-extrabold" :class="day.today ? 'text-accent' : 'text-text-muted'">{{ day.initial }}</span>
+                    <span
+                        class="flex size-8 items-center justify-center rounded-full text-[12px] font-extrabold"
+                        :class="day.done ? 'bg-accent text-on-accent' : day.planned ? 'border-[1.5px] border-dashed border-accent text-accent' : day.today ? 'border-[1.5px] border-text-muted' : 'bg-surface-2'"
+                        :title="day.planned ?? ''"
+                    >
+                        <template v-if="day.done">✓</template>
+                        <template v-else-if="day.planned">{{ day.planned.charAt(0).toUpperCase() }}</template>
+                    </span>
+                </div>
+            </div>
+            <span class="text-[12.5px] font-semibold text-text-muted">
+                <template v-if="props.week.goal">
+                    <span class="font-extrabold" :class="props.week.done >= props.week.goal ? 'text-accent' : 'text-text'">{{ props.week.done }} / {{ props.week.goal }}</span> séances cette semaine{{ props.week.done >= props.week.goal ? ' · objectif atteint' : '' }}
+                </template>
+                <template v-else>{{ props.week.done }} séance{{ props.week.done > 1 ? 's' : '' }} cette semaine · Fixe un objectif et ton programme →</template>
+            </span>
+        </Link>
+
+        <!-- La séance prévue aujourd'hui au programme. -->
+        <section v-if="props.todayWorkout && !running" class="flex items-center gap-4 rounded-3xl border-[1.5px] border-accent bg-accent/8 p-4">
+            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-accent uppercase">Au programme aujourd'hui{{ props.week.today?.time ? ` · ${props.week.today.time}` : '' }}</span>
+                <span class="display truncate text-[24px] font-bold">{{ props.todayWorkout.name }}</span>
+            </span>
+            <button type="button" class="btn-accent h-12 shrink-0 px-5 text-[19px]" @click="play(props.todayWorkout)">Lancer</button>
+        </section>
 
         <!-- Une séance laissée en route : la reprendre passe avant tout le reste. -->
         <button

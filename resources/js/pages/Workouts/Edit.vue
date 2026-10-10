@@ -131,7 +131,8 @@ function rowLine(item) {
         ? 'charge par série'
         : formatWeight(item.weight);
     const drops = item.drops?.length ? `drop ×${item.drops.length}` : null;
-    const rest = item.sets > 1 && item.rest_sets ? `repos ${formatShort(item.rest_sets)}` : null;
+    // Dans un superset, on enchaîne : le repos est celui du dernier exercice du groupe.
+    const rest = item.superset ? 'sans repos' : item.sets > 1 && item.rest_sets ? `repos ${formatShort(item.rest_sets)}` : null;
 
     return [`${item.sets} × ${targetLabel(item)}`, usesWeight(exercise) ? load : null, drops, rest, settingsLabel(item, machineFields(exercise, machine.value))]
         .filter(Boolean)
@@ -404,7 +405,11 @@ function destroy() {
 
             <!-- La séance d'un coup d'œil : une ligne par exercice ; ses réglages s'ouvrent au toucher. -->
             <ol v-if="items.length" class="flex flex-col gap-2" aria-label="Exercices de la séance">
-                <li v-for="(item, index) in items" :key="item.key" class="flex items-center gap-2.5 rounded-2xl bg-surface p-2.5">
+                <template v-for="(item, index) in items" :key="item.key">
+                <li
+                    class="flex items-center gap-2.5 rounded-2xl bg-surface p-2.5"
+                    :class="item.superset || items[index - 1]?.superset ? 'ring-[1.5px] ring-accent/60' : ''"
+                >
                     <span class="w-6 shrink-0 text-center font-display text-[20px] font-extrabold text-accent">{{ index + 1 }}</span>
                     <button type="button" class="flex min-w-0 flex-1 items-center gap-3 text-left" :aria-label="`Régler ${catalog[item.exercise].name}`" @click="editing = index">
                         <span class="size-14 shrink-0 overflow-hidden rounded-xl bg-surface-2">
@@ -417,6 +422,21 @@ function destroy() {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="shrink-0 text-text-faint" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
                     </button>
                 </li>
+                <!-- Entre deux exercices : les enchaîner sans repos (superset, circuit). -->
+                <li v-if="index < items.length - 1" class="-my-1 flex justify-center">
+                    <button
+                        type="button"
+                        class="flex h-8 items-center gap-1.5 rounded-full px-3 text-[11.5px] font-extrabold tracking-[0.06em] uppercase"
+                        :class="item.superset ? 'bg-accent text-on-accent' : 'bg-surface-2 text-text-muted'"
+                        :aria-pressed="item.superset"
+                        :aria-label="item.superset ? `Séparer ${catalog[item.exercise].name} du suivant` : `Enchaîner ${catalog[item.exercise].name} avec le suivant, sans repos`"
+                        @click="update(index, { superset: !item.superset })"
+                    >
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" /></svg>
+                        {{ item.superset ? 'Superset' : 'Enchaîner' }}
+                    </button>
+                </li>
+                </template>
             </ol>
 
             <div v-if="items.length < props.maxItems" class="grid gap-2" :class="items.length ? 'grid-cols-2' : 'grid-cols-1'">

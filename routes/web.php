@@ -4,20 +4,25 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\BodyMeasurementController;
+use App\Http\Controllers\BodyPhotoController;
 use App\Http\Controllers\BodyWeightController;
 use App\Http\Controllers\CustomSoundController;
 use App\Http\Controllers\ExerciseController;
 use App\Http\Controllers\ExerciseEquivalentController;
+use App\Http\Controllers\JournalController;
 use App\Http\Controllers\MuscleZoneController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\PushAlertController;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\WorkoutAssistantController;
 use App\Http\Controllers\WorkoutController;
 use App\Http\Controllers\WorkoutItemSettingsController;
 use App\Http\Controllers\WorkoutItemWeightController;
 use App\Http\Controllers\WorkoutLogController;
+use App\Http\Controllers\WorkoutShareController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -60,6 +65,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/seances/{workout}', [WorkoutController::class, 'update'])->name('workouts.update');
     Route::delete('/seances/{workout}', [WorkoutController::class, 'destroy'])->name('workouts.destroy');
     Route::get('/seances/{workout}/lancer', [WorkoutController::class, 'play'])->name('workouts.play');
+    Route::post('/seances/{workout}/dupliquer', [WorkoutShareController::class, 'duplicate'])->name('workouts.duplicate');
+    // Partage : le lien (JSON), puis la séance partagée et son import.
+    Route::post('/seances/{workout}/partage', [WorkoutShareController::class, 'link'])->middleware('throttle:30,1')->name('workouts.share');
+    Route::post('/seances/{workout}/partage/mail', [WorkoutShareController::class, 'mail'])->middleware('throttle:10,60')->name('workouts.share.mail');
+    Route::get('/partage/{token}', [WorkoutShareController::class, 'show'])->name('shares.show');
+    Route::post('/partage/{token}', [WorkoutShareController::class, 'import'])->middleware('throttle:30,1')->name('shares.import');
 
     // Charge changée depuis le lecteur — JSON.
     Route::patch('/seances/{workout}/charge', [WorkoutItemWeightController::class, 'update'])
@@ -93,6 +104,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('/progres/objectif-poids', [BodyWeightController::class, 'target'])->name('body-weights.target');
     Route::delete('/progres/poids/{bodyWeight}', [BodyWeightController::class, 'destroy'])->name('body-weights.destroy');
 
+    // Journal des séances faites : la liste, le détail série par série.
+    Route::get('/journal', [JournalController::class, 'index'])->name('journal.index');
+    Route::get('/journal/{log}', [JournalController::class, 'show'])->whereNumber('log')->name('journal.show');
+    Route::delete('/journal/{log}', [JournalController::class, 'destroy'])->whereNumber('log')->name('journal.destroy');
+    Route::post('/progres/mensurations', [BodyMeasurementController::class, 'store'])->name('body-measurements.store');
+    Route::delete('/progres/mensurations/{measurement}', [BodyMeasurementController::class, 'destroy'])->name('body-measurements.destroy');
+    // Photos de progression : disque privé, servies au seul propriétaire.
+    Route::post('/progres/photos', [BodyPhotoController::class, 'store'])->middleware('throttle:20,1')->name('body-photos.store');
+    Route::get('/progres/photos/{photo}', [BodyPhotoController::class, 'show'])->name('body-photos.show');
+    Route::delete('/progres/photos/{photo}', [BodyPhotoController::class, 'destroy'])->name('body-photos.destroy');
+
+    Route::get('/programme', [ScheduleController::class, 'edit'])->name('schedule.edit');
+    Route::put('/programme', [ScheduleController::class, 'update'])->name('schedule.update');
     Route::get('/reglages', [PreferencesController::class, 'edit'])->name('preferences.edit');
     Route::put('/reglages', [PreferencesController::class, 'update'])->name('preferences.update');
     Route::post('/reglages/son', [CustomSoundController::class, 'store'])->middleware('throttle:10,1')->name('preferences.sound.store');

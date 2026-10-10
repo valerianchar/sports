@@ -8,8 +8,11 @@
  * au sous-sol sans réseau n'affiche pas de trous.
  */
 
-const CACHE_VERSION = 'seance-v3';
+const CACHE_VERSION = 'seance-v4';
 const IMAGE_CACHE = 'seance-exercices-v2';
+// Les écrans utiles au fond d'une salle sans réseau : l'accueil, les séances, et le lecteur de chacune.
+const PAGE_CACHE = 'seance-pages-v1';
+const OFFLINE_PAGES = [/^\/$/, /^\/seances$/, /^\/seances\/\d+\/lancer$/];
 const OFFLINE_PAGE = '/offline.html';
 
 const SHELL_ASSETS = [
@@ -32,7 +35,7 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys()
             .then((names) => Promise.all(
-                names.filter((name) => name !== CACHE_VERSION && name !== IMAGE_CACHE).map((name) => caches.delete(name)),
+                names.filter((name) => ![CACHE_VERSION, IMAGE_CACHE, PAGE_CACHE].includes(name)).map((name) => caches.delete(name)),
             ))
             .then(() => self.clients.claim()),
     );
@@ -46,8 +49,20 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Les visites Inertia attendent du JSON : leur répondre du HTML en cache
-    // casserait la navigation. Elles restent donc strictement en ligne.
+    /*
+     * Hors ligne : l'accueil, la liste des séances et le lecteur de chacune
+     * se servent depuis le téléphone quand le réseau manque. Réseau d'abord,
+     * toujours : en ligne, rien ne change. Les visites Inertia (JSON) et les
+     * pages complètes (HTML) se gardent séparément.
+     */
+    if (OFFLINE_PAGES.some((pattern) => pattern.test(url.pathname))) {
+        event.respondWith(networkThenCachedPage(request));
+
+        return;
+    }
+
+    // Les autres visites Inertia attendent du JSON : leur répondre du HTML en
+    // cache casserait la navigation. Elles restent strictement en ligne.
     if (request.headers.get('X-Inertia')) {
         return;
     }
@@ -87,6 +102,45 @@ async function cacheFirst(request, cacheName) {
 
     return response;
 }
+
+/** La clé de cache d'une page : son adresse, et sa forme (JSON Inertia ou HTML). */
+function pageKey(request) {
+    const url = new URL(request.url);
+    url.search = '';
+    url.hash = request.headers.get('X-Inertia') ? 'inertia' : 'html';
+
+    return url.toString();
+}
+
+async function networkThenCachedPage(request) {
+    const cache = await caches.open(PAGE_CACHE);
+
+    try {
+        const response = await fetch(request);
+
+        // Une page de séance réussie se garde ; une redirection (connexion) ou une erreur, non.
+        if (response.ok && !response.redirected) {
+            cache.put(pageKey(request), response.clone());
+        }
+
+        return response;
+    } catch {
+        const cached = await cache.match(pageKey(request));
+
+        if (cached) {
+            return cached;
+        }
+
+        return request.headers.get('X-Inertia') ? Response.error() : networkThenOfflinePage(request);
+    }
+}
+
+// Déconnexion : les pages gardées appartiennent au compte, elles partent avec lui.
+self.addEventListener('message', (event) => {
+    if (event.data === 'logout') {
+        event.waitUntil(caches.delete(PAGE_CACHE));
+    }
+});
 
 async function networkThenOfflinePage(request) {
     try {

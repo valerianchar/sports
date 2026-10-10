@@ -27,6 +27,8 @@ import {
     settingsLabel,
     stepSetting,
     stepWeight,
+    platesLabel,
+    roundPlate,
     sidesLabel,
     targetLabel,
     usesWeight,
@@ -65,34 +67,92 @@ const RING_WORK = 753.98;
 function upcoming(order, passed = {}) {
     const list = [];
     const pending = order.filter((index) => (passed[index] ?? 0) < items[index].sets);
+    const done = (index) => passed[index] ?? 0;
+
+    /*
+     * Les groupes : un exercice enchaîné au suivant (superset, circuit) forme un
+     * groupe avec lui tant qu'ils se suivent ici. Un groupe se joue par tours —
+     * une série de chacun, sans repos entre eux — et le repos tombe après
+     * chaque tour, celui du dernier exercice du groupe.
+     */
+    const groups = [];
 
     pending.forEach((index, position) => {
-        const item = items[index];
+        const previous = pending[position - 1];
 
-        // Un côté puis l'autre : chaque série se joue en deux temps, côté droit puis côté gauche.
-        const sides = catalog[item.exercise]?.sides === 'each' ? ['droit', 'gauche'] : [undefined];
+        if (position > 0 && items[previous].superset && index === previous + 1 && groups.at(-1).includes(previous)) {
+            groups.at(-1).push(index);
+        } else {
+            groups.push([index]);
+        }
+    });
 
-        for (let set = (passed[index] ?? 0) + 1; set <= item.sets; set++) {
-            sides.forEach((side) => list.push({ kind: 'work', item: index, set, mode: item.mode, duration: item.mode === 'time' ? item.value : null, side }));
+    groups.forEach((group, number) => {
+        const last = items[group.at(-1)];
+        const rounds = Math.max(...group.map((index) => items[index].sets));
+        const rest = group.length > 1 ? last.rest_sets : items[group[0]].rest_sets;
 
-            // Drop set : les paliers suivent la série sans repos.
-            if (dropsOn(item, set)) {
-                item.drops.forEach((_, drop) => list.push({ kind: 'work', item: index, set, mode: 'reps', duration: null, drop }));
+        for (let set = Math.min(...group.map(done)) + 1; set <= rounds; set++) {
+            // Séries d'échauffement avant la première série lourde d'un exercice seul.
+            if (group.length === 1 && set === 1 && done(group[0]) === 0) {
+                pushWarmups(list, group[0]);
             }
 
-            if (set < item.sets && item.rest_sets > 0) {
-                list.push({ kind: 'rest', duration: item.rest_sets, item: index, set: set + 1 });
+            group
+                .filter((index) => set > done(index) && set <= items[index].sets)
+                .forEach((index) => pushSet(list, index, set, group.length > 1 ? group : null));
+
+            const nextInGroup = group.find((index) => set + 1 > done(index) && set + 1 <= items[index].sets);
+
+            if (nextInGroup !== undefined && rest > 0) {
+                list.push({ kind: 'rest', duration: rest, item: nextInGroup, set: set + 1 });
             }
         }
 
-        const following = pending[position + 1];
+        const following = groups[number + 1];
 
-        if (following !== undefined && item.rest_after > 0) {
-            list.push({ kind: 'rest', duration: item.rest_after, item: following, set: (passed[following] ?? 0) + 1, between: true });
+        if (following && last.rest_after > 0) {
+            list.push({ kind: 'rest', duration: last.rest_after, item: following[0], set: done(following[0]) + 1, between: true });
         }
     });
 
     return list;
+}
+
+/*
+ * Avant la première série d'un exercice chargé (30 kg et plus) : 10 reps à
+ * 50 %, puis 5 à 70 %, arrondis au disque, 45 s de repos entre chaque. Elles
+ * préparent la charge de travail et ne comptent pas comme des séries.
+ */
+function pushWarmups(list, index) {
+    const item = items[index];
+    const working = setWeight(item, 1);
+
+    if (!props.preferences.warmup_sets || item.mode !== 'reps' || !usesWeight(catalog[item.exercise]) || !working || working < 30) {
+        return;
+    }
+
+    [
+        [0.5, 10],
+        [0.7, 5],
+    ].forEach(([ratio, reps], position) => {
+        list.push({ kind: 'work', item: index, set: 1, mode: 'reps', duration: null, warmup: position + 1, warmupReps: reps, warmupWeight: roundPlate(working * ratio) });
+        list.push({ kind: 'rest', duration: 45, item: index, set: 1, afterWarmup: true });
+    });
+}
+
+/** Les étapes d'une série : un ou deux côtés, puis les paliers de drop sans repos. */
+function pushSet(list, index, set, group) {
+    const item = items[index];
+    // Un côté puis l'autre : chaque série se joue en deux temps, côté droit puis côté gauche.
+    const sides = catalog[item.exercise]?.sides === 'each' ? ['droit', 'gauche'] : [undefined];
+    const superset = group ? { superset: group.indexOf(index) + 1, supersetSize: group.length } : {};
+
+    sides.forEach((side) => list.push({ kind: 'work', item: index, set, mode: item.mode, duration: item.mode === 'time' ? item.value : null, side, ...superset }));
+
+    if (dropsOn(item, set)) {
+        item.drops.forEach((_, drop) => list.push({ kind: 'work', item: index, set, mode: 'reps', duration: null, drop, ...superset }));
+    }
 }
 
 function buildSteps() {
@@ -106,7 +166,7 @@ function buildSteps() {
 }
 
 /** L'étape qui achève une série : ni un palier de drop, ni le côté droit d'une série à deux côtés. */
-const isSetEnd = (s) => s.kind === 'work' && s.drop === undefined && s.side !== 'droit';
+const isSetEnd = (s) => s.kind === 'work' && s.drop === undefined && s.side !== 'droit' && !s.warmup;
 
 /** Séries principales passées de chaque exercice (les paliers de drop n'en sont pas). */
 function countPassed(list) {
@@ -349,7 +409,8 @@ function finish(at) {
  */
 function perform(s, seconds = null) {
     // Le côté droit n'est que la moitié de la série : elle se note une fois le côté gauche fait.
-    if (s.side === 'droit') {
+    // Une série d'échauffement ne se note pas.
+    if (s.side === 'droit' || s.warmup) {
         return;
     }
 
@@ -517,6 +578,10 @@ function addTime(seconds) {
 function load(s) {
     const it = items[s.item];
 
+    if (s.warmup) {
+        return { reps: s.warmupReps, weight: s.warmupWeight };
+    }
+
     if (s.drop !== undefined) {
         return { reps: it.drops[s.drop].reps, weight: it.drops[s.drop].weight ?? null };
     }
@@ -554,6 +619,15 @@ function setWeightTo(weight) {
 
 /** Fixe la charge d'une série donnée (`{ item, set, drop }`), en cours ou à venir. */
 function setWeightFor(current, weight) {
+    // L'échauffement se règle pour cette fois seulement : sa charge découle de celle de travail.
+    if (current.warmup) {
+        const warmup = state.steps.find((s) => s.item === current.item && s.warmup === current.warmup);
+        warmup.warmupWeight = weight;
+        current.warmupWeight = weight;
+
+        return;
+    }
+
     const position = current.item;
     const it = items[position];
     let payload;
@@ -660,7 +734,7 @@ function correctLastWeight(weight) {
 }
 
 /** La série qui suit le repos en cours, pour régler sa charge pendant qu'on charge la barre. */
-const upcomingSet = computed(() => (step.value?.kind === 'rest' ? { item: step.value.item, set: step.value.set } : null));
+const upcomingSet = computed(() => (step.value?.kind === 'rest' && !step.value.afterWarmup ? { item: step.value.item, set: step.value.set } : null));
 
 const completeSet = () => {
     perform(step.value);
@@ -720,10 +794,10 @@ const program = computed(() => {
 
 /** La dernière étape (exclue) du bloc de l'exercice en cours, repos entre séries compris. */
 function blockEnd(at) {
-    const head = state.steps[at].item;
+    // Le bloc en cours court jusqu'au prochain repos « changement d'exo » : un superset reste entier.
     let end = at + 1;
 
-    while (end < state.steps.length && state.steps[end].item === head && !state.steps[end].between) {
+    while (end < state.steps.length && !state.steps[end].between) {
         end++;
     }
 
@@ -981,8 +1055,18 @@ const remaining = computed(() => {
 const fraction = computed(() => (state.currentDuration ? clamp(remaining.value / (state.currentDuration * 1000), 0, 1) : 0));
 const seconds = computed(() => Math.ceil(remaining.value / 1000));
 const elapsed = computed(() => formatClock((state.elapsedBase + (state.paused ? 0 : now.value - state.startAt)) / 1000));
-const setLabel = computed(() => (item.value ? `Série ${step.value.set} / ${item.value.sets}${step.value.side ? ` · côté ${step.value.side}` : ''}` : ''));
+const setLabel = computed(() =>
+    step.value?.warmup
+        ? `Échauffement ${step.value.warmup}/2 · ${step.value.warmup === 1 ? '50' : '70'} %`
+        : item.value
+        ? `Série ${step.value.set} / ${item.value.sets}${step.value.side ? ` · côté ${step.value.side}` : ''}${step.value.superset ? ` · ${step.value.supersetSize > 2 ? 'circuit' : 'superset'} ${step.value.superset}/${step.value.supersetSize}` : ''}`
+        : '',
+);
 // « en alternant les côtés », « tout d'un côté, puis l'autre » : rappelé sous l'exercice.
+// L'heure de fin du repos en cours : on sait quand repartir sans regarder le chrono.
+const resumeAt = computed(() =>
+    step.value?.kind === 'rest' && !state.paused && state.endAt ? new Date(state.endAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : null,
+);
 const sidesHint = computed(() => (item.value ? sidesLabel(exercise.value, item.value) : null));
 const counter = computed(() => (step.value ? `Exercice ${Math.min(items.length, program.value.done.length + 1)} / ${items.length}` : ''));
 
@@ -1367,7 +1451,8 @@ onUnmounted(() => {
 
                 <!-- Repos -->
                 <template v-else-if="step.kind === 'rest'">
-                    <span class="eyebrow text-rest">{{ step.between ? "Repos · changement d'exo" : 'Repos entre les séries' }}</span>
+                    <span class="eyebrow text-rest">{{ step.afterWarmup ? 'Récup · échauffement' : step.between ? "Repos · changement d'exo" : 'Repos entre les séries' }}</span>
+                    <span v-if="resumeAt" class="-mt-1 text-[12.5px] font-bold text-text-muted">Reprise à {{ resumeAt }}</span>
                     <div class="relative my-1.5 size-[250px]">
                         <svg width="250" height="250" viewBox="0 0 250 250" class="block" aria-hidden="true">
                             <circle cx="125" cy="125" r="115" fill="none" stroke="var(--color-rest-track)" stroke-width="10" />
@@ -1420,6 +1505,9 @@ onUnmounted(() => {
                             <button type="button" class="iconbtn size-10 bg-surface-2! text-[20px] font-semibold" aria-label="Charge à venir : plus" @click="setWeightFor(upcomingSet, stepWeight(load(upcomingSet).weight, 1))">+</button>
                         </span>
                     </div>
+                    <p v-if="upcomingSet && usesWeight(exercise) && platesLabel(load(upcomingSet).weight, exercise.equipment)" class="mt-1.5 text-[12.5px] font-semibold text-text-muted">
+                        {{ platesLabel(load(upcomingSet).weight, exercise.equipment) }}
+                    </p>
                     <p v-if="lastSet && lastSet.reps !== null" class="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] font-semibold text-text-muted">
                         <span>Série faite :</span>
                         <button type="button" class="rounded-lg bg-surface px-2.5 py-1 font-bold text-text" :aria-label="`${lastSet.reps} répétitions faites : corriger`" @click="openQuick('reps', 'Répétitions faites (série précédente)', lastSet.reps, correctLastReps)">
@@ -1517,6 +1605,8 @@ onUnmounted(() => {
                         </button>
                         <button type="button" class="iconbtn size-10 bg-surface-2! text-[22px] font-semibold" aria-label="Charge : plus" @click="changeWeight(1)">+</button>
                     </div>
+                    <!-- Les disques à charger, pour ne pas calculer de tête. -->
+                    <p v-if="platesLabel(load(step).weight, exercise.equipment)" class="mt-1.5 text-[12.5px] font-semibold text-text-muted">{{ platesLabel(load(step).weight, exercise.equipment) }}</p>
                     <button
                         v-if="lastTime?.next && step.drop === undefined && lastTime.next.weight !== load(step).weight"
                         type="button"

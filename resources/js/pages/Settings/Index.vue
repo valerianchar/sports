@@ -7,6 +7,7 @@ import Stepper from '../../components/Stepper.vue';
 import TabBar from '../../components/TabBar.vue';
 import { diagnoseAlerts, disableAlerts, enableAlerts, pushSupport, testAlert } from '../../alerts';
 import { loadCustomSound, previewCountdown, setAudioMode } from '../../audio';
+import { forgetOfflinePages } from '../../offline';
 import { routes } from '../../routes';
 
 /*
@@ -25,6 +26,7 @@ const form = useForm({
     volume: user.value.volume ?? 80,
     countdown_sound: user.value.countdown_sound ?? 'bip',
     audio_mode: user.value.audio_mode ?? 'melange',
+    warmup_sets: user.value.warmup_sets ?? true,
 });
 
 // Le mode s'entend tout de suite au « Tester », avant même d'enregistrer.
@@ -148,6 +150,7 @@ function save() {
 }
 
 function logout() {
+    forgetOfflinePages();
     router.post(routes.logout);
 }
 </script>
@@ -280,6 +283,21 @@ function logout() {
                     <template v-if="form.countdown_sound === 'voix'"> La voix de l'iPhone coupe la musique dans tous les cas : préfère un bip.</template>
                 </p>
             </div>
+
+            <label class="flex cursor-pointer items-center justify-between gap-4">
+                <span class="flex flex-col gap-0.5">
+                    <span class="text-[15px] font-bold">Séries d'échauffement</span>
+                    <span class="text-[12.5px] font-medium text-text-muted">Avant la première série lourde (30 kg et plus) : 10 reps à 50 %, puis 5 à 70 %. Elles ne comptent pas dans les statistiques.</span>
+                </span>
+                <SwitchRoot
+                    v-model="form.warmup_sets"
+                    class="relative h-7 w-12 shrink-0 rounded-full transition-colors"
+                    :class="form.warmup_sets ? 'bg-accent' : 'bg-surface-3'"
+                    aria-label="Séries d'échauffement"
+                >
+                    <SwitchThumb class="absolute top-1 block size-5 rounded-full transition-[left]" :class="form.warmup_sets ? 'left-6 bg-on-accent' : 'left-1 bg-text-muted'" />
+                </SwitchRoot>
+            </label>
 
             <Stepper
                 label="Compte à rebours avant la séance"

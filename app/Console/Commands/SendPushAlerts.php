@@ -3,7 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Models\PushAlert;
+use App\Models\WorkoutSchedule;
 use App\Support\PushSender;
+use App\Support\WorkoutEstimate;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Database\QueryException;
 use Throwable;
@@ -33,6 +36,7 @@ class SendPushAlerts extends Command
             try {
                 if ($sender->enabled()) {
                     $this->sendDue($sender);
+                    $this->sendReminders($sender);
                 }
             } catch (QueryException $exception) {
                 // Base pas encore prête (premier démarrage, migration en cours) : on réessaie.
@@ -46,6 +50,44 @@ class SendPushAlerts extends Command
         } while (! $this->option('une-fois'));
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Les rappels du programme de la semaine : à l'heure prévue (heure de
+     * Paris), une notification par séance du jour — une seule, même si le
+     * conteneur a redémarré dans la minute ; jusqu'à dix minutes de retard
+     * rattrapées, au-delà le rappel ne sert plus.
+     */
+    private function sendReminders(PushSender $sender): void
+    {
+        $now = CarbonImmutable::now('Europe/Paris');
+
+        $due = WorkoutSchedule::query()
+            ->with(['workout.items', 'user.pushSubscriptions'])
+            ->where('weekday', $now->dayOfWeekIso)
+            ->where('remind', true)
+            ->whereNotNull('workout_id')
+            ->where('time', '<=', $now->format('H:i'))
+            ->where('time', '>=', $now->subMinutes(10)->format('H:i'))
+            ->where(fn ($query) => $query->whereNull('reminded_on')->orWhereDate('reminded_on', '<', $now->toDateString()))
+            ->get();
+
+        foreach ($due as $schedule) {
+            $schedule->update(['reminded_on' => $now->toDateString()]);
+            $minutes = (int) round(WorkoutEstimate::seconds($schedule->workout->items->map(fn ($item): array => ['mode' => $item->mode->value, ...$item->only(['value', 'sets', 'rest_sets', 'rest_after', 'per_side', 'drops', 'drop_on', 'superset'])])->all()) / 60);
+
+            foreach ($schedule->user->pushSubscriptions as $subscription) {
+                try {
+                    $payload = ['title' => "C'est l'heure : {$schedule->workout->name}", 'body' => "Ta séance du jour t'attend · {$schedule->workout->items->count()} exercices · ~{$minutes} min", 'tag' => 'seance-rappel', 'url' => '/'];
+
+                    if (! $sender->send($subscription, $payload)) {
+                        $subscription->delete();
+                    }
+                } catch (Throwable $exception) {
+                    report($exception);
+                }
+            }
+        }
     }
 
     private function sendDue(PushSender $sender): void

@@ -9,6 +9,7 @@ use App\Http\Requests\SaveWorkoutRequest;
 use App\Http\Resources\WorkoutResource;
 use App\Models\Workout;
 use App\Queries\PerformanceStats;
+use App\Queries\WeekPlan;
 use App\Support\ExerciseCatalog;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
@@ -33,13 +34,19 @@ class WorkoutController extends Controller
             ->sortByDesc(fn (Workout $workout): string => $workout->latestLog?->finished_at?->toIso8601String() ?? '0'.$workout->created_at->toIso8601String())
             ->values();
 
+        $week = (new WeekPlan($request->user()))->summary();
+        $today = $week['today'] === null ? null : $workouts->firstWhere('id', $week['today']['workout_id']);
+
         return Inertia::render('Home', [
             'workouts' => WorkoutResource::collection($workouts->take(3)),
             'workoutsCount' => $workouts->count(),
             // Une séance laissée en cours sur ce téléphone retrouve son nom.
             'workoutNames' => $workouts->mapWithKeys(fn (Workout $workout): array => [$workout->id => $workout->name]),
-            'exercises' => ExerciseCatalog::forClient($workouts->take(3)->flatMap->items->pluck('exercise')),
+            'exercises' => ExerciseCatalog::forClient($workouts->take(3)->push($today)->filter()->flatMap->items->pluck('exercise')),
             'kpis' => (new PerformanceStats($request->user()))->home(),
+            // La semaine : jours faits, séances prévues, objectif, et la séance du jour.
+            'week' => $week,
+            'todayWorkout' => $today === null ? null : new WorkoutResource($today),
         ]);
     }
 
@@ -134,6 +141,7 @@ class WorkoutController extends Controller
                 'countdown_sound' => $request->user()->countdown_sound->value,
                 'custom_sound_url' => $request->user()->custom_sound_url,
                 'audio_mode' => $request->user()->audio_mode->value,
+                'warmup_sets' => $request->user()->warmup_sets,
             ],
         ]);
     }

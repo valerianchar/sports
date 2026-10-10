@@ -47,6 +47,11 @@ function play(workout) {
             </button>
         </header>
 
+        <Link :href="routes.schedule" class="flex h-12 items-center justify-between rounded-2xl bg-surface px-4 text-[14px] font-bold text-text!">
+            <span>Ma semaine · programme et rappels</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="text-text-faint" aria-hidden="true"><path d="M9 5l7 7-7 7" /></svg>
+        </Link>
+
         <label v-if="props.workouts.length > 5" class="flex h-12 items-center gap-2.5 rounded-2xl bg-surface px-4">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" class="text-text-muted" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
             <input v-model="query" type="search" placeholder="Chercher une séance" aria-label="Chercher une séance" class="min-w-0 flex-1 border-none bg-transparent text-[16px] font-medium text-text outline-none" />

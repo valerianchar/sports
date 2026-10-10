@@ -69,6 +69,21 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   de repos, envoyées en notifications web par le conteneur `alertes` (`php artisan
   alertes:envoyer`, clés VAPID du .env via `php artisan alertes:cles` ; sur iPhone, appli ajoutée
   à l'écran d'accueil).
+- **Ma semaine** — une séance prévue par jour (`/programme`), à une heure, avec un rappel par
+  notification (envoyé par le conteneur `alertes`) ; un objectif de séances par semaine. L'accueil
+  montre la semaine (jours faits, séances prévues) et la séance du jour.
+- **Partager, dupliquer** — une séance se duplique, ou se partage par mail ou par lien : le
+  destinataire l'ajoute d'un toucher à ses séances (`/partage/{jeton}`), compte créé au besoin.
+- **Supersets et circuits** — dans l'éditeur, « Enchaîner » lie un exercice au suivant : le lecteur
+  joue une série de chacun sans repos, puis le repos du dernier, tour après tour.
+- **Échauffement et disques** — avant la première série d'un exercice chargé (30 kg et plus), deux
+  séries d'échauffement (10 reps à 50 %, 5 à 70 %), désactivables dans les réglages ; sous la charge
+  d'un exercice à barre, les disques à mettre de chaque côté. Le repos affiche l'heure de reprise.
+- **Journal** — chaque séance faite, série par série (`/journal`), supprimable.
+- **Corps** — pesées, poids visé, mensurations (taille, hanches, bras…) et photos de progression
+  (privées, servies au seul propriétaire), avec comparaison avant / après.
+- **Hors ligne** — l'accueil, les séances et le lecteur de chacune se gardent sur le téléphone
+  (service worker, préchargés une fois par heure) : une séance se lance au sous-sol sans réseau.
 - **Côtés** — chaque exercice dit s'il se fait des deux côtés à la fois, d'un côté puis de
   l'autre (`each` : le lecteur joue « côté droit » puis « côté gauche ») ou en alternant
   (`alternate` : la valeur compte par côté ou au total, au choix dans l'éditeur) ; champ
@@ -124,6 +139,11 @@ les 86 exercices de la première version gardent le leur (un test y veille).
 Les mêmes choix que pointage et Drop Picture : Laravel 13, Inertia 3, Vue 3 en JavaScript,
 Tailwind 4 (`@theme` + `@utility` dans `resources/css/app.css`), Reka UI, authentification
 maison, PHPUnit 12, URLs en français, FrankenPHP en production derrière le Traefik du VPS.
+
+## Tester
+
+La suite PHP (`php artisan test`) et les parcours dans un vrai navigateur (`tests/e2e/*.mjs`,
+Puppeteer) : la CI joue les deux avant chaque déploiement.
 
 ## Développer
 

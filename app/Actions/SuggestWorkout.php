@@ -566,7 +566,6 @@ final class SuggestWorkout
         return [
             'exercise' => $exercise['slug'],
             'mode' => $mode->value,
-            'per_side' => ($exercise['sides'] ?? 'both') === 'both' ? null : true,
             ...$this->prescribe($goal, $mode),
         ];
     }

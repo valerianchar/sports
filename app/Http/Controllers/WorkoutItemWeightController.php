@@ -28,8 +28,10 @@ class WorkoutItemWeightController extends Controller
             abort_unless(isset($drops[$request->integer('drop')]), 404);
             $drops[$request->integer('drop')]['weight'] = $weight;
             $item->drops = $drops;
-        } elseif ($request->filled('set') && $item->set_weights !== null) {
-            $weights = $item->set_weights;
+        } elseif ($request->filled('set')) {
+            // Une charge changée en séance ne vaut que pour sa série : la charge fixe
+            // devient une charge par série, chacune reprenant l'ancienne valeur.
+            $weights = $item->set_weights ?? array_fill(0, $item->sets, $item->weight);
             abort_unless(array_key_exists($request->integer('set'), $weights), 404);
             $weights[$request->integer('set')] = $weight;
             $item->set_weights = $weights;

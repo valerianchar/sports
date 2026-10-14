@@ -22,7 +22,7 @@ await clickText('Créer'); await p.waitForFunction(() => location.pathname === '
 await p.evaluate(async () => {
   const xsrf = decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)[1]);
   const items = [
-    { exercise: 'squat', mode: 'reps', value: 8, sets: 2, rest_sets: 5, rest_after: 5, weight: 60 },
+    { exercise: 'squat', mode: 'reps', value: 8, sets: 2, rest_sets: 5, rest_after: 5, weight: 60, warmup: true },
     { exercise: 'curl-barre', mode: 'reps', value: 10, sets: 2, rest_sets: 5, rest_after: 5, superset: true },
     { exercise: 'extension-triceps-poulie', mode: 'reps', value: 12, sets: 2, rest_sets: 6, rest_after: 5 },
   ];

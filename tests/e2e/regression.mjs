@@ -52,7 +52,7 @@ await step('lecteur', async () => {
   const first = await p.$eval('main .eyebrow', (x) => x.textContent.trim());
   await clickText('Série terminée'); await wait(500);
   const rest = await p.$eval('main .eyebrow', (x) => x.textContent.trim());
-  const restWeight = await has('Charge à venir', 'span');
+  const restWeight = await p.$$eval('[aria-label^="Charge à venir"]', (e) => e.length > 0);
   await clickLabel('Programme de la séance'); const programme = await p.$$eval('[role=dialog] ol li', (l) => l.length);
   await clickText('Plus tard', '[role=dialog] button').catch(() => null);
   await p.keyboard.press('Escape'); await wait(400);

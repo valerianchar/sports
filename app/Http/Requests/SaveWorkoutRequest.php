@@ -42,6 +42,8 @@ class SaveWorkoutRequest extends FormRequest
             'items.*.rest_after' => ['required', 'integer', 'min:0', 'max:900'],
             // Enchaîné avec l'exercice suivant sans repos (superset, circuit).
             'items.*.superset' => ['nullable', 'boolean'],
+            // Deux séries d'échauffement avant la première (50 %, 70 %).
+            'items.*.warmup' => ['nullable', 'boolean'],
             // Enregistrer puis lancer aussitôt : « Lancer la séance » depuis l'éditeur.
             'start' => ['boolean'],
             // Enregistrer puis ouvrir l'éditeur : une proposition de l'assistant qu'on veut retoucher.
@@ -122,6 +124,7 @@ class SaveWorkoutRequest extends FormRequest
             'rest_sets' => (int) $item['rest_sets'],
             'rest_after' => (int) $item['rest_after'],
             'superset' => (bool) ($item['superset'] ?? false),
+            'warmup' => (bool) ($item['warmup'] ?? false),
         ], $this->validated('items')));
 
         // Le dernier exercice n'a rien à quoi s'enchaîner.
@@ -133,18 +136,14 @@ class SaveWorkoutRequest extends FormRequest
     }
 
     /**
-     * Un exercice symétrique n'a pas de côté ; un exercice d'un côté puis de
-     * l'autre compte toujours par côté ; en alternant, c'est au choix.
+     * Gauche et droite : une option de l'exercice, désactivée par défaut —
+     * activée, la valeur compte pour chaque côté.
      *
      * @param  array<string, mixed>  $item
      */
     private function perSide(array $item): ?bool
     {
-        return match (ExerciseCatalog::sides($item['exercise'])) {
-            'each' => true,
-            'alternate' => array_key_exists('per_side', $item) && $item['per_side'] !== null ? (bool) $item['per_side'] : true,
-            default => null,
-        };
+        return ! empty($item['per_side']) ? true : null;
     }
 
     /** Vitesse ou inclinaison, au dixième. */

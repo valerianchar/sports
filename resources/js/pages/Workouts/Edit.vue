@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
+import { SwitchRoot, SwitchThumb } from 'reka-ui';
 import BodyMap from '../../components/BodyMap.vue';
 import BottomSheet from '../../components/BottomSheet.vue';
 import ExerciseLibrary from '../../components/ExerciseLibrary.vue';
@@ -134,7 +135,7 @@ function rowLine(item) {
     // Dans un superset, on enchaîne : le repos est celui du dernier exercice du groupe.
     const rest = item.superset ? 'sans repos' : item.sets > 1 && item.rest_sets ? `repos ${formatShort(item.rest_sets)}` : null;
 
-    return [`${item.sets} × ${targetLabel(item)}`, usesWeight(exercise) ? load : null, drops, rest, settingsLabel(item, machineFields(exercise, machine.value))]
+    return [`${item.sets} × ${targetLabel(item)}`, usesWeight(exercise) ? load : null, drops, rest, item.warmup ? 'échauffement' : null, settingsLabel(item, machineFields(exercise, machine.value))]
         .filter(Boolean)
         .join(' · ');
 }
@@ -559,26 +560,40 @@ function destroy() {
                     </button>
                 </div>
 
-                <!-- Les côtés : un côté puis l'autre, ou en alternant (par côté ou au total). -->
-                <p v-if="catalog[item.exercise].sides === 'each'" class="-mt-1 rounded-xl bg-bg px-3 py-2 text-[12.5px] font-semibold text-text-soft">
-                    <span class="font-extrabold text-accent">Droite puis gauche</span> : {{ item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value) }} de chaque côté, le lecteur annonce chaque côté.
-                </p>
-                <div v-else-if="catalog[item.exercise].sides === 'alternate'" class="-mt-1 flex flex-col gap-1.5">
-                    <span class="text-[10.5px] font-extrabold tracking-[0.1em] text-text-muted uppercase">En alternant les côtés, les {{ item.mode === 'reps' ? 'répétitions' : 'secondes' }} comptent…</span>
-                    <div class="grid grid-cols-2 gap-[3px] rounded-xl bg-bg p-[3px]" role="radiogroup" aria-label="Comment comptent les côtés">
-                        <button
-                            v-for="option in [{ value: true, label: `${item.value} par côté` }, { value: false, label: `${item.value} au total` }]"
-                            :key="String(option.value)"
-                            type="button"
-                            role="radio"
-                            :aria-checked="(item.per_side ?? true) === option.value"
-                            class="h-8 rounded-[9px] text-[12.5px] font-bold"
-                            :class="(item.per_side ?? true) === option.value ? 'bg-surface-3 text-text' : 'bg-transparent text-text-faint'"
-                            @click="update(index, { per_side: option.value })"
+                <!-- Deux options de l'exercice, désactivées par défaut : gauche / droite, et l'échauffement. -->
+                <div class="flex flex-col divide-y divide-divider rounded-2xl bg-bg">
+                    <label v-if="catalog[item.exercise].group !== 'cardio'" class="flex cursor-pointer items-center justify-between gap-4 px-3 py-3">
+                        <span class="flex flex-col gap-0.5">
+                            <span class="text-[14px] font-bold">Gauche et droite</span>
+                            <span class="text-[12px] font-medium text-text-muted">
+                                {{ catalog[item.exercise].sides === 'alternate' ? 'En alternant : la valeur compte pour chaque côté.' : 'Un côté puis l’autre : la valeur compte pour chaque côté, le lecteur annonce chacun.' }}
+                            </span>
+                        </span>
+                        <SwitchRoot
+                            :model-value="Boolean(item.per_side)"
+                            class="relative h-7 w-12 shrink-0 rounded-full transition-colors"
+                            :class="item.per_side ? 'bg-accent' : 'bg-surface-3'"
+                            aria-label="Gauche et droite"
+                            @update:model-value="update(index, { per_side: $event ? true : null })"
                         >
-                            {{ option.label }}
-                        </button>
-                    </div>
+                            <SwitchThumb class="absolute top-1 block size-5 rounded-full transition-[left]" :class="item.per_side ? 'left-6 bg-on-accent' : 'left-1 bg-text-muted'" />
+                        </SwitchRoot>
+                    </label>
+                    <label v-if="usesWeight(catalog[item.exercise]) && item.mode === 'reps'" class="flex cursor-pointer items-center justify-between gap-4 px-3 py-3">
+                        <span class="flex flex-col gap-0.5">
+                            <span class="text-[14px] font-bold">Séries d'échauffement</span>
+                            <span class="text-[12px] font-medium text-text-muted">Avant la première série : 10 reps à 50 % de la charge, puis 5 à 70 %. Elles ne comptent pas dans les statistiques.</span>
+                        </span>
+                        <SwitchRoot
+                            :model-value="Boolean(item.warmup)"
+                            class="relative h-7 w-12 shrink-0 rounded-full transition-colors"
+                            :class="item.warmup ? 'bg-accent' : 'bg-surface-3'"
+                            aria-label="Séries d'échauffement"
+                            @update:model-value="update(index, { warmup: $event })"
+                        >
+                            <SwitchThumb class="absolute top-1 block size-5 rounded-full transition-[left]" :class="item.warmup ? 'left-6 bg-on-accent' : 'left-1 bg-text-muted'" />
+                        </SwitchRoot>
+                    </label>
                 </div>
 
                 <LoadEditor v-if="usesWeight(catalog[item.exercise])" :item="item" @update="update(index, $event)" />

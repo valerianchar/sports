@@ -15,7 +15,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
-#[Fillable(['name', 'email', 'password', 'sound', 'prep_seconds', 'countdown_seconds', 'volume', 'countdown_sound', 'audio_mode', 'warmup_sets', 'weekly_goal', 'custom_sound_path', 'custom_sound_name', 'target_weight'])]
+#[Fillable(['name', 'email', 'password', 'sound', 'prep_seconds', 'countdown_seconds', 'volume', 'countdown_sound', 'audio_mode', 'weekly_goal', 'custom_sound_path', 'custom_sound_name', 'target_weight'])]
 #[Hidden(['password', 'remember_token', 'custom_sound_path'])]
 class User extends Authenticatable
 {
@@ -35,7 +35,6 @@ class User extends Authenticatable
         'volume' => 80,
         'countdown_sound' => 'bip',
         'audio_mode' => 'melange',
-        'warmup_sets' => true,
         'weekly_goal' => 0,
     ];
 
@@ -53,7 +52,6 @@ class User extends Authenticatable
             'volume' => 'integer',
             'countdown_sound' => CountdownSound::class,
             'audio_mode' => AudioMode::class,
-            'warmup_sets' => 'boolean',
             'weekly_goal' => 'integer',
             'target_weight' => 'float',
         ];

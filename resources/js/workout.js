@@ -26,18 +26,20 @@ export const formatMinutes = (seconds) => `${Math.max(1, Math.round(seconds / 60
 /** Ce qu'on vise sur une série : « 10 reps », « 45 s », « 10 reps / côté ». */
 export const targetLabel = (item) => `${item.mode === 'reps' ? `${item.value} reps` : formatShort(item.value)}${item.per_side ? ' / côté' : ''}`;
 
-/** La valeur compte-t-elle par côté par défaut ? Oui dès que l'exercice a des côtés. */
-export const perSideDefault = (exercise) => (exercise?.sides && exercise.sides !== 'both' ? true : null);
+/** Gauche et droite : une option de l'exercice, désactivée par défaut. */
+export const perSideDefault = () => null;
 
 /** « droite puis gauche », « en alternant » : comment se font les côtés d'un exercice. */
 export function sidesLabel(exercise, item) {
-    if (exercise?.sides === 'each') {
-        return 'droite, puis gauche';
+    if (!item?.per_side) {
+        return null;
     }
 
     if (exercise?.sides === 'alternate') {
-        return item?.per_side === false ? `en alternant · ${Math.ceil(item.value / 2)} par côté` : 'en alternant · par côté';
+        return 'en alternant · par côté';
     }
+
+    return 'droite, puis gauche';
 
     return null;
 }

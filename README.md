@@ -50,8 +50,8 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   sous 10 kg puis de 2,5 kg, ou saisie libre) — fixe ou une par série (dégressif, pyramide ;
   « Dégressif auto » baisse de 10 % par série) —, drop set (jusqu'à quatre paliers enchaînés
   sans repos, sur la dernière série ou sur chacune), répétitions ou durée, séries, repos entre séries,
-  repos après l'exercice. Le lecteur affiche la charge et la laisse ajuster en pleine séance :
-  elle devient celle de l'exercice pour la fois suivante. Une machine de cardio a ses réglages
+  repos après l'exercice. Le lecteur affiche la charge et la laisse ajuster en pleine séance,
+  série par série : une charge fixe devient alors une charge par série, retenue pour la fois suivante. Une machine de cardio a ses réglages
   (vitesse et inclinaison du tapis, niveau du vélo, du rameur… : `app/Support/MachineSettings.php`).
   ⟳ change un exercice pour une variante qui travaille les mêmes muscles ; « Compléter avec
   l'assistant » ajoute des exercices dans l'esprit de la séance (mêmes répétitions, séries,
@@ -76,18 +76,18 @@ En ligne : https://sports.vallau.com — mise en ligne décrite dans [DEPLOIEMEN
   destinataire l'ajoute d'un toucher à ses séances (`/partage/{jeton}`), compte créé au besoin.
 - **Supersets et circuits** — dans l'éditeur, « Enchaîner » lie un exercice au suivant : le lecteur
   joue une série de chacun sans repos, puis le repos du dernier, tour après tour.
-- **Échauffement et disques** — avant la première série d'un exercice chargé (30 kg et plus), deux
-  séries d'échauffement (10 reps à 50 %, 5 à 70 %), désactivables dans les réglages ; sous la charge
+- **Échauffement et disques** — une option de chaque exercice chargé, désactivée par défaut
+  (`warmup`) : deux séries d'échauffement avant la première (10 reps à 50 %, 5 à 70 %) ; sous la charge
   d'un exercice à barre, les disques à mettre de chaque côté. Le repos affiche l'heure de reprise.
 - **Journal** — chaque séance faite, série par série (`/journal`), supprimable.
 - **Corps** — pesées, poids visé, mensurations (taille, hanches, bras…) et photos de progression
   (privées, servies au seul propriétaire), avec comparaison avant / après.
 - **Hors ligne** — l'accueil, les séances et le lecteur de chacune se gardent sur le téléphone
   (service worker, préchargés une fois par heure) : une séance se lance au sous-sol sans réseau.
-- **Côtés** — chaque exercice dit s'il se fait des deux côtés à la fois, d'un côté puis de
-  l'autre (`each` : le lecteur joue « côté droit » puis « côté gauche ») ou en alternant
-  (`alternate` : la valeur compte par côté ou au total, au choix dans l'éditeur) ; champ
-  `sides` du catalogue, `per_side` de chaque exercice d'une séance (durée et volume doublés).
+- **Côtés** — « Gauche et droite » est une option de chaque exercice d'une séance, désactivée
+  par défaut (`per_side`) : la valeur compte alors pour chaque côté (durée et volume doublés) et
+  le lecteur joue « côté droit » puis « côté gauche », sauf pour un exercice en alternance
+  (`sides: alternate` du catalogue), fait d'un seul tenant.
 - **Comme une vidéo** — le mode de son « Comme une vidéo » fait de la séance un média en
   lecture (`resources/js/nowPlaying.js`) : une piste fabriquée à la volée, silence et bips du
   décompte à la seconde, garde la page éveillée en arrière-plan ; l'écran verrouillé et le

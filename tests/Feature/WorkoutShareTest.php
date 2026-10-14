@@ -107,15 +107,6 @@ class WorkoutShareTest extends TestCase
         $this->assertSame([true, false], $user->workouts()->sole()->items()->orderBy('position')->pluck('superset')->all());
     }
 
-    public function test_the_player_learns_whether_to_warm_up(): void
-    {
-        $user = User::factory()->create()->fresh();
-        $workout = Workout::factory()->for($user)->withItems()->create();
-
-        $this->actingAs($user)->get("/seances/{$workout->id}/lancer")
-            ->assertInertia(fn (AssertableInertia $page) => $page->where('preferences.warmup_sets', true));
-    }
-
     public function test_an_address_refused_by_the_mail_server_is_reported_not_crashed(): void
     {
         $owner = User::factory()->create();

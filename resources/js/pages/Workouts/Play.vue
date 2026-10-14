@@ -120,15 +120,15 @@ function upcoming(order, passed = {}) {
 }
 
 /*
- * Avant la première série d'un exercice chargé (30 kg et plus) : 10 reps à
- * 50 %, puis 5 à 70 %, arrondis au disque, 45 s de repos entre chaque. Elles
- * préparent la charge de travail et ne comptent pas comme des séries.
+ * Échauffement (une option de l'exercice) : avant sa première série, 10 reps
+ * à 50 % de la charge, puis 5 à 70 %, arrondis au disque, 45 s de repos entre
+ * chaque. Elles préparent la charge de travail et ne comptent pas comme des séries.
  */
 function pushWarmups(list, index) {
     const item = items[index];
     const working = setWeight(item, 1);
 
-    if (!props.preferences.warmup_sets || item.mode !== 'reps' || !usesWeight(catalog[item.exercise]) || !working || working < 30) {
+    if (!item.warmup || item.mode !== 'reps' || !usesWeight(catalog[item.exercise]) || !working) {
         return;
     }
 
@@ -145,7 +145,7 @@ function pushWarmups(list, index) {
 function pushSet(list, index, set, group) {
     const item = items[index];
     // Un côté puis l'autre : chaque série se joue en deux temps, côté droit puis côté gauche.
-    const sides = catalog[item.exercise]?.sides === 'each' ? ['droit', 'gauche'] : [undefined];
+    const sides = item.per_side && catalog[item.exercise]?.sides !== 'alternate' ? ['droit', 'gauche'] : [undefined];
     const superset = group ? { superset: group.indexOf(index) + 1, supersetSize: group.length } : {};
 
     sides.forEach((side) => list.push({ kind: 'work', item: index, set, mode: item.mode, duration: item.mode === 'time' ? item.value : null, side, ...superset }));
@@ -601,9 +601,9 @@ function target(s) {
 }
 
 /*
- * La charge se règle sans quitter la séance ; elle part au serveur une fois
- * le doigt posé (un court délai regroupe les appuis successifs) et devient
- * celle de l'exercice pour la prochaine fois.
+ * La charge se règle sans quitter la séance, série par série ; elle part au
+ * serveur une fois le doigt posé (un court délai regroupe les appuis
+ * successifs) et devient celle de cette série pour la prochaine fois.
  */
 const weightTimers = {};
 
@@ -637,7 +637,13 @@ function setWeightFor(current, weight) {
     if (current.drop !== undefined) {
         it.drops[current.drop].weight = weight;
         payload = { position, drop: current.drop, weight };
-    } else if (it.set_weights?.length) {
+    } else if (current.set) {
+        // Une charge changée ne vaut que pour sa série : la charge fixe devient
+        // une charge par série, les autres gardant l'ancienne valeur.
+        if (!it.set_weights?.length) {
+            it.set_weights = Array(it.sets).fill(it.weight ?? null);
+        }
+
         it.set_weights[current.set - 1] = weight;
         payload = { position, set: current.set - 1, weight };
     } else {
@@ -1451,13 +1457,18 @@ onUnmounted(() => {
                 </span>
             </button>
 
-            <main class="flex min-h-0 flex-1 flex-col items-center justify-center gap-1.5 px-6 py-3 text-center">
+            <!--
+                La zone du milieu défile si elle ne tient pas : centrée quand il y a la
+                place, elle ne passe jamais sous l'en-tête ni sous les boutons du bas.
+            -->
+            <main class="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto px-6 py-3">
+                <div class="m-auto flex w-full flex-col items-center gap-1.5 text-center">
                 <!-- Compte à rebours de départ -->
                 <template v-if="step.kind === 'prep'">
                     <span class="eyebrow text-prep">Prépare-toi</span>
-                    <span class="font-display text-[190px] leading-[0.9] font-extrabold text-prep tabular-nums" aria-live="polite">{{ seconds }}</span>
+                    <span class="font-display text-[length:min(190px,24dvh)] leading-[0.9] font-extrabold text-prep tabular-nums" aria-live="polite">{{ seconds }}</span>
                     <span class="mt-2.5 text-[13px] font-semibold text-text-muted">Premier exercice</span>
-                    <span class="display text-[34px] font-extrabold">{{ exercise.name }}</span>
+                    <span class="display text-[34px] leading-[0.95] font-extrabold text-balance">{{ exercise.name }}</span>
                     <span class="text-[14px] font-semibold text-text-soft">{{ target(step) }}</span>
                     <span v-if="itemSettings(step.item)" class="text-[13px] font-bold text-accent">{{ itemSettings(step.item) }}</span>
                     <button type="button" class="mt-3 h-10 rounded-full bg-surface px-4 text-[13px] font-extrabold text-accent" @click="programOpen = true">
@@ -1468,9 +1479,8 @@ onUnmounted(() => {
                 <!-- Repos -->
                 <template v-else-if="step.kind === 'rest'">
                     <span class="eyebrow text-rest">{{ step.afterWarmup ? 'Récup · échauffement' : step.between ? "Repos · changement d'exo" : 'Repos entre les séries' }}</span>
-                    <span v-if="resumeAt" class="-mt-1 text-[12.5px] font-bold text-text-muted">Reprise à {{ resumeAt }}</span>
-                    <div class="relative my-1.5 size-[250px]">
-                        <svg width="250" height="250" viewBox="0 0 250 250" class="block" aria-hidden="true">
+                    <div class="relative my-1.5 size-[min(240px,30dvh)]">
+                        <svg viewBox="0 0 250 250" class="block size-full" aria-hidden="true">
                             <circle cx="125" cy="125" r="115" fill="none" stroke="var(--color-rest-track)" stroke-width="10" />
                             <circle
                                 cx="125"
@@ -1485,46 +1495,57 @@ onUnmounted(() => {
                                 transform="rotate(-90 125 125)"
                             />
                         </svg>
-                        <span class="absolute inset-0 flex items-center justify-center font-display text-[84px] font-bold tabular-nums">{{ formatClock(seconds) }}</span>
+                        <span class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="font-display text-[length:min(84px,10.5dvh)] leading-none font-bold tabular-nums">{{ formatClock(seconds) }}</span>
+                            <span v-if="resumeAt" class="mt-1 text-[12px] font-bold text-text-muted">Reprise à {{ resumeAt }}</span>
+                        </span>
                     </div>
                     <div class="flex gap-2">
                         <button type="button" class="btn-soft h-10 px-4 text-[14px]" @click="addTime(-15)">−15 s</button>
                         <button type="button" class="btn-soft h-10 px-4 text-[14px]" @click="addTime(15)">+15 s</button>
                         <button type="button" class="h-10 rounded-full bg-rest px-4 text-[14px] font-extrabold text-on-accent" @click="next">Passer</button>
                     </div>
-                    <div class="mt-[18px] flex w-full items-center gap-3 rounded-[20px] bg-surface p-2.5 text-left">
-                        <span class="size-[60px] shrink-0 overflow-hidden rounded-xl">
-                            <ExerciseImage :images="exercise.images" :alt="exercise.name" />
-                        </span>
-                        <span class="flex min-w-0 flex-1 flex-col gap-[3px]">
-                            <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-text-muted">À SUIVRE</span>
-                            <span class="text-[16px] font-extrabold">{{ exercise.name }}</span>
-                            <span class="text-[12.5px] font-semibold text-text-soft">{{ setLabel }} · {{ target({ ...step, kind: 'work' }) }}</span>
-                            <span v-if="itemSettings(step.item)" class="text-[12px] font-bold text-accent">{{ itemSettings(step.item) }}</span>
-                        </span>
-                        <button type="button" class="iconbtn size-[38px] bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" aria-label="Comment faire" @click="openDetail">i</button>
-                    </div>
-                    <!-- Pendant le repos : la charge de la série qui vient, et la série faite à corriger. -->
-                    <div v-if="upcomingSet && usesWeight(exercise)" class="mt-2.5 flex w-full items-center justify-between gap-2 rounded-[18px] bg-surface p-1.5 pl-4">
-                        <span class="text-[11px] font-extrabold tracking-[0.1em] text-text-muted uppercase">Charge à venir</span>
-                        <span class="flex items-center gap-1.5">
-                            <button type="button" class="iconbtn size-10 bg-surface-2! text-[20px] font-semibold disabled:opacity-35" aria-label="Charge à venir : moins" :disabled="load(upcomingSet).weight === null" @click="setWeightFor(upcomingSet, stepWeight(load(upcomingSet).weight, -1))">−</button>
-                            <button
-                                type="button"
-                                class="min-w-[96px] text-center font-display text-[24px] leading-none font-extrabold tabular-nums underline decoration-line-strong decoration-2 underline-offset-[5px]"
-                                :class="load(upcomingSet).weight === null ? 'text-[15px]! text-text-muted' : ''"
-                                :aria-label="`Charge à venir ${formatWeight(load(upcomingSet).weight) ?? 'poids du corps'} : toucher pour la taper`"
-                                @click="openQuick('weight', 'Charge de la prochaine série', load(upcomingSet).weight, (weight) => setWeightFor(upcomingSet, weight))"
-                            >
-                                {{ formatWeight(load(upcomingSet).weight) ?? 'Poids du corps' }}
-                            </button>
-                            <button type="button" class="iconbtn size-10 bg-surface-2! text-[20px] font-semibold" aria-label="Charge à venir : plus" @click="setWeightFor(upcomingSet, stepWeight(load(upcomingSet).weight, 1))">+</button>
-                        </span>
-                    </div>
-                    <p v-if="upcomingSet && usesWeight(exercise) && platesLabel(load(upcomingSet).weight, exercise.equipment)" class="mt-1.5 text-[12.5px] font-semibold text-text-muted">
-                        {{ platesLabel(load(upcomingSet).weight, exercise.equipment) }}
-                    </p>
-                    <p v-if="lastSet && lastSet.reps !== null" class="mt-2 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] font-semibold text-text-muted">
+                    <section class="mt-4 flex w-full flex-col gap-2 rounded-[20px] bg-surface p-2.5 text-left" aria-label="À suivre">
+                        <div class="flex items-center gap-3">
+                            <span class="size-[52px] shrink-0 overflow-hidden rounded-xl">
+                                <ExerciseImage :images="exercise.images" :alt="exercise.name" />
+                            </span>
+                            <span class="flex min-w-0 flex-1 flex-col gap-0.5">
+                                <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-text-muted">À SUIVRE</span>
+                                <span class="text-[16px] leading-tight font-extrabold">{{ exercise.name }}</span>
+                                <span class="text-[12.5px] leading-snug font-semibold text-text-soft">{{ setLabel }} · {{ target({ ...step, kind: 'work' }) }}</span>
+                                <span v-if="itemSettings(step.item)" class="text-[12px] font-bold text-accent">{{ itemSettings(step.item) }}</span>
+                            </span>
+                            <button type="button" class="iconbtn size-[38px] shrink-0 bg-surface-2! font-serif text-[16px] font-extrabold text-accent italic" aria-label="Comment faire" @click="openDetail">i</button>
+                        </div>
+                        <!-- La charge de la série qui vient, réglée pendant qu'on charge la barre. -->
+                        <div v-if="upcomingSet && usesWeight(exercise)" class="flex items-center justify-between gap-2 rounded-2xl bg-bg/60 p-1.5 pl-3">
+                            <span class="flex min-w-0 flex-col">
+                                <span class="text-[10.5px] font-extrabold tracking-[0.1em] whitespace-nowrap text-text-muted uppercase">Charge</span>
+                                <span v-if="platesLabel(load(upcomingSet).weight, exercise.equipment)" class="text-[11.5px] leading-tight font-semibold text-text-muted">
+                                    {{ platesLabel(load(upcomingSet).weight, exercise.equipment) }}
+                                </span>
+                            </span>
+                            <span class="flex shrink-0 items-center gap-1">
+                                <button type="button" class="iconbtn size-10 bg-surface-2! text-[20px] font-semibold disabled:opacity-35" aria-label="Charge à venir : moins" :disabled="load(upcomingSet).weight === null" @click="setWeightFor(upcomingSet, stepWeight(load(upcomingSet).weight, -1))">−</button>
+                                <button
+                                    type="button"
+                                    class="min-w-[84px] text-center font-display text-[24px] leading-none font-extrabold whitespace-nowrap tabular-nums underline decoration-line-strong decoration-2 underline-offset-[5px]"
+                                    :class="load(upcomingSet).weight === null ? 'text-[14px]! text-text-muted' : ''"
+                                    :aria-label="`Charge à venir ${formatWeight(load(upcomingSet).weight) ?? 'poids du corps'} : toucher pour la taper`"
+                                    @click="openQuick('weight', 'Charge de la prochaine série', load(upcomingSet).weight, (weight) => setWeightFor(upcomingSet, weight))"
+                                >
+                                    {{ formatWeight(load(upcomingSet).weight) ?? 'Poids du corps' }}
+                                </button>
+                                <button type="button" class="iconbtn size-10 bg-surface-2! text-[20px] font-semibold" aria-label="Charge à venir : plus" @click="setWeightFor(upcomingSet, stepWeight(load(upcomingSet).weight, 1))">+</button>
+                            </span>
+                        </div>
+                        <button v-if="step.between" type="button" class="h-9 rounded-full bg-surface-2 text-[13px] font-extrabold text-accent" @click="programOpen = true">
+                            Machine prise ? Changer d'exercice
+                        </button>
+                    </section>
+                    <!-- La série qu'on vient de faire, à corriger d'un toucher. -->
+                    <p v-if="lastSet && lastSet.reps !== null" class="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[13px] font-semibold text-text-muted">
                         <span>Série faite :</span>
                         <button type="button" class="rounded-lg bg-surface px-2.5 py-1 font-bold text-text" :aria-label="`${lastSet.reps} répétitions faites : corriger`" @click="openQuick('reps', 'Répétitions faites (série précédente)', lastSet.reps, correctLastReps)">
                             {{ lastSet.reps }} reps ✎
@@ -1539,18 +1560,15 @@ onUnmounted(() => {
                             {{ formatWeight(lastSet.weight) ?? 'poids du corps' }} ✎
                         </button>
                     </p>
-                    <button v-if="step.between" type="button" class="mt-2 h-10 rounded-full bg-surface px-4 text-[13px] font-extrabold text-accent" @click="programOpen = true">
-                        Machine prise ? Changer d'exercice
-                    </button>
                 </template>
 
                 <!-- Effort -->
                 <template v-else>
                     <span v-if="step.drop !== undefined" class="eyebrow text-prep">Drop {{ step.drop + 1 }}/{{ item.drops.length }} · {{ setLabel }} · sans repos</span>
                     <span v-else class="eyebrow text-accent">Effort · {{ setLabel }}</span>
-                    <h1 class="display mt-1.5 text-[40px] leading-[0.95] font-extrabold text-balance">{{ exercise.name }}</h1>
+                    <h1 class="display mt-1 text-[40px] leading-[0.95] font-extrabold text-balance [@media(max-height:720px)]:text-[32px]">{{ exercise.name }}</h1>
                     <div class="mt-2.5 flex w-full items-center gap-3 rounded-[18px] bg-surface p-2 text-left">
-                        <span class="size-[60px] shrink-0 overflow-hidden rounded-xl">
+                        <span class="size-[52px] shrink-0 overflow-hidden rounded-xl">
                             <ExerciseImage :images="exercise.images" :alt="exercise.name" />
                         </span>
                         <span class="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -1591,7 +1609,7 @@ onUnmounted(() => {
                                 <button
                                     type="button"
                                     class="font-display leading-[0.85] font-extrabold tabular-nums"
-                                    :class="usesWeight(exercise) ? 'text-[100px]' : 'text-[120px]'"
+                                    :class="usesWeight(exercise) ? 'text-[length:min(100px,12dvh)]' : 'text-[length:min(120px,15dvh)]'"
                                     aria-live="polite"
                                     :aria-label="`${shownReps} répétitions : toucher pour taper le nombre fait`"
                                     @click="openQuick('reps', 'Répétitions faites', shownReps, (reps) => (state.repsDone = reps))"
@@ -1632,19 +1650,10 @@ onUnmounted(() => {
                         Conseil : <span class="text-accent">{{ formatWeight(lastTime.next.weight) }} {{ { up: '▲', keep: '=', down: '▼' }[lastTime.next.trend] }}</span> · Appliquer
                     </button>
 
-                        <button
-                            type="button"
-                            class="btn-accent mt-[18px] h-[84px] w-full rounded-[26px]! text-[30px] shadow-[0_10px_30px_rgb(212_255_58/0.18)] active:scale-[0.97]"
-                            @click="completeSet"
-                        >
-                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-                            {{ step.drop !== undefined ? 'Palier terminé' : 'Série terminée' }}
-                        </button>
-                        <span class="hidden text-[12px] font-semibold text-text-faint [@media(hover:hover)]:inline">ou touche Espace</span>
                     </template>
 
-                    <div v-else class="relative mt-3.5 size-[210px]">
-                        <svg width="210" height="210" viewBox="0 0 260 260" class="block" aria-hidden="true">
+                    <div v-else class="relative mt-3.5 size-[min(210px,30dvh)]">
+                        <svg viewBox="0 0 260 260" class="block size-full" aria-hidden="true">
                             <circle cx="130" cy="130" r="120" fill="none" stroke="var(--color-accent-track)" stroke-width="12" />
                             <circle
                                 cx="130"
@@ -1659,21 +1668,35 @@ onUnmounted(() => {
                                 transform="rotate(-90 130 130)"
                             />
                         </svg>
-                        <span class="absolute inset-0 flex items-center justify-center font-display text-[76px] font-extrabold text-accent tabular-nums">{{ formatClock(seconds) }}</span>
+                        <span class="absolute inset-0 flex items-center justify-center font-display text-[length:min(76px,10dvh)] font-extrabold text-accent tabular-nums">{{ formatClock(seconds) }}</span>
                     </div>
                 </template>
+                </div>
             </main>
 
-            <p v-if="step.kind === 'work'" class="mx-5 mb-3.5 flex items-center gap-2.5 text-[13px] font-semibold text-text-muted">
+            <!-- Toujours au même endroit, à portée de pouce : la série se termine ici. -->
+            <div v-if="step.kind === 'work' && step.mode === 'reps'" class="flex flex-col items-center gap-1 px-5 pt-2">
+                <button
+                    type="button"
+                    class="btn-accent h-[76px] w-full rounded-[26px]! text-[30px] shadow-[0_10px_30px_rgb(212_255_58/0.18)] active:scale-[0.97] [@media(max-height:720px)]:h-16 [@media(max-height:720px)]:text-[26px]"
+                    @click="completeSet"
+                >
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                    {{ step.drop !== undefined ? 'Palier terminé' : 'Série terminée' }}
+                </button>
+                <span class="hidden text-[12px] font-semibold text-text-faint [@media(hover:hover)]:inline">ou touche Espace</span>
+            </div>
+
+            <p v-if="step.kind === 'work'" class="mx-5 mt-2.5 mb-1 flex min-w-0 items-center gap-2.5 text-[13px] font-semibold text-text-muted">
                 <span class="text-[10.5px] font-extrabold tracking-[0.12em] text-text-faint">ENSUITE</span>
                 <span class="truncate text-text-soft">{{ nextLabel }}</span>
             </p>
 
-            <div class="flex items-center justify-center gap-7 px-5 pt-1.5 pb-[calc(env(safe-area-inset-bottom)+24px)]">
+            <div class="flex items-center justify-center gap-7 px-5 pt-2 pb-[calc(env(safe-area-inset-bottom)+20px)] [@media(max-height:720px)]:pb-[calc(env(safe-area-inset-bottom)+10px)]">
                 <button type="button" class="iconbtn size-[54px]" aria-label="Étape précédente" @click="previous">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5.5v13a.8.8 0 0 1-1.2.7L9.5 12.7a.8.8 0 0 1 0-1.4l9.3-6.5a.8.8 0 0 1 1.2.7z" /></svg>
                 </button>
-                <button type="button" class="iconbtn size-[76px] bg-text! text-bg! active:scale-95" aria-label="Pause" @click="pause">
+                <button type="button" class="iconbtn size-[72px] bg-text! text-bg! active:scale-95 [@media(max-height:720px)]:size-16" aria-label="Pause" @click="pause">
                     <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.2" /><rect x="14" y="4.5" width="4" height="15" rx="1.2" /></svg>
                 </button>
                 <button type="button" class="iconbtn size-[54px]" aria-label="Étape suivante" @click="next">

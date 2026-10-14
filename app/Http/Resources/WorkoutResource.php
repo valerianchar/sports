@@ -36,6 +36,7 @@ class WorkoutResource extends JsonResource
                 'rest_sets' => $item->rest_sets,
                 'rest_after' => $item->rest_after,
                 'superset' => $item->superset,
+                'warmup' => $item->warmup,
             ])->values(),
             'last_done' => $this->whenLoaded('latestLog', fn (): ?string => $this->latestLog?->finished_at->diffForHumans()),
             'urls' => [

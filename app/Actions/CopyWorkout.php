@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 final class CopyWorkout
 {
     /** Ce qui se copie d'un exercice : tout sauf ce qui le rattache à sa séance. */
-    private const COPIED = ['position', 'exercise', 'mode', 'per_side', 'value', 'weight', 'set_weights', 'drops', 'drop_on', 'speed', 'incline', 'level', 'sets', 'rest_sets', 'rest_after', 'superset'];
+    private const COPIED = ['position', 'exercise', 'mode', 'per_side', 'value', 'weight', 'set_weights', 'drops', 'drop_on', 'speed', 'incline', 'level', 'sets', 'rest_sets', 'rest_after', 'superset', 'warmup'];
 
     public function handle(Workout $source, User $owner, string $name): Workout
     {

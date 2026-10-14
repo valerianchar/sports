@@ -141,7 +141,6 @@ class WorkoutController extends Controller
                 'countdown_sound' => $request->user()->countdown_sound->value,
                 'custom_sound_url' => $request->user()->custom_sound_url,
                 'audio_mode' => $request->user()->audio_mode->value,
-                'warmup_sets' => $request->user()->warmup_sets,
             ],
         ]);
     }

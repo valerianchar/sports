@@ -157,7 +157,7 @@ class ExerciseCatalogTest extends TestCase
 
     public function test_cardio_defaults_to_one_long_set(): void
     {
-        $this->assertSame(['exercise' => 'rameur', 'mode' => 'time', 'per_side' => null, 'value' => 300, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => 60, 'level' => 5], WorkoutDefaults::for('rameur'));
+        $this->assertSame(['exercise' => 'rameur', 'mode' => 'time', 'value' => 300, 'sets' => 1, 'rest_sets' => 0, 'rest_after' => 60, 'level' => 5], WorkoutDefaults::for('rameur'));
         $this->assertSame(10, WorkoutDefaults::for('squat')['value']);
         $this->assertSame(30, WorkoutDefaults::for('gainage-planche')['value']);
     }

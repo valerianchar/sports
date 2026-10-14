@@ -36,8 +36,8 @@ class SidesTest extends TestCase
         ]])->assertRedirect();
 
         $this->assertSame(
-            // Un côté puis l'autre : toujours par côté ; en alternant : au choix, par côté sans précision ; symétrique : sans objet.
-            [true, false, true, null],
+            // Gauche / droite : une option de l'exercice, désactivée sauf si on l'active.
+            [null, null, null, true],
             $user->workouts()->sole()->items()->orderBy('position')->pluck('per_side')->all(),
         );
     }
@@ -50,8 +50,8 @@ class SidesTest extends TestCase
             WorkoutEstimate::seconds([$both]) + 3 * 10 * (int) config('sport.seconds_per_rep'),
             WorkoutEstimate::seconds([[...$both, 'per_side' => true]]),
         );
-        $this->assertTrue(WorkoutDefaults::for('rowing-haltere-un-bras')['per_side']);
-        $this->assertNull(WorkoutDefaults::for('developpe-couche')['per_side']);
+        // Désactivé par défaut, même pour un exercice qui se fait d'un côté.
+        $this->assertArrayNotHasKey('per_side', WorkoutDefaults::for('rowing-haltere-un-bras'));
     }
 
     public function test_per_side_sets_lift_twice_the_volume(): void
@@ -76,5 +76,28 @@ class SidesTest extends TestCase
     public function test_the_catalogue_tells_the_player_how_sides_work(): void
     {
         $this->assertSame('each', collect(ExerciseCatalog::forClient(['rowing-haltere-un-bras']))->first()['sides']);
+    }
+
+    public function test_a_weight_changed_during_the_session_only_changes_its_set(): void
+    {
+        $user = User::factory()->create();
+        $workout = Workout::factory()->for($user)->withItems(['developpe-couche'])->create();
+        $workout->items()->first()->update(['weight' => 60, 'sets' => 4]);
+
+        $this->actingAs($user)->patchJson("/seances/{$workout->id}/charge", ['position' => 0, 'set' => 1, 'weight' => 62.5])->assertOk();
+
+        $this->assertSame([60.0, 62.5, 60.0, 60.0], array_map('floatval', $workout->items()->first()->set_weights));
+    }
+
+    public function test_warm_up_sets_are_chosen_per_exercise_and_off_by_default(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post('/seances', ['name' => 'Squat', 'items' => [
+            $this->item('squat', ['warmup' => true, 'weight' => 80]),
+            $this->item('leg-extension', ['weight' => 40]),
+        ]])->assertRedirect();
+
+        $this->assertSame([true, false], $user->workouts()->sole()->items()->orderBy('position')->pluck('warmup')->all());
     }
 }
